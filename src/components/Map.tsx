@@ -705,6 +705,7 @@ const Map = ({ zenMode }: MapProps) => {
     } else {
       // Add category - fetch POIs
       const pois = await poiService.getPOIs(category)
+      console.log(`[Map] Received ${pois.length} POIs for category ${category}`)
       newActivePOIs.set(category, pois)
 
       // Add markers to map
@@ -734,6 +735,7 @@ const Map = ({ zenMode }: MapProps) => {
         newMarkers.push(marker)
       })
 
+      console.log(`[Map] Added ${newMarkers.length} markers to map`)
       setPoiMarkers([...poiMarkers, ...newMarkers])
     }
 

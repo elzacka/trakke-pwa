@@ -86,11 +86,34 @@ class POIService {
       for (let i = 0; i < features.length; i++) {
         const feature = features[i]
 
-        // Extract properties
-        const romnr = feature.querySelector('romnr')?.textContent || `shelter-${i}`
-        const adresse = feature.querySelector('adresse')?.textContent || 'Ukjent adresse'
-        const plasser = feature.querySelector('plasser')?.textContent || '0'
-        const kategori = feature.querySelector('t_kategori')?.textContent || 'Ukjent'
+        // Extract properties - try both with and without namespace
+        const romnr =
+          feature.querySelector('romnr')?.textContent ||
+          feature.querySelector('ms\\:romnr')?.textContent ||
+          feature.getElementsByTagName('romnr')[0]?.textContent ||
+          feature.getElementsByTagName('ms:romnr')[0]?.textContent ||
+          `shelter-${i}`
+
+        const adresse =
+          feature.querySelector('adresse')?.textContent ||
+          feature.querySelector('ms\\:adresse')?.textContent ||
+          feature.getElementsByTagName('adresse')[0]?.textContent ||
+          feature.getElementsByTagName('ms:adresse')[0]?.textContent ||
+          'Ukjent adresse'
+
+        const plasser =
+          feature.querySelector('plasser')?.textContent ||
+          feature.querySelector('ms\\:plasser')?.textContent ||
+          feature.getElementsByTagName('plasser')[0]?.textContent ||
+          feature.getElementsByTagName('ms:plasser')[0]?.textContent ||
+          '0'
+
+        const kategori =
+          feature.querySelector('t_kategori')?.textContent ||
+          feature.querySelector('ms\\:t_kategori')?.textContent ||
+          feature.getElementsByTagName('t_kategori')[0]?.textContent ||
+          feature.getElementsByTagName('ms:t_kategori')[0]?.textContent ||
+          'Ukjent'
 
         // Extract coordinates
         const posElement = feature.getElementsByTagNameNS('http://www.opengis.net/gml', 'pos')[0]
@@ -160,6 +183,7 @@ class POIService {
       })
       .then(gmlText => {
         const shelters = this.parseShelterGML(gmlText)
+        console.log(`[POIService] Fetched ${shelters.length} shelters`)
 
         // Cache the results (only cache if no bounds filter)
         if (!bounds) {

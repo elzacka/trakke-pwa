@@ -1,0 +1,198 @@
+/* Bottom Sheet - Mobile-first drawer pattern */
+
+.bottom-sheet-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 998;
+  backdrop-filter: blur(4px);
+  animation: backdropFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.bottom-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #ffffff;
+  border-radius: 16px 16px 0 0;
+  z-index: 999;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+  max-height: calc(100dvh - env(safe-area-inset-top));
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sheet height states */
+.bottom-sheet-peek {
+  transform: translateY(calc(100% - var(--peek-height, 30vh) - env(safe-area-inset-bottom)));
+}
+
+.bottom-sheet-half {
+  transform: translateY(calc(100% - var(--half-height, 50vh) - env(safe-area-inset-bottom)));
+}
+
+.bottom-sheet-full {
+  transform: translateY(0);
+  border-radius: 0;
+}
+
+.bottom-sheet-closed {
+  transform: translateY(100%);
+  pointer-events: none;
+}
+
+/* Sheet handle for dragging */
+.bottom-sheet-handle {
+  width: 40px;
+  height: 4px;
+  background: #cbd5e1;
+  border-radius: 2px;
+  margin: 12px auto 16px;
+  cursor: grab;
+  flex-shrink: 0;
+  touch-action: none;
+}
+
+.bottom-sheet-handle:active {
+  cursor: grabbing;
+}
+
+/* Sheet content area */
+.bottom-sheet-content {
+  padding: 0 20px calc(20px + env(safe-area-inset-bottom)) 20px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Custom scrollbar for sheet content */
+.bottom-sheet-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.bottom-sheet-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.bottom-sheet-content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 2px;
+}
+
+.bottom-sheet-content::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Mobile: Position sheets at top instead of bottom */
+.bottom-sheet-mobile {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: auto;
+  border-radius: 0 0 16px 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  max-height: calc(100svh - 96px); /* Use small viewport height, leave space for FAB */
+  height: auto;
+  transform-origin: top center;
+}
+
+/* Peek state: show small portion at top */
+.bottom-sheet-mobile.bottom-sheet-peek {
+  max-height: 40vh;
+  transform: translateY(0);
+}
+
+/* Half state: show half screen */
+.bottom-sheet-mobile.bottom-sheet-half {
+  max-height: 60vh;
+  transform: translateY(0);
+}
+
+/* Full state: almost full screen, leave room for FAB */
+.bottom-sheet-mobile.bottom-sheet-full {
+  max-height: calc(100svh - 96px);
+  transform: translateY(0);
+  border-radius: 0 0 16px 16px;
+}
+
+/* Closed state: hide above screen */
+.bottom-sheet-mobile.bottom-sheet-closed {
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+
+/* When keyboard is visible, constrain height to visible viewport */
+.bottom-sheet-mobile.keyboard-visible {
+  max-height: calc(var(--viewport-height, 100vh) - 20px);
+  top: 0;
+}
+
+.bottom-sheet-mobile.keyboard-visible.bottom-sheet-peek {
+  max-height: min(40vh, calc(var(--viewport-height, 100vh) - 20px));
+}
+
+.bottom-sheet-mobile.keyboard-visible.bottom-sheet-half,
+.bottom-sheet-mobile.keyboard-visible.bottom-sheet-full {
+  max-height: calc(var(--viewport-height, 100vh) - 20px);
+}
+
+/* Handle at top for mobile (reversed position) */
+.bottom-sheet-mobile .bottom-sheet-handle {
+  margin: 16px auto 12px;
+}
+
+.bottom-sheet-mobile .bottom-sheet-content {
+  padding: 0 16px 16px 16px;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .bottom-sheet:not(.bottom-sheet-mobile) {
+    max-height: calc(100dvh - 20px);
+  }
+
+  .bottom-sheet-full:not(.bottom-sheet-mobile) {
+    max-height: 100dvh;
+  }
+
+  .bottom-sheet-content {
+    padding: 0 16px calc(16px + env(safe-area-inset-bottom)) 16px;
+  }
+}
+
+/* Prevent body scroll when sheet is open - but NOT on mobile to allow keyboard to work */
+@media (min-width: 769px) {
+  body:has(.bottom-sheet-backdrop) {
+    overflow: hidden;
+  }
+}
+
+/* Accessibility - reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .bottom-sheet {
+    transition: none;
+  }
+
+  .bottom-sheet-backdrop {
+    animation: none;
+  }
+}

@@ -1,0 +1,199 @@
+/* FAB Menu - Material 3 Expressive Pattern */
+
+.fab-container {
+  position: fixed;
+  bottom: max(24px, calc(24px + env(safe-area-inset-bottom)));
+  right: max(24px, calc(24px + env(safe-area-inset-right)));
+  z-index: 1000;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fab-container.fab-hidden {
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+}
+
+/* On mobile, move FAB down when sheets are open to avoid covering content */
+@media (max-width: 768px) {
+  .fab-container.fab-shifted {
+    transform: translateY(calc(100vh - 100px));
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Primary FAB - Material 3 Regular (56dp) */
+.fab-primary {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: #3e4533;
+  border: none;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 2;
+  /* Prevent text selection and context menu on mobile */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.fab-primary:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+}
+
+.fab-primary:active {
+  transform: scale(0.95);
+}
+
+.fab-primary .material-symbols-outlined {
+  font-size: 24px;
+  color: #ffffff;
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  transition: transform 0.3s ease;
+}
+
+.fab-primary[aria-expanded="true"] .material-symbols-outlined {
+  transform: rotate(180deg);
+}
+
+/* FAB Menu - appears above primary FAB */
+.fab-menu {
+  position: absolute;
+  bottom: 72px;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: fabMenuSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+}
+
+@keyframes fabMenuSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* FAB Menu Items */
+.fab-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #ffffff;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  min-width: 120px;
+  /* Prevent double-tap zoom on mobile */
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.fab-menu-item:hover {
+  background: #f8fafc;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  transform: translateX(-4px);
+}
+
+.fab-menu-item:active {
+  transform: translateX(-4px) scale(0.95);
+}
+
+.fab-menu-item .material-symbols-outlined {
+  font-size: 20px;
+  color: #3e4533;
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+  flex-shrink: 0;
+}
+
+.fab-menu-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .fab-container {
+    bottom: max(20px, calc(20px + env(safe-area-inset-bottom)));
+    right: max(20px, calc(20px + env(safe-area-inset-right)));
+  }
+
+  .fab-primary {
+    width: 56px;
+    height: 56px;
+  }
+
+  .fab-menu {
+    bottom: 68px;
+  }
+
+  .fab-menu-item {
+    min-width: 110px;
+    padding: 10px 14px;
+  }
+
+  .fab-menu-label {
+    font-size: 13px;
+  }
+}
+
+/* Accessibility - reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .fab-primary,
+  .fab-menu-item {
+    transition: none;
+  }
+
+  .fab-menu {
+    animation: none;
+  }
+
+  .fab-primary .material-symbols-outlined {
+    transition: none;
+  }
+}
+
+/* Touch target size (minimum 44x44px) */
+@media (pointer: coarse) {
+  .fab-primary {
+    min-width: 56px;
+    min-height: 56px;
+  }
+
+  .fab-menu-item {
+    min-height: 44px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .fab-primary {
+    border: 2px solid currentColor;
+  }
+
+  .fab-menu-item {
+    border: 1px solid #cbd5e1;
+  }
+}

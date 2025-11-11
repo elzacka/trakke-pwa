@@ -1,0 +1,179 @@
+/* Download Control - Minimal and integrated */
+.download-toggle {
+  width: 44px;
+  height: 44px;
+  background-color: #ffffff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.download-toggle:hover {
+  background-color: #f8fafc;
+}
+
+.download-toggle:active {
+  background-color: #f1f5f9;
+}
+
+.download-toggle .material-symbols-outlined {
+  font-size: 24px;
+  color: #3e4533;
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Instruction panel - shown when selecting area */
+.download-instruction-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: #ffffff;
+}
+
+.instruction-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #3e4533;
+  white-space: nowrap;
+}
+
+.instruction-cancel {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.instruction-cancel:hover {
+  background-color: #f1f5f9;
+}
+
+.instruction-cancel .material-symbols-outlined {
+  font-size: 20px;
+  color: #64748b;
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+}
+
+/* Confirm panel - shown when area selected */
+.download-confirm-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background-color: #ffffff;
+  min-width: 200px;
+}
+
+.confirm-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.confirm-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.confirm-subtext {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.confirm-button {
+  flex: 1;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.confirm-button.cancel {
+  background-color: #f1f5f9;
+}
+
+.confirm-button.cancel:hover {
+  background-color: #e2e8f0;
+}
+
+.confirm-button.cancel .material-symbols-outlined {
+  font-size: 20px;
+  color: #64748b;
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+}
+
+.confirm-button.download {
+  background-color: #3e4533;
+}
+
+.confirm-button.download:hover {
+  background-color: #2d3325;
+}
+
+.confirm-button.download .material-symbols-outlined {
+  font-size: 20px;
+  color: #ffffff;
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+}
+
+/* Progress panel - shown during download */
+.download-progress-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background-color: #ffffff;
+  min-width: 200px;
+}
+
+.progress-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.progress-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.progress-subtext {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background-color: #f1f5f9;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #3e4533;
+  transition: width 0.3s ease;
+  border-radius: 2px;
+}

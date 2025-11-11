@@ -1,0 +1,146 @@
+/* Main app container */
+.app {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  /* Use map background color to extend into safe area */
+  background-color: #f1f5f9;
+}
+
+/* App header */
+.app-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 16px 20px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-icon {
+  color: #3e4533;
+  font-size: 28px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-title {
+  font-family: 'Exo 2', sans-serif;
+  color: #3e4533;
+  font-size: 28px;
+  font-weight: 300;
+  margin: 0;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+/* Main content area - fills entire screen */
+.app-main {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+.map-container {
+  width: 100%;
+  height: 100%;
+  background-color: #f1f5f9;
+}
+
+/* Welcome header (auto-hide) */
+.welcome-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2000;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+  backdrop-filter: blur(8px);
+  border-bottom: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.5s ease-in;
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  /* Position below status bar on mobile */
+  padding: calc(10px + env(safe-area-inset-top)) 20px 10px 20px;
+}
+
+.welcome-header .header-content {
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  justify-content: center;
+}
+
+.header-branding {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.welcome-header-hidden {
+  opacity: 0;
+  transform: translateY(-20px);
+  pointer-events: none;
+}
+
+.app-tagline {
+  font-family: 'Exo 2', sans-serif;
+  color: #3e4533;
+  font-size: 14px;
+  font-weight: 300;
+  margin: 0;
+  letter-spacing: 0.02em;
+  opacity: 0.8;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .app-header {
+    padding: 12px 16px;
+  }
+
+  .welcome-header {
+    padding: calc(8px + env(safe-area-inset-top)) 16px 8px 16px;
+  }
+
+  .logo-icon {
+    font-size: 28px;
+  }
+
+  .app-title {
+    font-size: 24px;
+  }
+
+  .header-content {
+    gap: 6px;
+  }
+
+  .app-tagline {
+    font-size: 12px;
+  }
+}

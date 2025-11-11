@@ -1,0 +1,246 @@
+/* Search Control - Minimal and integrated */
+.search-control {
+  position: absolute;
+  top: max(10px, env(safe-area-inset-top));
+  left: max(10px, env(safe-area-inset-left));
+  z-index: 1000;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+}
+
+/* Search toggle button - matches map controls */
+.search-toggle {
+  width: 44px;
+  height: 44px;
+  background-color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.search-toggle:hover {
+  background-color: #f8fafc;
+}
+
+.search-toggle:active {
+  background-color: #f1f5f9;
+}
+
+.search-toggle .material-symbols-outlined {
+  font-size: 24px;
+  color: #3e4533;
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Search panel - expands from toggle */
+.search-panel {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  min-width: 320px;
+  max-width: 400px;
+  overflow: hidden;
+}
+
+/* Search input wrapper */
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.search-icon {
+  font-size: 20px;
+  color: #64748b;
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #111827;
+  background: transparent;
+}
+
+.search-input::placeholder {
+  color: #94a3b8;
+}
+
+.search-close {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.search-close:hover {
+  background-color: #f1f5f9;
+}
+
+.search-close .material-symbols-outlined {
+  font-size: 20px;
+  color: #64748b;
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+}
+
+/* Address filter toggle button */
+.search-filter {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.search-filter:hover {
+  background-color: #f1f5f9;
+}
+
+.search-filter.active {
+  background-color: #3e4533;
+}
+
+.search-filter .material-symbols-outlined {
+  font-size: 20px;
+  color: #64748b;
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+}
+
+.search-filter.active .material-symbols-outlined {
+  color: #ffffff;
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+}
+
+/* Search results list */
+.search-results {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.search-result-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-item:hover {
+  background-color: #f8fafc;
+}
+
+.search-result-item:active {
+  background-color: #f1f5f9;
+}
+
+.result-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.result-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-subtext {
+  font-size: 12px;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-icon {
+  font-size: 20px;
+  color: #94a3b8;
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+  flex-shrink: 0;
+}
+
+/* Loading and empty states */
+.search-loading,
+.search-empty {
+  padding: 16px 12px;
+  text-align: center;
+}
+
+.loading-text,
+.empty-text {
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .search-panel {
+    min-width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+  }
+
+  .search-results {
+    max-height: 240px;
+  }
+}
+
+/* Smooth scrolling for results */
+.search-results {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Custom scrollbar for results (desktop) */
+.search-results::-webkit-scrollbar {
+  width: 4px;
+}
+
+.search-results::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.search-results::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 2px;
+}
+
+.search-results::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

@@ -28,6 +28,7 @@ function injectCSP(): Plugin {
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/trakke-pwa/',
   plugins: [
     react(),
     injectCSP(),

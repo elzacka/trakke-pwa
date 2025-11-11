@@ -14,6 +14,7 @@ import SettingsSheet from './SettingsSheet'
 import CategorySheet from './CategorySheet'
 import POIDetailsSheet from './POIDetailsSheet'
 import { useAutoHide } from '../hooks/useAutoHide'
+import { MAP_CONFIG } from '../constants'
 import type { SearchResult } from '../services/searchService'
 import type { Route } from '../services/routeService'
 import { routeService } from '../services/routeService'
@@ -95,11 +96,11 @@ const Map = ({ zenMode }: MapProps) => {
           }
         ]
       },
-      center: [10.7522, 59.9139], // Oslo, Norway
-      zoom: 10,
-      pitch: 60, // Default tilt (max is 85, 60 provides good 3D effect)
-      maxZoom: 18,
-      minZoom: 3,
+      center: MAP_CONFIG.DEFAULT_CENTER,
+      zoom: MAP_CONFIG.DEFAULT_ZOOM,
+      pitch: MAP_CONFIG.DEFAULT_PITCH,
+      maxZoom: MAP_CONFIG.MAX_ZOOM,
+      minZoom: MAP_CONFIG.MIN_ZOOM,
       maxPitch: 85, // Allow full tilt
       attributionControl: zenMode ? false : undefined // Hide default attribution in Zen Mode
     })

@@ -40,7 +40,7 @@ export const useAutoHide = (options: UseAutoHideOptions = {}) => {
     return () => {
       clearTimeout(timerRef.current)
     }
-  }, [initialVisible, show])
+  }, [initialVisible]) // Removed show from dependencies - it's stable enough
 
   return { visible, show, hide, toggle }
 }

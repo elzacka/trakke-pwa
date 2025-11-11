@@ -2,41 +2,69 @@
 
 A Progressive Web Application for Norwegian outdoor navigation with offline capabilities.
 
-## 🌟 Features (MVP)
+## 🌟 Current Features
 
 ✅ **Interactive Topographic Map**
-- Kartverket WMTS topographic tiles
+- Kartverket WMTS topographic tiles (Norway)
 - Responsive zoom and pan controls
-- Scale indicator
+- Pitch control (0° default, tiltable for 3D view)
+- Scale indicator and compass
+- MapLibre GL JS rendering engine
 
 ✅ **GPS Location Tracking**
-- Real-time user location on map
-- Location button to center map
+- Real-time user location with blue marker
+- FAB menu with quick location centering
 - Continuous position tracking
+- Accuracy circle visualization
+
+✅ **Search & Navigation**
+- Norwegian place name search (Kartverket SSR API)
+- Address search with smart fuzzy matching
+- Outdoor feature prioritization (mountains, lakes, etc.)
+- Search result markers with details
+
+✅ **Offline Map Downloads**
+- Select custom areas for offline use
+- Configurable zoom level range
+- Download progress tracking
+- Manage downloaded areas
+- Navigate to saved areas
+
+✅ **Routes & Waypoints**
+- Draw routes by clicking on map
+- Calculate distances using Haversine formula
+- Place custom waypoints with names
+- Save routes to IndexedDB
+- Toggle route/waypoint visibility
+- Route management and deletion
+
+✅ **Points of Interest (POI)**
+- Public shelters (Tilfluktsrom) from DSB
+- Custom T-marker icons on map
+- POI details sheets with capacity info
+- Category-based filtering
 
 ✅ **Progressive Web App**
 - Installable on mobile and desktop
 - Works offline with cached map tiles
 - Fast, app-like experience
+- iOS and Android home screen support
+- Service Worker with intelligent caching
 
-✅ **Norwegian Design**
-- White (#ffffff) primary background
-- Tråkke green (#3e4533) brand color
-- Material Symbols "forest" icon logo
-- Fully Norwegian language UI
-
-✅ **Offline Storage**
-- IndexedDB for user data
-- Service Worker with Workbox
-- Cache-first strategy for map tiles
-- Automatic tile caching (30-day expiration)
+✅ **Zen Mode Interface**
+- Auto-hiding controls for immersive map view
+- Floating Action Button (FAB) menu
+- Bottom sheets for feature access
+- Mobile-first design with desktop support
+- Gesture-based navigation
 
 ✅ **Privacy by Design (GDPR Compliant)**
-- No external tracking or analytics
+- Zero external tracking or analytics
 - All fonts and assets self-hosted
 - No data transfers outside EU/EØS
 - Content Security Policy (CSP) enforced
 - No cookies or user profiling
+- All data stored locally in IndexedDB
 
 ## 🚀 Quick Start
 
@@ -198,19 +226,31 @@ See [DEPENDENCIES.md](DEPENDENCIES.md) for complete dependency list with exact v
 
 ## 🛣️ Roadmap
 
-### Phase 2 (Future)
-- [ ] Offline map downloads (select area)
-- [ ] Search functionality (place names, coordinates)
-- [ ] Routes and waypoints
-- [ ] Projects/tracks management
-- [ ] Push notifications
-- [ ] Background sync
+### Phase 1 (Complete) ✅
+- ✅ Interactive topographic map with Kartverket tiles
+- ✅ GPS location tracking and centering
+- ✅ Progressive Web App with offline capabilities
+- ✅ IndexedDB for local data storage
+- ✅ Privacy-first architecture (no tracking)
 
-### Phase 3 (Future)
-- [ ] POI categories (cabins, trails, etc.)
-- [ ] Trail overlays
-- [ ] Elevation profiles
-- [ ] Export/import GPX
+### Phase 2 (In Progress) 🚧
+- ✅ **Search functionality** - Place names and addresses (Kartverket APIs)
+- ✅ **Offline map downloads** - Select area and download for offline use
+- ✅ **Routes and waypoints** - Draw routes, place waypoints, calculate distances
+- ✅ **POI categories** - Public shelters (Tilfluktsrom) from DSB
+- ⏳ Route editing and management UI improvements
+- ⏳ Projects/tracks management
+- ⏳ GPX export functionality
+
+### Phase 3 (Future) 📅
+- [ ] Additional POI categories (cabins, trails, parking)
+- [ ] Trail overlays from external sources
+- [ ] Elevation profiles using DTM data
+- [ ] GPX import functionality
+- [ ] Compass and bearing tools
+- [ ] Push notifications for weather alerts
+
+**Last Updated**: 2025-01-11
 
 ## 🔒 Privacy & Security
 

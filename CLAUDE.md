@@ -254,6 +254,163 @@ if (oldVersion < 4 && !db.objectStoreNames.contains('myStore')) {
 connect-src 'self' https://cache.kartverket.no https://ws.geonorge.no https://new-api.eu
 ```
 
+## Code Quality & Best Practices
+
+**Recent Code Review Findings (2025-01-11)**: A comprehensive review identified and fixed critical issues. When working with this codebase, be aware of these patterns:
+
+### Memory Leak Prevention
+
+**Event Listeners**: Always create stable event handler references within useEffect to prevent memory leaks:
+
+```typescript
+// ❌ BAD - Recreates handlers on every dependency change
+useEffect(() => {
+  window.addEventListener('mousemove', handleMouseMove)
+  return () => window.removeEventListener('mousemove', handleMouseMove)
+}, [isDragging, overlayRect]) // overlayRect causes re-registration
+
+// ✅ GOOD - Stable handlers, minimal dependencies
+useEffect(() => {
+  if (!isDragging) return
+
+  const mouseMoveHandler = (e: MouseEvent) => handleMouseMove(e)
+  window.addEventListener('mousemove', mouseMoveHandler)
+
+  return () => {
+    window.removeEventListener('mousemove', mouseMoveHandler)
+  }
+}, [isDragging]) // Only re-register when isDragging changes
+```
+
+**MapLibre Event Handlers**: Be careful with map event registrations:
+
+```typescript
+// Remove unnecessary dependencies from map.on() effects
+useEffect(() => {
+  if (!map.current) return
+
+  const clickHandler = (e: maplibregl.MapMouseEvent) => handleMapClick(e)
+  map.current.on('click', clickHandler)
+
+  return () => {
+    if (map.current) map.current.off('click', clickHandler)
+  }
+}, [isDrawingRoute, isPlacingWaypoint]) // Don't include routePoints array
+```
+
+### Component Lifecycle Management
+
+**Mounted Refs**: Always use mounted refs for async operations that update state:
+
+```typescript
+const mountedRef = useRef(true)
+const timeoutRef = useRef<number>()
+
+useEffect(() => {
+  return () => {
+    mountedRef.current = false
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+  }
+}, [])
+
+// In async operations:
+timeoutRef.current = window.setTimeout(() => {
+  if (mountedRef.current) {
+    setState(newValue) // Only update if component still mounted
+  }
+}, 2000)
+```
+
+**Debounce Cleanup**: Clear timeouts and reset loading states in cleanup:
+
+```typescript
+useEffect(() => {
+  if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
+
+  setIsSearching(true)
+  searchTimeoutRef.current = window.setTimeout(async () => {
+    // ... search logic
+  }, 300)
+
+  return () => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
+      setIsSearching(false) // Reset state on cleanup
+    }
+  }
+}, [query])
+```
+
+### Input Validation & Security
+
+**Always validate and sanitize user input** before storing or displaying:
+
+```typescript
+// Use the validateName utility function in Map.tsx
+const inputName = prompt('Navn på ruten:')
+const name = validateName(inputName) // Validates length, sanitizes HTML
+if (name) {
+  await routeService.createRoute({ name, ... })
+}
+```
+
+The `validateName()` function:
+- Checks for empty/null input
+- Enforces max length (default 100 chars)
+- Strips HTML/script tags to prevent XSS
+- Provides user-friendly Norwegian error messages
+
+### Effect Dependencies
+
+**Minimize unnecessary re-runs** by carefully managing dependency arrays:
+
+```typescript
+// ❌ BAD - Function dependency causes unnecessary re-runs
+useEffect(() => {
+  if (anySheetOpen) showControls()
+}, [searchSheetOpen, infoSheetOpen, showControls]) // showControls changes when delay changes
+
+// ✅ GOOD - Rely on useCallback stability
+useEffect(() => {
+  if (anySheetOpen) showControls()
+}, [searchSheetOpen, infoSheetOpen]) // showControls is stable from useCallback
+```
+
+### State Updates
+
+**Use functional updates** when new state depends on previous state to avoid stale closures:
+
+```typescript
+// ✅ GOOD - Functional update prevents stale state
+setPoiMarkers(prevMarkers => {
+  prevMarkers.forEach(marker => {
+    if (shouldRemove(marker)) marker.remove()
+  })
+  return prevMarkers.filter(marker => !shouldRemove(marker))
+})
+```
+
+### Error Handling
+
+**Always provide user feedback** for failed operations:
+
+```typescript
+try {
+  await someDatabaseOperation()
+} catch (error) {
+  console.error('Operation failed:', error) // For debugging
+  alert('Kunne ikke fullføre operasjonen') // For user
+}
+```
+
+### Known Gotchas Addendum
+
+7. **Effect Dependencies**: Carefully consider what goes in dependency arrays. Including objects/arrays causes unnecessary re-runs. Use stable references (useCallback, useMemo) or omit if the function is inherently stable.
+
+8. **Timeouts and Component Unmounting**: Always store timeout IDs in refs and clear them on unmount to prevent "Can't perform a React state update on an unmounted component" warnings.
+
+9. **MapLibre Marker Custom Data**: When storing data on markers (e.g., `_poiData`), remember to clean up event listeners on marker removal to prevent memory leaks.
+
 ## Build & PWA
 
 **Service Worker** (Workbox):

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { LngLatBounds } from 'maplibre-gl'
 import BottomSheet from './BottomSheet'
 import { offlineMapService, type DownloadArea, type DownloadProgress } from '../services/offlineMapService'
@@ -35,6 +35,20 @@ const DownloadSheet = ({
   const [maxZoom, setMaxZoom] = useState(Math.min(18, zoom + 2))
   const [downloadedAreas, setDownloadedAreas] = useState<DownloadArea[]>([])
 
+  // Track if component is mounted to prevent state updates after unmount
+  const mountedRef = useRef(true)
+  const timeoutRef = useRef<number | undefined>(undefined)
+
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false
+      // Clear any pending timeouts on unmount
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [])
+
   // Load downloaded areas when sheet opens
   useEffect(() => {
     if (isOpen && viewMode === 'list') {
@@ -44,13 +58,14 @@ const DownloadSheet = ({
 
   // When bounds are set (after clicking "Neste"), switch to configure view
   useEffect(() => {
-    if (bounds && !isSelecting && isOpen && viewMode !== 'downloading' && viewMode !== 'complete') {
+    // Only switch to configure if we're in list mode and bounds are newly set
+    if (bounds && !isSelecting && isOpen && viewMode === 'list') {
       setViewMode('configure')
       setAreaName(`Område ${new Date().toLocaleDateString('no')}`)
       setMinZoom(Math.max(3, zoom - 2))
       setMaxZoom(Math.min(18, zoom + 2))
     }
-  }, [bounds, isSelecting, isOpen])
+  }, [bounds, isSelecting, isOpen, viewMode, zoom])
 
   // Reset to list view when sheet closes
   useEffect(() => {
@@ -58,7 +73,7 @@ const DownloadSheet = ({
       setViewMode('list')
       setAreaName('')
     }
-  }, [isOpen])
+  }, [isOpen, viewMode])
 
   const loadDownloadedAreas = async () => {
     try {
@@ -115,11 +130,15 @@ const DownloadSheet = ({
       setIsDownloading(false)
       setViewMode('complete')
 
-      setTimeout(() => {
-        setViewMode('list')
-        setProgress(null)
-        onCancelSelection()
-        loadDownloadedAreas()
+      // Wait to clear selection until after showing success and transitioning back
+      timeoutRef.current = window.setTimeout(() => {
+        if (mountedRef.current) {
+          setViewMode('list')
+          setProgress(null)
+          loadDownloadedAreas()
+          // Clear selection AFTER transitioning back to list
+          onCancelSelection()
+        }
       }, 2000)
     } catch (error) {
       console.error('Download error:', error)
@@ -217,19 +236,21 @@ const DownloadSheet = ({
         </div>
 
         <div className="download-sheet-content">
-          {viewMode === 'downloading' && progress ? (
+          {viewMode === 'downloading' ? (
             // Download in progress
             <div className="download-progress">
               <div className="progress-info">
-                <span className="progress-text">Laster ned {progress.percentage}%</span>
+                <span className="progress-text">
+                  Laster ned {progress?.percentage ?? 0}%
+                </span>
                 <span className="progress-subtext">
-                  {progress.downloadedTiles} / {progress.totalTiles} fliser
+                  {progress?.downloadedTiles ?? 0} / {progress?.totalTiles ?? 0} fliser
                 </span>
               </div>
               <div className="progress-bar">
                 <div
                   className="progress-fill"
-                  style={{ width: `${progress.percentage}%` }}
+                  style={{ width: `${progress?.percentage ?? 0}%` }}
                 />
               </div>
             </div>

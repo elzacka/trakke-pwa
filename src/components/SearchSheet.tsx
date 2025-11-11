@@ -32,6 +32,7 @@ const SearchSheet = ({ isOpen, onClose, onResultSelect }: SearchSheetProps) => {
 
     if (query.trim().length === 0) {
       setResults([])
+      setIsSearching(false)
       return
     }
 
@@ -53,6 +54,7 @@ const SearchSheet = ({ isOpen, onClose, onResultSelect }: SearchSheetProps) => {
     return () => {
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current)
+        setIsSearching(false) // Reset searching state on cleanup
       }
     }
   }, [query, includeAddresses])

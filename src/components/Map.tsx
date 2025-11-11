@@ -25,6 +25,27 @@ interface MapProps {
   zenMode: boolean
 }
 
+// Utility function to validate and sanitize user input
+function validateName(name: string | null, maxLength: number = 100): string | null {
+  if (!name) return null
+  const trimmed = name.trim()
+  if (trimmed.length === 0) {
+    alert('Navn kan ikke være tomt')
+    return null
+  }
+  if (trimmed.length > maxLength) {
+    alert(`Navn kan ikke være lengre enn ${maxLength} tegn`)
+    return null
+  }
+  // Sanitize HTML/script tags
+  const sanitized = trimmed.replace(/<[^>]*>/g, '')
+  if (sanitized !== trimmed) {
+    alert('Ugyldige tegn i navn')
+    return null
+  }
+  return sanitized
+}
+
 const Map = ({ zenMode }: MapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<maplibregl.Map | null>(null)
@@ -311,7 +332,7 @@ const Map = ({ zenMode }: MapProps) => {
         map.current.off('click', clickHandler)
       }
     }
-  }, [isDrawingRoute, isPlacingWaypoint, routePoints, isSelectingArea])
+  }, [isDrawingRoute, isPlacingWaypoint, isSelectingArea]) // Removed routePoints to reduce re-registrations
 
   // Handle map clicks when selecting area, drawing routes, or placing waypoints
   const handleMapClick = async (e: maplibregl.MapMouseEvent) => {
@@ -409,7 +430,8 @@ const Map = ({ zenMode }: MapProps) => {
 
     // Waypoint placement mode
     if (isPlacingWaypoint) {
-      const name = prompt('Navn på punkt:')
+      const inputName = prompt('Navn på punkt:')
+      const name = validateName(inputName)
       if (name) {
         try {
           await routeService.createWaypoint({
@@ -612,22 +634,30 @@ const Map = ({ zenMode }: MapProps) => {
     setIsDragging(null)
   }
 
-  // Add/remove drag event listeners
+  // Add/remove drag event listeners (memoized to prevent memory leaks)
   useEffect(() => {
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove)
-      window.addEventListener('mouseup', handleMouseUp)
-      window.addEventListener('touchmove', handleMouseMove)
-      window.addEventListener('touchend', handleMouseUp)
+    if (!isDragging) return
 
-      return () => {
-        window.removeEventListener('mousemove', handleMouseMove)
-        window.removeEventListener('mouseup', handleMouseUp)
-        window.removeEventListener('touchmove', handleMouseMove)
-        window.removeEventListener('touchend', handleMouseUp)
-      }
+    const mouseMoveHandler = (e: MouseEvent | TouchEvent) => {
+      handleMouseMove(e)
     }
-  }, [isDragging, overlayRect])
+
+    const mouseUpHandler = () => {
+      handleMouseUp()
+    }
+
+    window.addEventListener('mousemove', mouseMoveHandler as any)
+    window.addEventListener('mouseup', mouseUpHandler)
+    window.addEventListener('touchmove', mouseMoveHandler as any)
+    window.addEventListener('touchend', mouseUpHandler)
+
+    return () => {
+      window.removeEventListener('mousemove', mouseMoveHandler as any)
+      window.removeEventListener('mouseup', mouseUpHandler)
+      window.removeEventListener('touchmove', mouseMoveHandler as any)
+      window.removeEventListener('touchend', mouseUpHandler)
+    }
+  }, [isDragging]) // Removed overlayRect dependency to prevent re-registration
 
   // Update overlay position when map is moved/zoomed
   useEffect(() => {
@@ -737,16 +767,18 @@ const Map = ({ zenMode }: MapProps) => {
       newActivePOIs.delete(category)
 
       // Remove markers for this category
-      poiMarkers.forEach(marker => {
-        const data = (marker as any)._poiData
-        if (data && data.category === category) {
-          marker.remove()
-        }
+      setPoiMarkers(prevMarkers => {
+        prevMarkers.forEach(marker => {
+          const data = (marker as any)._poiData
+          if (data && data.category === category) {
+            marker.remove()
+          }
+        })
+        return prevMarkers.filter(marker => {
+          const data = (marker as any)._poiData
+          return !data || data.category !== category
+        })
       })
-      setPoiMarkers(poiMarkers.filter(marker => {
-        const data = (marker as any)._poiData
-        return !data || data.category !== category
-      }))
     } else {
       // Add category - fetch POIs
       const pois = await poiService.getPOIs(category)
@@ -792,7 +824,7 @@ const Map = ({ zenMode }: MapProps) => {
       })
 
       console.log(`[Map] Added ${newMarkers.length} markers to map`)
-      setPoiMarkers([...poiMarkers, ...newMarkers])
+      setPoiMarkers(prevMarkers => [...prevMarkers, ...newMarkers])
     }
 
     setActivePOIs(newActivePOIs)
@@ -999,7 +1031,8 @@ const Map = ({ zenMode }: MapProps) => {
                 <button
                   className="drawing-banner-finish"
                   onClick={async () => {
-                    const name = prompt('Navn på ruten:')
+                    const inputName = prompt('Navn på ruten:')
+                    const name = validateName(inputName)
                     if (name) {
                       try {
                         const distance = routeService.calculateDistance(routePoints)

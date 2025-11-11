@@ -162,7 +162,7 @@ const BottomSheet = ({
 
   return (
     <>
-      {isOpen && (
+      {isOpen && height !== 'closed' && (
         <div
           className="bottom-sheet-backdrop"
           onClick={onClose}

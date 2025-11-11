@@ -49,12 +49,15 @@
     max-width: 600px;
     width: 90%;
     max-height: 80vh;
+    min-height: 300px;
   }
 
   .bottom-sheet.bottom-sheet-peek,
   .bottom-sheet.bottom-sheet-half,
   .bottom-sheet.bottom-sheet-full {
     transform: translate(-50%, -50%);
+    opacity: 1;
+    pointer-events: auto;
   }
 
   .bottom-sheet.bottom-sheet-closed {
@@ -69,23 +72,25 @@
   }
 }
 
-/* Sheet height states */
-.bottom-sheet-peek {
-  transform: translateY(calc(100% - var(--peek-height, 30vh) - env(safe-area-inset-bottom)));
-}
+/* Sheet height states - Mobile only */
+@media (max-width: 1023px) {
+  .bottom-sheet-peek {
+    transform: translateY(calc(100% - var(--peek-height, 30vh) - env(safe-area-inset-bottom)));
+  }
 
-.bottom-sheet-half {
-  transform: translateY(calc(100% - var(--half-height, 50vh) - env(safe-area-inset-bottom)));
-}
+  .bottom-sheet-half {
+    transform: translateY(calc(100% - var(--half-height, 50vh) - env(safe-area-inset-bottom)));
+  }
 
-.bottom-sheet-full {
-  transform: translateY(0);
-  border-radius: 0;
-}
+  .bottom-sheet-full {
+    transform: translateY(0);
+    border-radius: 0;
+  }
 
-.bottom-sheet-closed {
-  transform: translateY(100%);
-  pointer-events: none;
+  .bottom-sheet-closed {
+    transform: translateY(100%);
+    pointer-events: none;
+  }
 }
 
 /* Sheet handle for dragging */

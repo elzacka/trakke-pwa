@@ -12,8 +12,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 12px;
+  padding: 20px 20px 16px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  background: var(--color-white);
+  z-index: 10;
   flex-shrink: 0;
   gap: 12px;
 }

@@ -13,6 +13,7 @@ const SettingsSheet = ({ isOpen, onClose }: SettingsSheetProps) => {
   const [selectedFormat, setSelectedFormat] = useState<CoordinateFormat>(
     settingsService.getCoordinateFormat()
   )
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
 
   // Example coordinates for preview (Oslo, Norway)
   const exampleLon = 10.7522
@@ -29,6 +30,16 @@ const SettingsSheet = ({ isOpen, onClose }: SettingsSheetProps) => {
     settingsService.setCoordinateFormat(format)
   }
 
+  const toggleSection = (sectionId: string) => {
+    const newExpanded = new Set(expandedSections)
+    if (newExpanded.has(sectionId)) {
+      newExpanded.delete(sectionId)
+    } else {
+      newExpanded.add(sectionId)
+    }
+    setExpandedSections(newExpanded)
+  }
+
   const formats: CoordinateFormat[] = ['DD', 'DMS', 'DDM', 'UTM', 'MGRS']
 
   return (
@@ -41,35 +52,63 @@ const SettingsSheet = ({ isOpen, onClose }: SettingsSheetProps) => {
     >
       <div className="settings-sheet">
         <div className="settings-sheet-header">
-          <h2>Koordinatformat</h2>
+          <h2>Innstillinger</h2>
+          <button
+            className="settings-sheet-close"
+            onClick={onClose}
+            aria-label="Lukk"
+          >
+            <span className="material-symbols-outlined">close</span>
+          </button>
         </div>
 
         <div className="settings-sheet-content">
-          <div className="coordinate-format-list">
-            {formats.map((format) => {
-              const formatted = coordinateService.format(exampleLon, exampleLat, format)
-              const isSelected = selectedFormat === format
+          <div className="settings-menu">
+            {/* Coordinate Format Section */}
+            <div className="settings-section">
+              <button
+                className="settings-section-header"
+                onClick={() => toggleSection('coordinate-format')}
+                aria-expanded={expandedSections.has('coordinate-format')}
+              >
+                <span className="settings-section-title">Koordinatformat</span>
+                <span className="material-symbols-outlined settings-section-chevron">
+                  {expandedSections.has('coordinate-format') ? 'expand_less' : 'expand_more'}
+                </span>
+              </button>
 
-              return (
-                <button
-                  key={format}
-                  className={`coordinate-format-option ${isSelected ? 'selected' : ''}`}
-                  onClick={() => handleFormatChange(format)}
-                >
-                  <div className="format-option-info">
-                    <div className="format-option-name">
-                      {coordinateService.getFormatName(format)}
-                    </div>
-                    <div className="format-option-example">
-                      {formatted.display}
-                    </div>
-                  </div>
-                  {isSelected && (
-                    <span className="material-symbols-outlined format-option-check">check</span>
-                  )}
-                </button>
-              )
-            })}
+              {expandedSections.has('coordinate-format') && (
+                <div className="settings-section-content">
+                  {formats.map((format) => {
+                    const formatted = coordinateService.format(exampleLon, exampleLat, format)
+                    const isSelected = selectedFormat === format
+
+                    return (
+                      <button
+                        key={format}
+                        className={`settings-option ${isSelected ? 'selected' : ''}`}
+                        onClick={() => handleFormatChange(format)}
+                      >
+                        <div className="settings-option-info">
+                          <div className="settings-option-name">
+                            {coordinateService.getFormatName(format)}
+                          </div>
+                          <div className="settings-option-example">
+                            {formatted.display}
+                          </div>
+                        </div>
+                        {isSelected && (
+                          <span className="material-symbols-outlined settings-option-check">check</span>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Placeholder for future settings sections */}
+            {/* Add more sections here as needed */}
           </div>
         </div>
       </div>

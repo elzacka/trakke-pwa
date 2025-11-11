@@ -71,9 +71,6 @@
   cursor: pointer;
   width: 32px;
   height: 32px;
-  background: #ffffff;
-  border-radius: 50%;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s ease;
   pointer-events: auto;
   z-index: 1;
@@ -83,9 +80,21 @@
   transform: scale(1.15);
 }
 
+/* Only add white circle background for Material Symbol icons, not custom SVG */
+.poi-marker:has(.material-symbols-outlined) {
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
 .poi-marker .material-symbols-outlined {
   font-size: 24px;
   font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Custom T marker with drop shadow */
+.poi-marker svg {
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
 }
 
 /* MapLibre control styling customization */
@@ -134,10 +143,10 @@
   display: none;
 }
 
-/* Zen Mode: Custom Attribution in top-left */
-.zen-mode .maplibregl-ctrl-top-left {
-  top: max(10px, env(safe-area-inset-top));
-  left: max(10px, env(safe-area-inset-left));
+/* Zen Mode: Custom Attribution in bottom-left, aligned with FAB */
+.zen-mode .maplibregl-ctrl-bottom-left {
+  bottom: max(var(--space-xl), calc(var(--space-xl) + var(--safe-area-inset-bottom)));
+  left: max(var(--space-xl), calc(var(--space-xl) + var(--safe-area-inset-left)));
 }
 
 .custom-attribution {
@@ -165,9 +174,9 @@
   transform: scale(0.95);
 }
 
-/* Compact mode - icon only (no circle background) */
+/* Compact mode - icon only, no background */
 .custom-attribution.attribution-compact {
-  padding: 2px;
+  padding: 0;
   gap: 0;
   background-color: transparent;
   backdrop-filter: none;
@@ -175,8 +184,7 @@
 }
 
 .custom-attribution.attribution-compact:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(4px);
+  background-color: transparent;
 }
 
 .custom-attribution.attribution-compact .attribution-text {
@@ -186,16 +194,20 @@
   margin: 0;
 }
 
-/* Hide icon when expanded (text visible), show only when compact */
+/* Show icon only when compact, hide when expanded */
+.custom-attribution.attribution-compact .attribution-icon {
+  display: flex;
+}
+
 .custom-attribution:not(.attribution-compact) .attribution-icon {
   display: none;
 }
 
 .attribution-icon {
-  font-size: 16px;
+  font-size: 11px;
   color: #3e4533;
-  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
-  line-height: 1;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  line-height: 1.2;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -588,43 +600,44 @@
   box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.3);
 }
 
-/* Corner handles */
+/* Corner handles - Simplified */
 .selection-handle {
   position: absolute;
-  width: 44px;
-  height: 44px;
-  background: #3e4533;
-  border: 3px solid #ffffff;
-  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  background: #ffffff;
+  border: 2px solid #3e4533;
+  border-radius: 8px;
   pointer-events: all;
   cursor: grab;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   touch-action: none;
+  transition: transform 0.2s ease;
 }
 
 .selection-handle:active {
   cursor: grabbing;
-  transform: scale(1.1);
+  transform: scale(1.15);
 }
 
 .selection-handle.nw {
-  top: -22px;
-  left: -22px;
+  top: -16px;
+  left: -16px;
 }
 
 .selection-handle.ne {
-  top: -22px;
-  right: -22px;
+  top: -16px;
+  right: -16px;
 }
 
 .selection-handle.sw {
-  bottom: -22px;
-  left: -22px;
+  bottom: -16px;
+  left: -16px;
 }
 
 .selection-handle.se {
-  bottom: -22px;
-  right: -22px;
+  bottom: -16px;
+  right: -16px;
 }
 
 /* Confirm button */

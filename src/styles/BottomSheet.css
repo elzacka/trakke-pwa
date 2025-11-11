@@ -7,9 +7,9 @@
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.4);
-  z-index: 998;
+  z-index: var(--z-overlay);
   backdrop-filter: blur(4px);
-  animation: backdropFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: backdropFadeIn var(--transition-slow);
 }
 
 @keyframes backdropFadeIn {
@@ -26,15 +26,47 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: #ffffff;
-  border-radius: 16px 16px 0 0;
-  z-index: 999;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
-  max-height: calc(100dvh - env(safe-area-inset-top));
+  background: var(--color-white);
+  border-radius: var(--sheet-border-radius) var(--sheet-border-radius) 0 0;
+  z-index: var(--z-sheet);
+  transition: transform var(--transition-slow);
+  box-shadow: var(--shadow-2xl);
+  max-height: calc(100dvh - var(--safe-area-inset-top));
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+/* Desktop: Centered modal-style sheet with rounded corners */
+@media (min-width: 1024px) {
+  .bottom-sheet {
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    transform: translate(-50%, -50%);
+    border-radius: var(--sheet-border-radius);
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+  }
+
+  .bottom-sheet.bottom-sheet-peek,
+  .bottom-sheet.bottom-sheet-half,
+  .bottom-sheet.bottom-sheet-full {
+    transform: translate(-50%, -50%);
+  }
+
+  .bottom-sheet.bottom-sheet-closed {
+    transform: translate(-50%, -50%) scale(0.95);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Hide handle on desktop - not needed for modal style */
+  .bottom-sheet-handle {
+    display: none;
+  }
 }
 
 /* Sheet height states */
@@ -164,10 +196,10 @@
   padding: 0 16px 16px 16px;
 }
 
-/* Mobile optimizations */
-@media (max-width: 768px) {
+/* Mobile optimizations - Updated breakpoint to 1024px for tablets */
+@media (max-width: 1023px) {
   .bottom-sheet:not(.bottom-sheet-mobile) {
-    max-height: calc(100dvh - 20px);
+    max-height: calc(100dvh - var(--space-xl));
   }
 
   .bottom-sheet-full:not(.bottom-sheet-mobile) {
@@ -175,14 +207,18 @@
   }
 
   .bottom-sheet-content {
-    padding: 0 16px calc(16px + env(safe-area-inset-bottom)) 16px;
+    padding: 0 var(--sheet-padding-mobile) calc(var(--sheet-padding-mobile) + var(--safe-area-inset-bottom)) var(--sheet-padding-mobile);
   }
 }
 
-/* Prevent body scroll when sheet is open - but NOT on mobile to allow keyboard to work */
-@media (min-width: 769px) {
+/* Prevent body scroll when sheet is open - but NOT on mobile/tablet to allow keyboard to work */
+@media (min-width: 1024px) {
   body:has(.bottom-sheet-backdrop) {
     overflow: hidden;
+  }
+
+  .bottom-sheet-content {
+    padding: 0 var(--sheet-padding-desktop) calc(var(--sheet-padding-desktop) + var(--safe-area-inset-bottom)) var(--sheet-padding-desktop);
   }
 }
 

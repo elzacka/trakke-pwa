@@ -1,0 +1,200 @@
+/**
+ * Design Tokens - Tråkke PWA
+ * Centralized design system for consistent UI across all components
+ *
+ * DESIGN PRINCIPLES:
+ * 1. Minimalist approach - No decorative icons/emojis unless explicitly requested by user
+ * 2. Functional icons only - Material Symbols for navigation (close, expand, check) and UI controls
+ * 3. Text-first - Use clear text labels instead of icons for content
+ * 4. Clean hierarchy - Use typography, spacing, and color for visual structure
+ *
+ * ALIGNMENT GUIDELINES:
+ * 1. Icon-Text Alignment:
+ *    - Always use flexbox with align-items: center for horizontal icon-text pairs
+ *    - Icons should have explicit width/height matching their visual size
+ *    - Use gap property for consistent spacing between icon and text
+ *    - Line-height on text should match icon height for perfect vertical centering
+ *
+ * 2. List Item Alignment:
+ *    - All list items must have consistent padding (e.g., 12px 14px)
+ *    - Icon containers must have fixed dimensions (e.g., width: 20px, height: 20px)
+ *    - Text containers should use flex: 1 with min-width: 0 for proper text overflow
+ *    - Action icons (check, chevron) must have flex-shrink: 0
+ *
+ * 3. Sheet Content Alignment:
+ *    - Headers: padding 20px 20px 16px (top/horizontal, bottom)
+ *    - Content: padding 8px for container, gap 8px between sections
+ *    - Nested content: padding 0 8px 8px 8px (indent children)
+ *
+ * 4. Typography Alignment:
+ *    - Use consistent font-family across all text elements
+ *    - Font sizes: headers 16-18px, body 14-15px, meta 12-13px
+ *    - Font weights: headers 600, body 500, meta 400
+ *    - Line heights should be 1.2-1.5 for optimal vertical rhythm
+ *
+ * 5. Spacing System:
+ *    - Use design token spacing variables for consistency
+ *    - Gap between related items: 4px (tight), 8px (normal), 12px (loose)
+ *    - Padding in containers: 8px (compact), 12-14px (normal), 16-20px (spacious)
+ */
+
+:root {
+  /* ===== SPACING SCALE ===== */
+  /* 8px base unit for consistent spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 48px;
+  --space-4xl: 64px;
+
+  /* ===== BORDER RADIUS ===== */
+  /* Mobile-first: larger radius for better touch UX */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* ===== TOUCH TARGETS ===== */
+  /* Minimum touch target size for accessibility (WCAG 2.1 Level AAA) */
+  --touch-target-min: 44px;
+  --touch-target-comfortable: 48px;
+
+  /* ===== TYPOGRAPHY SCALE ===== */
+  /* rem-based for better accessibility */
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 2rem;      /* 32px */
+
+  /* ===== BREAKPOINTS ===== */
+  /* Mobile-first approach */
+  --breakpoint-tablet: 1024px;  /* Tablets and up */
+  --breakpoint-desktop: 1280px; /* Desktop and up */
+
+  /* ===== Z-INDEX HIERARCHY ===== */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-overlay: 300;
+  --z-sheet: 400;
+  --z-modal: 500;
+  --z-fab: 600;
+  --z-tooltip: 700;
+  --z-notification: 800;
+
+  /* ===== COLORS ===== */
+  /* Primary colors */
+  --color-primary: #3e4533;
+  --color-primary-light: #565e47;
+  --color-primary-dark: #2a2f23;
+
+  /* Neutral colors */
+  --color-white: #ffffff;
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+
+  /* Semantic colors */
+  --color-error: #ef4444;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+
+  /* Map colors */
+  --color-location: #2563eb;
+  --color-location-bg: rgba(37, 99, 235, 0.1);
+
+  /* ===== SHADOWS ===== */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  /* ===== TRANSITIONS ===== */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ===== SAFE AREA INSETS ===== */
+  /* For notched devices (iPhone X+) */
+  --safe-area-inset-top: env(safe-area-inset-top);
+  --safe-area-inset-right: env(safe-area-inset-right);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom);
+  --safe-area-inset-left: env(safe-area-inset-left);
+
+  /* ===== SHEET/PANEL SPECIFIC ===== */
+  --sheet-border-radius: var(--radius-lg);
+  --sheet-padding-mobile: var(--space-lg);
+  --sheet-padding-desktop: var(--space-xl);
+  --sheet-header-height: 56px;
+  --sheet-peek-height: 40vh;
+  --sheet-half-height: 70vh;
+}
+
+/* ===== UTILITY CLASSES ===== */
+
+/* Spacing utilities */
+.p-sm { padding: var(--space-sm); }
+.p-md { padding: var(--space-md); }
+.p-lg { padding: var(--space-lg); }
+.p-xl { padding: var(--space-xl); }
+
+.px-sm { padding-left: var(--space-sm); padding-right: var(--space-sm); }
+.px-md { padding-left: var(--space-md); padding-right: var(--space-md); }
+.px-lg { padding-left: var(--space-lg); padding-right: var(--space-lg); }
+.px-xl { padding-left: var(--space-xl); padding-right: var(--space-xl); }
+
+.py-sm { padding-top: var(--space-sm); padding-bottom: var(--space-sm); }
+.py-md { padding-top: var(--space-md); padding-bottom: var(--space-md); }
+.py-lg { padding-top: var(--space-lg); padding-bottom: var(--space-lg); }
+.py-xl { padding-top: var(--space-xl); padding-bottom: var(--space-xl); }
+
+/* Gap utilities */
+.gap-sm { gap: var(--space-sm); }
+.gap-md { gap: var(--space-md); }
+.gap-lg { gap: var(--space-lg); }
+.gap-xl { gap: var(--space-xl); }
+
+/* Border radius utilities */
+.rounded-sm { border-radius: var(--radius-sm); }
+.rounded-md { border-radius: var(--radius-md); }
+.rounded-lg { border-radius: var(--radius-lg); }
+.rounded-xl { border-radius: var(--radius-xl); }
+.rounded-full { border-radius: var(--radius-full); }
+
+/* Shadow utilities */
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+.shadow-xl { box-shadow: var(--shadow-xl); }
+
+/* Transition utilities */
+.transition-fast { transition: all var(--transition-fast); }
+.transition-base { transition: all var(--transition-base); }
+.transition-slow { transition: all var(--transition-slow); }
+
+/* Touch target helper */
+.touch-target {
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+}
+
+.touch-target-comfortable {
+  min-width: var(--touch-target-comfortable);
+  min-height: var(--touch-target-comfortable);
+}

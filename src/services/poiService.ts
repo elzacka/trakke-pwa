@@ -28,8 +28,8 @@ const CATEGORIES: Record<POICategory, CategoryConfig> = {
   shelters: {
     id: 'shelters',
     name: 'Tilfluktsrom',
-    icon: 'shield',
-    color: '#dc2626', // Red for emergency
+    icon: 'custom-t-marker', // Custom T marker
+    color: '#fbbf24', // Yellow background (matches app design)
     wfsUrl: 'https://ogc.dsb.no/wfs.ashx',
     layerName: 'layer_340'
   }

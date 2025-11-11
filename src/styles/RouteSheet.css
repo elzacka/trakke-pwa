@@ -12,8 +12,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 12px;
+  padding: 20px 20px 16px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  background: var(--color-white);
+  z-index: 10;
   flex-shrink: 0;
   gap: 12px;
 }
@@ -27,8 +31,15 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+.route-sheet-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .route-sheet-back,
-.route-sheet-close {
+.route-sheet-close,
+.route-visibility-button {
   width: 32px;
   height: 32px;
   border: none;
@@ -40,6 +51,14 @@
   border-radius: 8px;
   transition: background-color 0.2s ease;
   flex-shrink: 0;
+}
+
+.route-visibility-button {
+  color: #3e4533;
+}
+
+.route-visibility-button:hover {
+  background-color: rgba(62, 69, 51, 0.08);
 }
 
 .route-sheet-back:hover,

@@ -2,10 +2,10 @@
 
 .fab-container {
   position: fixed;
-  bottom: max(24px, calc(24px + env(safe-area-inset-bottom)));
-  right: max(24px, calc(24px + env(safe-area-inset-right)));
-  z-index: 1000;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  bottom: max(var(--space-xl), calc(var(--space-xl) + var(--safe-area-inset-bottom)));
+  right: max(var(--space-xl), calc(var(--space-xl) + var(--safe-area-inset-right)));
+  z-index: var(--z-fab);
+  transition: opacity var(--transition-slow), transform var(--transition-slow);
 }
 
 .fab-container.fab-hidden {
@@ -14,27 +14,29 @@
   pointer-events: none;
 }
 
-/* On mobile, move FAB down when sheets are open to avoid covering content */
-@media (max-width: 768px) {
+/* On mobile/tablet, move FAB down when sheets are open to avoid covering content */
+@media (max-width: 1023px) {
   .fab-container.fab-shifted {
     transform: translateY(calc(100vh - 100px));
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform var(--transition-slow);
   }
 }
 
-/* Primary FAB - Material 3 Regular (56dp) */
+/* Primary FAB - Material 3 Regular (56dp = 44px+ for accessibility) */
 .fab-primary {
   width: 56px;
   height: 56px;
-  border-radius: 16px;
-  background: #3e4533;
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+  border-radius: var(--radius-lg);
+  background: var(--color-primary);
   border: none;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--transition-slow);
   position: relative;
   z-index: 2;
   /* Prevent text selection and context menu on mobile */
@@ -133,11 +135,11 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Mobile optimizations */
-@media (max-width: 768px) {
+/* Mobile/Tablet optimizations */
+@media (max-width: 1023px) {
   .fab-container {
-    bottom: max(20px, calc(20px + env(safe-area-inset-bottom)));
-    right: max(20px, calc(20px + env(safe-area-inset-right)));
+    bottom: max(var(--space-lg), calc(var(--space-lg) + var(--safe-area-inset-bottom)));
+    right: max(var(--space-lg), calc(var(--space-lg) + var(--safe-area-inset-right)));
   }
 
   .fab-primary {
@@ -151,11 +153,12 @@
 
   .fab-menu-item {
     min-width: 110px;
-    padding: 10px 14px;
+    min-height: var(--touch-target-min);
+    padding: var(--space-md) var(--space-lg);
   }
 
   .fab-menu-label {
-    font-size: 13px;
+    font-size: var(--text-sm);
   }
 }
 

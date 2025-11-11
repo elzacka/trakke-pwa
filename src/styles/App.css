@@ -73,9 +73,15 @@
   border-bottom: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   animation: fadeIn 0.5s ease-in;
-  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
   /* Position below status bar on mobile */
   padding: calc(10px + env(safe-area-inset-top)) 20px 10px 20px;
+  cursor: pointer;
+}
+
+.welcome-header:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .welcome-header .header-content {

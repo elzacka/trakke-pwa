@@ -9,6 +9,11 @@ interface RouteSheetProps {
   onStartDrawing: () => void
   onStartWaypointPlacement: () => void
   onSelectRoute: (route: Route) => void
+  onSelectWaypoint: (waypoint: Waypoint) => void
+  onDeleteRoute: (routeId: string) => void
+  onDeleteWaypoint: (waypointId: string) => void
+  routesVisible: boolean
+  onToggleVisibility: () => void
 }
 
 type ViewMode = 'list' | 'detail' | 'create'
@@ -18,7 +23,12 @@ const RouteSheet = ({
   onClose,
   onStartDrawing,
   onStartWaypointPlacement,
-  onSelectRoute
+  onSelectRoute,
+  onSelectWaypoint,
+  onDeleteRoute,
+  onDeleteWaypoint,
+  routesVisible,
+  onToggleVisibility
 }: RouteSheetProps) => {
   const [viewMode, setViewMode] = useState<ViewMode>('list')
   const [routes, setRoutes] = useState<Route[]>([])
@@ -84,6 +94,7 @@ const RouteSheet = ({
 
     try {
       await routeService.deleteRoute(routeId)
+      onDeleteRoute(routeId) // Notify Map to remove from map
       await loadData()
       if (selectedRoute?.id === routeId) {
         setViewMode('list')
@@ -101,6 +112,7 @@ const RouteSheet = ({
 
     try {
       await routeService.deleteWaypoint(waypointId)
+      onDeleteWaypoint(waypointId) // Notify Map to remove from map
       await loadData()
     } catch (error) {
       console.error('Failed to delete waypoint:', error)
@@ -135,13 +147,25 @@ const RouteSheet = ({
     <div className="route-sheet">
       <div className="route-sheet-header">
         <h2>Ruter og punkter</h2>
-        <button
-          className="route-sheet-close"
-          onClick={onClose}
-          aria-label="Lukk"
-        >
-          <span className="material-symbols-outlined">close</span>
-        </button>
+        <div className="route-sheet-header-actions">
+          <button
+            className="route-visibility-button"
+            onClick={onToggleVisibility}
+            aria-label={routesVisible ? 'Skjul ruter og punkter' : 'Vis ruter og punkter'}
+            title={routesVisible ? 'Skjul på kartet' : 'Vis på kartet'}
+          >
+            <span className="material-symbols-outlined">
+              {routesVisible ? 'visibility' : 'visibility_off'}
+            </span>
+          </button>
+          <button
+            className="route-sheet-close"
+            onClick={onClose}
+            aria-label="Lukk"
+          >
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
       </div>
 
       <div className="route-sheet-content">
@@ -216,6 +240,8 @@ const RouteSheet = ({
                     <div
                       key={waypoint.id}
                       className="route-item"
+                      onClick={() => onSelectWaypoint(waypoint)}
+                      style={{ cursor: 'pointer' }}
                     >
                       <div className="route-item-icon">
                         <span className="material-symbols-outlined">

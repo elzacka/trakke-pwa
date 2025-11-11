@@ -2,6 +2,21 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## ⚠️ CRITICAL DEPLOYMENT WORKFLOW ⚠️
+
+**NEVER push to GitHub without user's explicit approval after local testing.**
+
+### Mandatory Workflow:
+1. Make code changes
+2. Build locally: `npm run build`
+3. **STOP** - Inform user: "Changes built. Please test locally before pushing to GitHub."
+4. **WAIT** for user to explicitly say "push" or "deploy" or similar confirmation
+5. Only then: `git add && git commit && git push`
+
+**Exception**: Only push immediately if user explicitly says "and push to GitHub" in the same request.
+
+See `.claude/workflow-reminder.md` for complete details.
+
 ## Project Overview
 
 **Tråkke** is a privacy-first Progressive Web Application for Norwegian outdoor navigation. It's built with React 19.2, TypeScript 5.9.3, and Vite 5.4.21, using MapLibre GL JS for mapping with Kartverket (Norwegian government) tiles.

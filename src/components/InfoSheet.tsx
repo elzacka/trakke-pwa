@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import BottomSheet from './BottomSheet'
 import '../styles/InfoSheet.css'
 
@@ -7,17 +8,29 @@ interface InfoSheetProps {
 }
 
 const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
+
+  const toggleSection = (sectionId: string) => {
+    const newExpanded = new Set(expandedSections)
+    if (newExpanded.has(sectionId)) {
+      newExpanded.delete(sectionId)
+    } else {
+      newExpanded.add(sectionId)
+    }
+    setExpandedSections(newExpanded)
+  }
+
   return (
     <BottomSheet
       isOpen={isOpen}
       onClose={onClose}
-      peekHeight={35}
+      peekHeight={40}
       halfHeight={70}
       initialHeight="half"
     >
       <div className="info-sheet">
         <div className="info-sheet-header">
-          <h2>Datakilder</h2>
+          <h2>Info</h2>
           <button
             className="info-sheet-close"
             onClick={onClose}
@@ -28,95 +41,114 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
         </div>
 
         <div className="info-sheet-content">
-          <section className="info-section">
-            <h3>Kartdata</h3>
-            <p>
-              Topografiske kart fra Kartverkets{' '}
-              <a
-                href="https://www.kartverket.no/api-og-data/kartdata/gratis-kartdata/cache-tjenester"
-                target="_blank"
-                rel="noopener noreferrer"
+          <div className="info-menu">
+            {/* Datakilder Section */}
+            <div className="info-section-group">
+              <button
+                className="info-section-header"
+                onClick={() => toggleSection('datakilder')}
+                aria-expanded={expandedSections.has('datakilder')}
               >
-                WMTS cache-tjeneste
-              </a>
-            </p>
-            <p className="info-detail">
-              Leveres via cache.kartverket.no • © Kartverket - CC BY 4.0 lisens
-            </p>
-          </section>
+                <span className="info-section-title">Datakilder</span>
+                <span className="material-symbols-outlined info-section-chevron">
+                  {expandedSections.has('datakilder') ? 'expand_less' : 'expand_more'}
+                </span>
+              </button>
 
-          <section className="info-section">
-            <h3>Søk - Stedsnavn</h3>
-            <p>
-              Stedsnavn fra Kartverkets{' '}
-              <a
-                href="https://www.kartverket.no/api-og-data/stedsnavn"
-                target="_blank"
-                rel="noopener noreferrer"
+              {expandedSections.has('datakilder') && (
+                <div className="info-section-content">
+                  <section className="info-section">
+                    <h3>Kartverket</h3>
+                    <ul className="info-list">
+                      <li>
+                        Topografiske kart. {' '}
+                        <a
+                          href="https://kartkatalog.geonorge.no/metadata/topografisk-norgeskart-wmts--cache/8f381180-1a47-4453-bee7-9a3d64843efa"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          WMTS cache-tjeneste.
+                        </a>
+                      </li>
+                      <li>
+                        Stedsnavn for søkefunksjon. {' '}
+                        <a
+                          href="https://kartkatalog.geonorge.no/metadata/stedsnavn-komplett-ssr/e1c50348-962d-4047-8325-bdc265c853ed?search=Sentralt%20Stedsnavnregister%20(SSR)"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          REST API.
+                        </a>
+                      </li>
+                      <li>
+                        Adresser for søkefunksjon. {' '}
+                        <a
+                          href="https://kartkatalog.geonorge.no/metadata/adresser/ea192681-d039-42ec-b1bc-f3ce04c189ac"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          REST API.
+                        </a>
+                      </li>
+                    </ul>
+                  </section>
+
+                  <section className="info-section">
+                    <h3>Direktoratet for samfunnssikkerhet og beredskap</h3>
+                    <p>
+                      Offentlige tilfluktsrom i Norge. {' '}
+                      <a
+                        href="https://kartkatalog.geonorge.no/metadata/tilfluktsrom-offentlige-wfs/06da6e96-544c-467d-8329-5ca25a11328b"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        WMS-tjeneste.
+                      </a>
+                    </p>
+                  </section>
+                </div>
+              )}
+            </div>
+
+            {/* Personvern Section */}
+            <div className="info-section-group">
+              <button
+                className="info-section-header"
+                onClick={() => toggleSection('personvern')}
+                aria-expanded={expandedSections.has('personvern')}
               >
-                Sentralt Stedsnavnregister (SSR)
-              </a>
-            </p>
-            <p className="info-detail">
-              API: ws.geonorge.no/stedsnavn/v1 • © Kartverket - CC BY 4.0 lisens
-            </p>
-          </section>
+                <span className="info-section-title">Personvern</span>
+                <span className="material-symbols-outlined info-section-chevron">
+                  {expandedSections.has('personvern') ? 'expand_less' : 'expand_more'}
+                </span>
+              </button>
 
-          <section className="info-section">
-            <h3>Søk - Adresser</h3>
-            <p>
-              Adresser fra Kartverkets{' '}
-              <a
-                href="https://www.kartverket.no/api-og-data/adresser"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Adresseregister
-              </a>
-            </p>
-            <p className="info-detail">
-              API: ws.geonorge.no/adresser/v1 • © Kartverket - CC BY 4.0 lisens
-            </p>
-          </section>
-
-          <section className="info-section">
-            <h3>Geolokalisering</h3>
-            <p>
-              Posisjonsdata fra din enhets GPS/nettverksbaserte lokalisering via nettleserens Geolocation API
-            </p>
-            <p className="info-detail">
-              Alle lokasjonsdata lagres kun lokalt på din enhet
-            </p>
-          </section>
-
-          <section className="info-section">
-            <h3>Om Tråkke</h3>
-            <p>
-              Tråkke er en personvernvennlig kartapplikasjon for norsk natur. Ingen
-              sporing, ingen analyser, alle data lagres lokalt på din enhet.
-            </p>
-            <p className="info-detail">
-              Bygget med React • MapLibre GL JS • Material Symbols
-            </p>
-          </section>
-
-          <section className="info-section">
-            <h3>Vilkår og betingelser</h3>
-            <p>
-              Kartdata og stedsnavn er tilgjengelig under{' '}
-              <a
-                href="https://www.kartverket.no/api-og-data/vilkar-for-bruk"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Kartverkets vilkår for bruk
-              </a>
-            </p>
-            <p className="info-detail">
-              Tråkke er GDPR-kompatibel og følger norske personvernregler
-            </p>
-          </section>
-          <div style={{ height: '200px', flexShrink: 0 }} />
+              {expandedSections.has('personvern') && (
+                <div className="info-section-content">
+                  <section className="info-section">
+                    <p>
+                      Tråkke er laget med personvern som grunnleggende prinsipp:
+                    </p>
+                    <ul className="info-list">
+                      <li>Ingen eksterne sporingsverktøy, ingen analyser, ingen cookies.</li>
+                      <li>All brukerdata lagres kun lokalt på din enhet.</li>
+                    </ul>
+                    <p>
+                      Les mer i{' '}
+                      <a
+                        href="https://forvarelset.tazk.no/space/TO/293371905/Personvernerkl%C3%A6ring+for+Tr%C3%A5kke"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Tråkkes personvernerklæring
+                      </a>
+                      .
+                    </p>
+                  </section>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </BottomSheet>

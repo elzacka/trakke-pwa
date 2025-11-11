@@ -14,19 +14,17 @@ function App() {
     })
   }, [])
 
-  useEffect(() => {
-    // Auto-hide welcome header after 4 seconds
-    const timer = setTimeout(() => {
-      setShowWelcome(false)
-    }, 4000)
-
-    return () => clearTimeout(timer)
-  }, [])
+  const handleHeaderClick = () => {
+    setShowWelcome(false)
+  }
 
   return (
     <div className={`app ${zenMode ? 'zen-mode' : ''}`}>
       {showWelcome && zenMode && (
-        <header className={`app-header welcome-header ${!showWelcome ? 'welcome-header-hidden' : ''}`}>
+        <header
+          className="app-header welcome-header"
+          onClick={handleHeaderClick}
+        >
           <div className="header-content">
             <div className="header-branding">
               <span className="material-symbols-outlined logo-icon">

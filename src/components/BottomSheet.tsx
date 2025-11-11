@@ -10,6 +10,8 @@ interface BottomSheetProps {
   peekHeight?: number
   halfHeight?: number
   initialHeight?: SheetHeight
+  height?: SheetHeight // External height control
+  onHeightChange?: (height: SheetHeight) => void
 }
 
 const BottomSheet = ({
@@ -18,9 +20,22 @@ const BottomSheet = ({
   children,
   peekHeight = 30,
   halfHeight = 50,
-  initialHeight = 'peek'
+  initialHeight = 'peek',
+  height: externalHeight,
+  onHeightChange
 }: BottomSheetProps) => {
-  const [height, setHeight] = useState<SheetHeight>(initialHeight)
+  const [internalHeight, setInternalHeight] = useState<SheetHeight>(initialHeight)
+
+  // Use external height if provided, otherwise use internal state
+  const height = externalHeight !== undefined ? externalHeight : internalHeight
+
+  // Wrapper to handle both internal and external height changes
+  const updateHeight = (newHeight: SheetHeight) => {
+    if (externalHeight === undefined) {
+      setInternalHeight(newHeight)
+    }
+    onHeightChange?.(newHeight)
+  }
   const [isMobile, setIsMobile] = useState(false)
   const [keyboardVisible, setKeyboardVisible] = useState(false)
   const [viewportHeight, setViewportHeight] = useState(0)
@@ -31,7 +46,7 @@ const BottomSheet = ({
   // Detect mobile device
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768)
+      setIsMobile(window.innerWidth <= 1023)
     }
     checkMobile()
     window.addEventListener('resize', checkMobile)
@@ -98,36 +113,38 @@ const BottomSheet = ({
       // Mobile: sheets at top, swipe down to expand, up to close
       if (diff < 0) {
         // Swipe down (expand)
-        if (height === 'peek') setHeight('half')
-        else if (height === 'half') setHeight('full')
+        if (height === 'peek') updateHeight('half')
+        else if (height === 'half') updateHeight('full')
       } else {
         // Swipe up (collapse)
-        if (height === 'full') setHeight('half')
-        else if (height === 'half') setHeight('peek')
+        if (height === 'full') updateHeight('half')
+        else if (height === 'half') updateHeight('peek')
         else if (height === 'peek') onClose()
       }
     } else {
       // Desktop: sheets at bottom, swipe up to expand, down to close
       if (diff > 0) {
         // Swipe up
-        if (height === 'peek') setHeight('half')
-        else if (height === 'half') setHeight('full')
+        if (height === 'peek') updateHeight('half')
+        else if (height === 'half') updateHeight('full')
       } else {
         // Swipe down
-        if (height === 'full') setHeight('half')
-        else if (height === 'half') setHeight('peek')
+        if (height === 'full') updateHeight('half')
+        else if (height === 'half') updateHeight('peek')
         else if (height === 'peek') onClose()
       }
     }
   }
 
   useEffect(() => {
-    if (isOpen) {
-      setHeight(initialHeight)
-    } else {
-      setHeight('closed')
+    if (externalHeight === undefined) {
+      if (isOpen) {
+        setInternalHeight(initialHeight)
+      } else {
+        setInternalHeight('closed')
+      }
     }
-  }, [isOpen, initialHeight])
+  }, [isOpen, initialHeight, externalHeight])
 
   // Close on escape key
   useEffect(() => {
@@ -145,11 +162,13 @@ const BottomSheet = ({
 
   return (
     <>
-      <div
-        className="bottom-sheet-backdrop"
-        onClick={onClose}
-        aria-hidden="true"
-      />
+      {isOpen && (
+        <div
+          className="bottom-sheet-backdrop"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+      )}
       <div
         ref={sheetRef}
         className={`bottom-sheet bottom-sheet-${height} ${isMobile ? 'bottom-sheet-mobile' : ''} ${keyboardVisible ? 'keyboard-visible' : ''}`}

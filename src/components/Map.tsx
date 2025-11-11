@@ -16,7 +16,7 @@ import POIDetailsSheet from './POIDetailsSheet'
 import { useAutoHide } from '../hooks/useAutoHide'
 import { MAP_CONFIG } from '../constants'
 import type { SearchResult } from '../services/searchService'
-import type { Route } from '../services/routeService'
+import type { Route, Waypoint } from '../services/routeService'
 import { routeService } from '../services/routeService'
 import { poiService, type POICategory, type POI } from '../services/poiService'
 import '../styles/Map.css'
@@ -62,6 +62,8 @@ const Map = ({ zenMode }: MapProps) => {
   const [isPlacingWaypoint, setIsPlacingWaypoint] = useState(false)
   const [routePoints, setRoutePoints] = useState<Array<[number, number]>>([])
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null)
+  const [waypointMarkers, setWaypointMarkers] = useState<Record<string, maplibregl.Marker>>({})
+  const [routesVisible, setRoutesVisible] = useState(true)
 
   const { visible: controlsVisible, show: showControls, hide: hideControls } = useAutoHide({
     delay: 5000,
@@ -120,7 +122,7 @@ const Map = ({ zenMode }: MapProps) => {
 
     } else {
       // Zen mode: no navigation controls (all functionality in FAB menu)
-      // Add custom clickable attribution with info icon in top-left
+      // Add custom clickable attribution with info icon in bottom-left
       const attributionContainer = document.createElement('button')
       attributionContainer.className = 'custom-attribution'
       attributionContainer.setAttribute('aria-label', 'Toggle attribution')
@@ -164,7 +166,7 @@ const Map = ({ zenMode }: MapProps) => {
         }
       }
 
-      map.current.addControl(new CustomAttributionControl(attributionContainer), 'top-left')
+      map.current.addControl(new CustomAttributionControl(attributionContainer), 'bottom-left')
     }
 
     // Track zoom changes
@@ -266,6 +268,33 @@ const Map = ({ zenMode }: MapProps) => {
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [isDrawingRoute, isPlacingWaypoint])
+
+  // Toggle visibility of routes and waypoints
+  useEffect(() => {
+    if (!map.current) return
+
+    // Toggle all route layers
+    const style = map.current.getStyle()
+    if (style && style.layers) {
+      style.layers.forEach((layer) => {
+        if (layer.id.startsWith('route-') && (layer.id.endsWith('-line-layer') || layer.id.endsWith('-points-layer'))) {
+          map.current!.setLayoutProperty(
+            layer.id,
+            'visibility',
+            routesVisible ? 'visible' : 'none'
+          )
+        }
+      })
+    }
+
+    // Toggle waypoint markers
+    Object.values(waypointMarkers).forEach((marker) => {
+      const element = marker.getElement()
+      if (element) {
+        element.style.display = routesVisible ? 'block' : 'none'
+      }
+    })
+  }, [routesVisible, waypointMarkers])
 
   // Register map click handler with current state values (fixes closure issue)
   useEffect(() => {
@@ -666,7 +695,23 @@ const Map = ({ zenMode }: MapProps) => {
   }
 
   const handleDownloadClick = () => {
+    // Open download sheet to view/manage downloaded areas or start new download
     setDownloadSheetOpen(true)
+  }
+
+  const handleNavigateToArea = (bounds: { north: number; south: number; east: number; west: number }) => {
+    if (!map.current) return
+
+    // Convert bounds to LngLatBounds and fit the map to them
+    const lngLatBounds = new maplibregl.LngLatBounds(
+      [bounds.west, bounds.south],
+      [bounds.east, bounds.north]
+    )
+
+    map.current.fitBounds(lngLatBounds, {
+      padding: { top: 50, bottom: 50, left: 50, right: 50 },
+      duration: 1000
+    })
   }
 
   const handleInfoClick = () => {
@@ -715,7 +760,18 @@ const Map = ({ zenMode }: MapProps) => {
       pois.forEach(poi => {
         const el = document.createElement('div')
         el.className = 'poi-marker'
-        el.innerHTML = `<span class="material-symbols-outlined" style="color: ${categoryConfig.color}">${categoryConfig.icon}</span>`
+
+        // Use custom T marker for shelters, Material Symbol for others
+        if (categoryConfig.icon === 'custom-t-marker') {
+          el.innerHTML = `
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="1" y="1" width="22" height="22" rx="3" fill="#fbbf24" stroke="#111827" stroke-width="2"/>
+              <text x="12" y="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="400" fill="#111827" text-anchor="middle" dominant-baseline="central">T</text>
+            </svg>
+          `
+        } else {
+          el.innerHTML = `<span class="material-symbols-outlined" style="color: ${categoryConfig.color}">${categoryConfig.icon}</span>`
+        }
 
         const marker = new maplibregl.Marker({ element: el })
           .setLngLat(poi.coordinates)
@@ -742,12 +798,6 @@ const Map = ({ zenMode }: MapProps) => {
     setActivePOIs(newActivePOIs)
   }
 
-  const handleResetNorth = () => {
-    if (map.current) {
-      map.current.resetNorthPitch()
-    }
-  }
-
   // Route handlers
   const handleRoutesClick = () => {
     setRouteSheetOpen(true)
@@ -768,10 +818,152 @@ const Map = ({ zenMode }: MapProps) => {
     setSelectedRoute(route)
     // Render route on map
     if (map.current && route.coordinates.length > 0) {
+      const lineSourceId = `route-${route.id}-line`
+      const pointsSourceId = `route-${route.id}-points`
+      const lineLayerId = `route-${route.id}-line-layer`
+      const pointsLayerId = `route-${route.id}-points-layer`
+
+      // Add route line if not already present
+      if (!map.current.getSource(lineSourceId) && route.coordinates.length >= 2) {
+        map.current.addSource(lineSourceId, {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'LineString',
+              coordinates: route.coordinates
+            }
+          }
+        })
+
+        map.current.addLayer({
+          id: lineLayerId,
+          type: 'line',
+          source: lineSourceId,
+          paint: {
+            'line-color': '#3e4533',
+            'line-width': 4,
+            'line-opacity': 0.8
+          }
+        })
+      }
+
+      // Add route points
+      if (!map.current.getSource(pointsSourceId)) {
+        const pointFeatures = route.coordinates.map(coord => ({
+          type: 'Feature' as const,
+          properties: {},
+          geometry: {
+            type: 'Point' as const,
+            coordinates: coord
+          }
+        }))
+
+        map.current.addSource(pointsSourceId, {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: pointFeatures
+          }
+        })
+
+        map.current.addLayer({
+          id: pointsLayerId,
+          type: 'circle',
+          source: pointsSourceId,
+          paint: {
+            'circle-radius': 6,
+            'circle-color': '#3e4533',
+            'circle-stroke-color': '#ffffff',
+            'circle-stroke-width': 2
+          }
+        })
+      }
+
+      // Fly to route start
       map.current.flyTo({
         center: route.coordinates[0],
         zoom: 13,
         essential: true
+      })
+
+      // Haptic feedback
+      if ('vibrate' in navigator) {
+        navigator.vibrate(10)
+      }
+    }
+  }
+
+  const handleSelectWaypoint = (waypoint: Waypoint) => {
+    // Navigate to waypoint on map and add marker if not present
+    if (map.current) {
+      // Check if marker already exists
+      if (!waypointMarkers[waypoint.id]) {
+        // Create marker element
+        const el = document.createElement('div')
+        el.className = 'waypoint-marker'
+        el.innerHTML = '<span class="material-symbols-outlined">location_on</span>'
+
+        // Add marker to map
+        const marker = new maplibregl.Marker({ element: el })
+          .setLngLat(waypoint.coordinates)
+          .addTo(map.current)
+
+        // Track marker
+        setWaypointMarkers(prev => ({ ...prev, [waypoint.id]: marker }))
+      }
+
+      // Navigate to waypoint
+      map.current.flyTo({
+        center: waypoint.coordinates,
+        zoom: 14,
+        essential: true
+      })
+
+      // Haptic feedback
+      if ('vibrate' in navigator) {
+        navigator.vibrate(10)
+      }
+    }
+  }
+
+  const handleDeleteRoute = (routeId: string) => {
+    if (!map.current) return
+
+    // Remove route layers and sources from map
+    const lineLayerId = `route-${routeId}-line-layer`
+    const pointsLayerId = `route-${routeId}-points-layer`
+    const lineSourceId = `route-${routeId}-line`
+    const pointsSourceId = `route-${routeId}-points`
+
+    // Remove layers
+    if (map.current.getLayer(lineLayerId)) {
+      map.current.removeLayer(lineLayerId)
+    }
+    if (map.current.getLayer(pointsLayerId)) {
+      map.current.removeLayer(pointsLayerId)
+    }
+
+    // Remove sources
+    if (map.current.getSource(lineSourceId)) {
+      map.current.removeSource(lineSourceId)
+    }
+    if (map.current.getSource(pointsSourceId)) {
+      map.current.removeSource(pointsSourceId)
+    }
+  }
+
+  const handleDeleteWaypoint = (waypointId: string) => {
+    // Remove waypoint marker from map
+    const marker = waypointMarkers[waypointId]
+    if (marker) {
+      marker.remove()
+      // Update state to remove the marker
+      setWaypointMarkers(prev => {
+        const newMarkers = { ...prev }
+        delete newMarkers[waypointId]
+        return newMarkers
       })
     }
   }
@@ -788,7 +980,6 @@ const Map = ({ zenMode }: MapProps) => {
             onRoutesClick={handleRoutesClick}
             onCategoryClick={handleCategoryClick}
             onLocationClick={handleLocationClick}
-            onResetNorthClick={handleResetNorth}
             onSettingsClick={handleSettingsClick}
             visible={controlsVisible}
             sheetsOpen={searchSheetOpen || infoSheetOpen || downloadSheetOpen || routeSheetOpen || settingsSheetOpen || categorySheetOpen || poiDetailsSheetOpen}
@@ -880,8 +1071,8 @@ const Map = ({ zenMode }: MapProps) => {
                 <div className="selection-banner-content">
                   <span className="material-symbols-outlined">download</span>
                   <div className="selection-banner-text">
-                    <strong>Velg nedlastingsområde</strong>
-                    <span>Dra hjørnene for å endre størrelse</span>
+                    <strong>Velg område</strong>
+                    <span>Dra hjørnene for å endre</span>
                   </div>
                 </div>
                 <button
@@ -926,21 +1117,28 @@ const Map = ({ zenMode }: MapProps) => {
                 />
               </div>
 
-              {/* Confirm button */}
+              {/* Next button */}
               <button
                 className="selection-confirm-button"
                 onClick={handleConfirmSelection}
-                aria-label="Bekreft valg"
+                aria-label="Neste"
               >
-                <span className="material-symbols-outlined">check</span>
-                <span>Bekreft</span>
+                <span className="material-symbols-outlined">arrow_forward</span>
+                <span>Neste</span>
               </button>
             </>
           )}
 
           <SearchSheet
             isOpen={searchSheetOpen}
-            onClose={() => setSearchSheetOpen(false)}
+            onClose={() => {
+              setSearchSheetOpen(false)
+              // Remove search marker when sheet closes
+              if (searchMarker.current) {
+                searchMarker.current.remove()
+                searchMarker.current = null
+              }
+            }}
             onResultSelect={handleSearchResult}
           />
           <InfoSheet
@@ -955,6 +1153,7 @@ const Map = ({ zenMode }: MapProps) => {
             isSelecting={isSelectingArea}
             onStartSelection={handleStartSelection}
             onCancelSelection={handleCancelSelection}
+            onNavigateToArea={handleNavigateToArea}
           />
           <RouteSheet
             isOpen={routeSheetOpen}
@@ -962,6 +1161,11 @@ const Map = ({ zenMode }: MapProps) => {
             onStartDrawing={handleStartDrawing}
             onStartWaypointPlacement={handleStartWaypointPlacement}
             onSelectRoute={handleSelectRoute}
+            onSelectWaypoint={handleSelectWaypoint}
+            onDeleteRoute={handleDeleteRoute}
+            onDeleteWaypoint={handleDeleteWaypoint}
+            routesVisible={routesVisible}
+            onToggleVisibility={() => setRoutesVisible(!routesVisible)}
           />
           <SettingsSheet
             isOpen={settingsSheetOpen}

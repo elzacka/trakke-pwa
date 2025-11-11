@@ -8,7 +8,6 @@ interface FABMenuProps {
   onRoutesClick: () => void
   onCategoryClick: () => void
   onLocationClick: () => void
-  onResetNorthClick: () => void
   onSettingsClick: () => void
   visible?: boolean
   sheetsOpen?: boolean
@@ -21,7 +20,6 @@ const FABMenu = ({
   onRoutesClick,
   onCategoryClick,
   onLocationClick,
-  onResetNorthClick,
   onSettingsClick
 }: FABMenuProps) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -114,20 +112,11 @@ const FABMenu = ({
           <button
             className="fab-menu-item"
             onClick={() => handleMenuItemClick(onDownloadClick)}
-            aria-label="Last ned kart"
+            aria-label="Offline kart"
             role="menuitem"
           >
             <span className="material-symbols-outlined">download</span>
-            <span className="fab-menu-label">Last ned</span>
-          </button>
-          <button
-            className="fab-menu-item"
-            onClick={() => handleMenuItemClick(onResetNorthClick)}
-            aria-label="Tilbakestill retning"
-            role="menuitem"
-          >
-            <span className="material-symbols-outlined">explore</span>
-            <span className="fab-menu-label">Tilbakestill</span>
+            <span className="fab-menu-label">Offline kart</span>
           </button>
           <button
             className="fab-menu-item"

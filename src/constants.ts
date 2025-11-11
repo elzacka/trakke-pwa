@@ -6,7 +6,7 @@ export const MAP_CONFIG = {
   // Default center (Oslo, Norway)
   DEFAULT_CENTER: [10.7522, 59.9139] as [number, number],
   DEFAULT_ZOOM: 10,
-  DEFAULT_PITCH: 60,
+  DEFAULT_PITCH: 0,
   MAX_ZOOM: 18,
   MIN_ZOOM: 3,
 

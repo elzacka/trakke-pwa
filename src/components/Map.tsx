@@ -421,10 +421,9 @@ const Map = ({ zenMode }: MapProps) => {
       // Update existing marker position
       userMarker.current.setLngLat([longitude, latitude])
     } else {
-      // Create new marker
+      // Create new marker - simple blue dot
       const el = document.createElement('div')
       el.className = 'user-location-marker'
-      el.innerHTML = '<span class="material-symbols-outlined">my_location</span>'
 
       userMarker.current = new maplibregl.Marker({ element: el })
         .setLngLat([longitude, latitude])

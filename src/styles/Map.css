@@ -12,23 +12,15 @@
   left: 0;
 }
 
-/* User location marker */
+/* User location marker - Simple blue dot */
 .user-location-marker {
-  width: 32px;
-  height: 32px;
-  background-color: #3e4533;
+  width: 16px;
+  height: 16px;
+  background-color: #2563eb;
   border: 3px solid #ffffff;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.2);
   cursor: pointer;
-}
-
-.user-location-marker .material-symbols-outlined {
-  font-size: 20px;
-  color: #ffffff;
 }
 
 /* Search result marker */

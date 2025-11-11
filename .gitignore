@@ -52,6 +52,7 @@ temp/
 *.temp
 
 # OS generated files
+.DS_Store
 Thumbs.db
 .AppleDouble
 .LSOverride
@@ -59,6 +60,16 @@ Icon
 ._*
 .Spotlight-V100
 .Trashes
+
+# Internal documentation (not for public repo)
+CONTENT_DRAFTS.md
+SETUP_COMPLETE.md
+BROWSER_COMPATIBILITY.md
+DEPENDENCIES.md
+TESTING.md
+PRIVACY_COMPLIANCE.md
+*_INTERNAL.md
+*_DRAFT.md
 
 # PWA service worker cache (runtime generated)
 sw.js.map

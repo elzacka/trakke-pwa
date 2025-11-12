@@ -86,12 +86,17 @@ export const useViewportPOIs = ({
 
   // Fetch POIs for all active categories in the current viewport
   const fetchPOIsForViewport = useCallback(async () => {
-    if (!map) return
+    if (!map) {
+      console.log('[useViewportPOIs] Map not initialized yet')
+      return
+    }
 
     const zoom = map.getZoom()
+    console.log(`[useViewportPOIs] Current zoom: ${zoom}, minZoom: ${minZoom}, active categories:`, Array.from(activeCategories))
 
     // Don't show POIs below minimum zoom level
     if (zoom < minZoom) {
+      console.log(`[useViewportPOIs] Zoom ${zoom} < minZoom ${minZoom}, hiding POIs`)
       setVisiblePOIs(new Map())
       return
     }
@@ -110,10 +115,12 @@ export const useViewportPOIs = ({
     previousZoomRef.current = zoom
 
     if (activeCategories.size === 0) {
+      console.log('[useViewportPOIs] No active categories')
       setVisiblePOIs(new Map())
       return
     }
 
+    console.log(`[useViewportPOIs] Fetching POIs for bounds:`, bounds)
     setIsLoading(true)
     setError(null)
 
@@ -140,6 +147,7 @@ export const useViewportPOIs = ({
       if (mountedRef.current) {
         setVisiblePOIs(newVisiblePOIs)
         setIsLoading(false)
+        console.log(`[useViewportPOIs] Updated visiblePOIs:`, newVisiblePOIs)
       }
     } catch (err) {
       console.error('Failed to fetch viewport POIs:', err)
@@ -189,8 +197,9 @@ export const useViewportPOIs = ({
 
   // Reload when active categories change
   useEffect(() => {
+    console.log('[useViewportPOIs] Active categories changed, fetching...', Array.from(activeCategories))
     fetchPOIsForViewport()
-  }, [activeCategories, fetchPOIsForViewport])
+  }, [activeCategories]) // Only depend on activeCategories, not the function
 
   return {
     visiblePOIs,

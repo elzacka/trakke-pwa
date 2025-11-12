@@ -14,6 +14,7 @@ import SettingsSheet from './SettingsSheet'
 import CategorySheet from './CategorySheet'
 import POIDetailsSheet from './POIDetailsSheet'
 import { useAutoHide } from '../hooks/useAutoHide'
+import { useViewportPOIs } from '../hooks/useViewportPOIs'
 import { MAP_CONFIG } from '../constants'
 import type { SearchResult } from '../services/searchService'
 import type { Route, Waypoint } from '../services/routeService'
@@ -74,9 +75,18 @@ const Map = ({ zenMode }: MapProps) => {
   const [poiDetailsSheetOpen, setPoiDetailsSheetOpen] = useState(false)
 
   // POI/Category state
-  const [activePOIs, setActivePOIs] = useState<globalThis.Map<POICategory, POI[]>>(() => new globalThis.Map())
+  const [activeCategories, setActiveCategories] = useState<Set<POICategory>>(new Set())
   const [poiMarkers, setPoiMarkers] = useState<maplibregl.Marker[]>([])
   const [selectedPOI, setSelectedPOI] = useState<POI | null>(null)
+
+  // Use viewport-based POI loading hook
+  const { visiblePOIs, isLoading: poisLoading } = useViewportPOIs({
+    map: map.current,
+    activeCategories,
+    debounceDelay: 300,
+    bufferFactor: 1.2,
+    minZoom: 10
+  })
 
   // Route drawing state
   const [isDrawingRoute, setIsDrawingRoute] = useState(false)
@@ -316,6 +326,105 @@ const Map = ({ zenMode }: MapProps) => {
       }
     })
   }, [routesVisible, waypointMarkers])
+
+  // Sync POI markers with visible POIs from viewport-based loading
+  useEffect(() => {
+    if (!map.current) return
+
+    // Build set of POI IDs that should be visible
+    const shouldBeVisible = new Set<string>()
+    const poiLookup = new globalThis.Map<string, POI>()
+
+    visiblePOIs.forEach((pois, category) => {
+      if (activeCategories.has(category)) {
+        pois.forEach(poi => {
+          shouldBeVisible.add(poi.id)
+          poiLookup.set(poi.id, poi)
+        })
+      }
+    })
+
+    // Remove markers that should no longer be visible
+    setPoiMarkers(prevMarkers => {
+      const markersToKeep: maplibregl.Marker[] = []
+
+      prevMarkers.forEach(marker => {
+        const data = (marker as any)._poiData
+        if (data && shouldBeVisible.has(data.id)) {
+          // Keep this marker
+          markersToKeep.push(marker)
+        } else {
+          // Remove this marker
+          marker.remove()
+        }
+      })
+
+      // Find POIs that need new markers
+      const existingIds = new Set(markersToKeep.map(m => (m as any)._poiData?.id))
+      const newMarkers: maplibregl.Marker[] = []
+
+      shouldBeVisible.forEach(poiId => {
+        if (!existingIds.has(poiId)) {
+          const poi = poiLookup.get(poiId)
+          if (!poi) return
+
+          // Find which category this POI belongs to
+          let category: POICategory | null = null
+          for (const [cat, pois] of visiblePOIs.entries()) {
+            if (pois.some(p => p.id === poiId)) {
+              category = cat
+              break
+            }
+          }
+          if (!category) return
+
+          const categoryConfig = poiService.getCategoryConfig(category)
+
+          // Create marker element
+          const el = document.createElement('div')
+          el.className = 'poi-marker'
+
+          // Use custom T marker for shelters, Material Symbol for others
+          if (categoryConfig.icon === 'custom-t-marker') {
+            el.innerHTML = `
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="1" y="1" width="22" height="22" rx="3" fill="#fbbf24" stroke="#111827" stroke-width="2"/>
+                <text x="12" y="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="400" fill="#111827" text-anchor="middle" dominant-baseline="central">T</text>
+              </svg>
+            `
+          } else {
+            el.innerHTML = `<span class="material-symbols-outlined" style="color: ${categoryConfig.color}">${categoryConfig.icon}</span>`
+          }
+
+          const marker = new maplibregl.Marker({ element: el })
+            .setLngLat(poi.coordinates)
+            .addTo(map.current!)
+
+          // Store POI data on marker for filtering
+          ;(marker as any)._poiData = { category, id: poi.id }
+
+          // Add click handler to show details
+          el.addEventListener('click', (e) => {
+            e.stopPropagation()
+            e.preventDefault()
+            setSelectedPOI(poi)
+            setPoiDetailsSheetOpen(true)
+          })
+
+          newMarkers.push(marker)
+        }
+      })
+
+      if (newMarkers.length > 0) {
+        console.log(`[Map] Added ${newMarkers.length} new POI markers`)
+      }
+      if (prevMarkers.length - markersToKeep.length > 0) {
+        console.log(`[Map] Removed ${prevMarkers.length - markersToKeep.length} POI markers`)
+      }
+
+      return [...markersToKeep, ...newMarkers]
+    })
+  }, [visiblePOIs, activeCategories])
 
   // Register map click handler with current state values (fixes closure issue)
   useEffect(() => {
@@ -756,78 +865,21 @@ const Map = ({ zenMode }: MapProps) => {
     setCategorySheetOpen(true)
   }
 
-  const handleCategorySelect = async (category: POICategory) => {
+  const handleCategorySelect = (category: POICategory) => {
     if (!map.current) return
 
-    // Toggle category - if already active, remove it; otherwise add it
-    const newActivePOIs = new globalThis.Map(activePOIs)
-
-    if (newActivePOIs.has(category)) {
-      // Remove category
-      newActivePOIs.delete(category)
-
-      // Remove markers for this category
-      setPoiMarkers(prevMarkers => {
-        prevMarkers.forEach(marker => {
-          const data = (marker as any)._poiData
-          if (data && data.category === category) {
-            marker.remove()
-          }
-        })
-        return prevMarkers.filter(marker => {
-          const data = (marker as any)._poiData
-          return !data || data.category !== category
-        })
-      })
-    } else {
-      // Add category - fetch POIs
-      const pois = await poiService.getPOIs(category)
-      console.log(`[Map] Received ${pois.length} POIs for category ${category}`)
-      newActivePOIs.set(category, pois)
-
-      // Add markers to map
-      const newMarkers: maplibregl.Marker[] = []
-      const categoryConfig = poiService.getCategoryConfig(category)
-
-      pois.forEach(poi => {
-        const el = document.createElement('div')
-        el.className = 'poi-marker'
-
-        // Use custom T marker for shelters, Material Symbol for others
-        if (categoryConfig.icon === 'custom-t-marker') {
-          el.innerHTML = `
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="1" y="1" width="22" height="22" rx="3" fill="#fbbf24" stroke="#111827" stroke-width="2"/>
-              <text x="12" y="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="400" fill="#111827" text-anchor="middle" dominant-baseline="central">T</text>
-            </svg>
-          `
-        } else {
-          el.innerHTML = `<span class="material-symbols-outlined" style="color: ${categoryConfig.color}">${categoryConfig.icon}</span>`
-        }
-
-        const marker = new maplibregl.Marker({ element: el })
-          .setLngLat(poi.coordinates)
-          .addTo(map.current!)
-
-        // Store POI data on marker for filtering
-        ;(marker as any)._poiData = { category, id: poi.id }
-
-        // Add click handler to show details
-        el.addEventListener('click', (e) => {
-          e.stopPropagation()
-          e.preventDefault()
-          setSelectedPOI(poi)
-          setPoiDetailsSheetOpen(true)
-        })
-
-        newMarkers.push(marker)
-      })
-
-      console.log(`[Map] Added ${newMarkers.length} markers to map`)
-      setPoiMarkers(prevMarkers => [...prevMarkers, ...newMarkers])
-    }
-
-    setActivePOIs(newActivePOIs)
+    // Toggle category - markers will be managed by useEffect watching visiblePOIs
+    setActiveCategories(prev => {
+      const newCategories = new Set(prev)
+      if (newCategories.has(category)) {
+        newCategories.delete(category)
+        console.log(`[Map] Deactivated category: ${category}`)
+      } else {
+        newCategories.add(category)
+        console.log(`[Map] Activated category: ${category}`)
+      }
+      return newCategories
+    })
   }
 
   // Route handlers

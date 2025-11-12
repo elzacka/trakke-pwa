@@ -35,9 +35,25 @@ const CATEGORIES: Record<POICategory, CategoryConfig> = {
   }
 }
 
+interface BoundsRect {
+  north: number
+  south: number
+  east: number
+  west: number
+}
+
+interface CacheEntry {
+  pois: POI[]
+  bounds: BoundsRect
+  zoom: number
+  timestamp: number
+}
+
 class POIService {
-  private cache: Map<POICategory, POI[]> = new Map()
-  private loading: Map<POICategory, Promise<POI[]>> = new Map()
+  // Viewport-aware cache: key = "category-north,south,east,west-z##"
+  private cache: Map<string, CacheEntry> = new Map()
+  private loading: Map<string, Promise<POI[]>> = new Map()
+  private readonly CACHE_TTL = 300000 // 5 minutes
 
   // Get category configuration
   getCategoryConfig(category: POICategory): CategoryConfig {
@@ -47,6 +63,22 @@ class POIService {
   // Get all available categories
   getAllCategories(): CategoryConfig[] {
     return Object.values(CATEGORIES)
+  }
+
+  // Generate cache key from category, bounds, and zoom
+  private getCacheKey(category: POICategory, bounds: BoundsRect, zoom: number): string {
+    // Round to 4 decimals for cache efficiency
+    const n = bounds.north.toFixed(4)
+    const s = bounds.south.toFixed(4)
+    const e = bounds.east.toFixed(4)
+    const w = bounds.west.toFixed(4)
+    const z = Math.floor(zoom)
+    return `${category}-${n},${s},${e},${w}-z${z}`
+  }
+
+  // Check if cache entry is stale
+  private isCacheStale(timestamp: number): boolean {
+    return Date.now() - timestamp > this.CACHE_TTL
   }
 
   // Parse GML Point coordinates from WFS response
@@ -141,38 +173,34 @@ class POIService {
     return shelters
   }
 
-  // Fetch shelters from WFS service
-  async fetchShelters(bounds?: { north: number; south: number; east: number; west: number }): Promise<ShelterPOI[]> {
+  // Fetch shelters from WFS service with viewport-aware caching
+  async fetchShelters(bounds: { north: number; south: number; east: number; west: number }, zoom: number): Promise<ShelterPOI[]> {
+    const cacheKey = this.getCacheKey('shelters', bounds, zoom)
+
     // Check cache first
-    if (this.cache.has('shelters')) {
-      const cached = this.cache.get('shelters') as ShelterPOI[]
-
-      // If bounds provided, filter cached results
-      if (bounds) {
-        return cached.filter(shelter => {
-          const [lon, lat] = shelter.coordinates
-          return lat >= bounds.south && lat <= bounds.north &&
-                 lon >= bounds.west && lon <= bounds.east
-        })
+    if (this.cache.has(cacheKey)) {
+      const cached = this.cache.get(cacheKey)!
+      if (!this.isCacheStale(cached.timestamp)) {
+        console.log(`[POIService] Cache hit: ${cacheKey} (${cached.pois.length} shelters)`)
+        return cached.pois as ShelterPOI[]
+      } else {
+        console.log(`[POIService] Cache stale: ${cacheKey}`)
+        this.cache.delete(cacheKey)
       }
-
-      return cached
     }
 
-    // Check if already loading
-    if (this.loading.has('shelters')) {
-      return this.loading.get('shelters') as Promise<ShelterPOI[]>
+    // Check if already loading this viewport
+    if (this.loading.has(cacheKey)) {
+      console.log(`[POIService] Already loading: ${cacheKey}`)
+      return this.loading.get(cacheKey) as Promise<ShelterPOI[]>
     }
 
-    // Fetch from WFS
+    // Fetch from WFS with BBOX
     const config = CATEGORIES.shelters
-    let url = `${config.wfsUrl}?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TYPENAME=${config.layerName}&SRSNAME=EPSG:4326`
+    const bbox = `${bounds.west},${bounds.south},${bounds.east},${bounds.north},EPSG:4326`
+    const url = `${config.wfsUrl}?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TYPENAME=${config.layerName}&SRSNAME=EPSG:4326&BBOX=${bbox}`
 
-    // Add bbox filter if bounds provided
-    if (bounds) {
-      const bbox = `${bounds.west},${bounds.south},${bounds.east},${bounds.north},EPSG:4326`
-      url += `&BBOX=${bbox}`
-    }
+    console.log(`[POIService] Fetching shelters for viewport: ${cacheKey}`)
 
     const fetchPromise = fetch(url)
       .then(response => {
@@ -183,54 +211,83 @@ class POIService {
       })
       .then(gmlText => {
         const shelters = this.parseShelterGML(gmlText)
-        console.log(`[POIService] Fetched ${shelters.length} shelters`)
+        console.log(`[POIService] Fetched ${shelters.length} shelters for ${cacheKey}`)
 
-        // Cache the results (only cache if no bounds filter)
-        if (!bounds) {
-          this.cache.set('shelters', shelters)
-        }
+        // Cache the results with viewport bounds and timestamp
+        this.cache.set(cacheKey, {
+          pois: shelters,
+          bounds,
+          zoom,
+          timestamp: Date.now()
+        })
 
-        this.loading.delete('shelters')
+        this.loading.delete(cacheKey)
         return shelters
       })
       .catch(error => {
         console.error('Failed to fetch shelters:', error)
-        this.loading.delete('shelters')
+        this.loading.delete(cacheKey)
         return []
       })
 
-    this.loading.set('shelters', fetchPromise)
+    this.loading.set(cacheKey, fetchPromise)
     return fetchPromise
   }
 
-  // Get POIs for a category
-  async getPOIs(category: POICategory, bounds?: { north: number; south: number; east: number; west: number }): Promise<POI[]> {
+  // Get POIs for a category with viewport bounds and zoom
+  async getPOIs(category: POICategory, bounds: { north: number; south: number; east: number; west: number }, zoom: number): Promise<POI[]> {
     switch (category) {
       case 'shelters':
-        return this.fetchShelters(bounds)
+        return this.fetchShelters(bounds, zoom)
       default:
         return []
     }
   }
 
-  // Clear cache for a category
-  clearCache(category?: POICategory): void {
-    if (category) {
-      this.cache.delete(category)
-    } else {
-      this.cache.clear()
+  // Clear all cache entries (useful for debugging or forced refresh)
+  clearCache(): void {
+    this.cache.clear()
+    this.loading.clear()
+    console.log('[POIService] Cache cleared')
+  }
+
+  // Clear stale cache entries (cleanup utility)
+  clearStaleCache(): void {
+    const now = Date.now()
+    for (const [key, entry] of this.cache.entries()) {
+      if (now - entry.timestamp > this.CACHE_TTL) {
+        this.cache.delete(key)
+      }
     }
   }
 
-  // Get total count for a category (from cache)
+  // Get total count for a category (from all cache entries)
   getCachedCount(category: POICategory): number {
-    const cached = this.cache.get(category)
-    return cached ? cached.length : 0
+    let total = 0
+    const seenIds = new Set<string>()
+
+    for (const [key, entry] of this.cache.entries()) {
+      if (key.startsWith(category)) {
+        entry.pois.forEach(poi => {
+          if (!seenIds.has(poi.id)) {
+            seenIds.add(poi.id)
+            total++
+          }
+        })
+      }
+    }
+
+    return total
   }
 
-  // Check if category is cached
+  // Check if category has any cached data
   isCached(category: POICategory): boolean {
-    return this.cache.has(category)
+    for (const key of this.cache.keys()) {
+      if (key.startsWith(category)) {
+        return true
+      }
+    }
+    return false
   }
 }
 

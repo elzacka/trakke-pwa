@@ -85,7 +85,7 @@ export default defineConfig({
             options: {
               cacheName: 'kartverket-tiles',
               expiration: {
-                maxEntries: 500,
+                maxEntries: 25000, // Increased to support large offline downloads (up to MAX_TILES limit)
                 maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
               },
               cacheableResponse: {

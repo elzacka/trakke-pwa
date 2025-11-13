@@ -61,7 +61,7 @@ const DownloadSheet = ({
     // Only switch to configure if we're in list mode and bounds are newly set
     if (bounds && !isSelecting && isOpen && viewMode === 'list') {
       setViewMode('configure')
-      setAreaName(`Område ${new Date().toLocaleDateString('no')}`)
+      setAreaName(`Område ${new Date().toLocaleDateString('nb-NO')}`)
       setMinZoom(Math.max(3, zoom - 2))
       setMaxZoom(Math.min(18, zoom + 2))
     }

@@ -33,6 +33,8 @@ class OfflineMapService {
   private readonly TILE_URL_TEMPLATE =
     'https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png'
   private readonly TILE_SIZE_ESTIMATE = 15000 // ~15KB average per tile
+  private readonly MAX_TILES = 20000 // Hard limit to prevent browser/device issues
+  private readonly WARNING_THRESHOLD = 1000 // Warn user for downloads over this size
 
   /**
    * Calculate number of tiles needed for area
@@ -63,6 +65,15 @@ class OfflineMapService {
     onProgress?: (progress: DownloadProgress) => void
   ): Promise<void> {
     const totalTiles = this.calculateTileCount(area)
+
+    // Safety check: hard limit to prevent device/browser issues
+    if (totalTiles > this.MAX_TILES) {
+      throw new Error(
+        `Området er for stort (${totalTiles} fliser). Maksimalt tillatt er ${this.MAX_TILES} fliser. ` +
+        `Vennligst zoom inn eller velg et mindre område.`
+      )
+    }
+
     let downloadedTiles = 0
     let failedTiles = 0
     let currentSize = 0
@@ -127,7 +138,7 @@ class OfflineMapService {
     }
 
     // Save area metadata
-    await dbService.saveData('downloadedArea', {
+    await dbService.saveDownloadedArea({
       ...area,
       downloadedAt: Date.now(),
       tileCount: downloadedTiles
@@ -172,7 +183,7 @@ class OfflineMapService {
    * Get downloaded areas
    */
   async getDownloadedAreas(): Promise<DownloadArea[]> {
-    const areas = await dbService.getData('downloadedArea')
+    const areas = await dbService.getDownloadedAreas()
     return areas as DownloadArea[]
   }
 
@@ -180,9 +191,13 @@ class OfflineMapService {
    * Delete downloaded area
    */
   async deleteArea(areaId: string): Promise<void> {
-    // Note: This is simplified - in production, should delete associated tiles
-    // For now, we'll just remove the area metadata
-    console.log(`Delete area ${areaId} - tiles remain in cache`)
+    // Delete area metadata from IndexedDB
+    await dbService.deleteDownloadedArea(areaId)
+    console.log(`Deleted area ${areaId} metadata`)
+
+    // TODO: Optionally delete associated tiles from cache
+    // This would require tracking which tiles belong to which area
+    // For now, tiles remain in Service Worker cache and will be evicted by LRU policy
   }
 
   /**

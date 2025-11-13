@@ -172,6 +172,64 @@ class DatabaseService {
       }
     })
   }
+
+  // Downloaded Areas methods (using dedicated downloadedAreas store)
+  async saveDownloadedArea(area: unknown): Promise<void> {
+    const db = await this.init()
+
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([AREAS_STORE], 'readwrite')
+      const store = transaction.objectStore(AREAS_STORE)
+
+      const request = store.put(area)
+
+      request.onsuccess = () => {
+        resolve()
+      }
+
+      request.onerror = () => {
+        reject(new Error('Failed to save downloaded area'))
+      }
+    })
+  }
+
+  async getDownloadedAreas(): Promise<unknown[]> {
+    const db = await this.init()
+
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([AREAS_STORE], 'readonly')
+      const store = transaction.objectStore(AREAS_STORE)
+
+      const request = store.getAll()
+
+      request.onsuccess = () => {
+        resolve(request.result)
+      }
+
+      request.onerror = () => {
+        reject(new Error('Failed to retrieve downloaded areas'))
+      }
+    })
+  }
+
+  async deleteDownloadedArea(areaId: string): Promise<void> {
+    const db = await this.init()
+
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([AREAS_STORE], 'readwrite')
+      const store = transaction.objectStore(AREAS_STORE)
+
+      const request = store.delete(areaId)
+
+      request.onsuccess = () => {
+        resolve()
+      }
+
+      request.onerror = () => {
+        reject(new Error('Failed to delete downloaded area'))
+      }
+    })
+  }
 }
 
 export const dbService = new DatabaseService()

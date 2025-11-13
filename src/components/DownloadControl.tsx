@@ -30,7 +30,7 @@ const DownloadControl = ({
 
     const area: DownloadArea = {
       id: `area-${Date.now()}`,
-      name: `Nedlastet ${new Date().toLocaleDateString('no')}`,
+      name: `Nedlastet ${new Date().toLocaleDateString('nb-NO')}`,
       bounds: {
         north: bounds.getNorth(),
         south: bounds.getSouth(),

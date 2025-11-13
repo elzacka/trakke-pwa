@@ -13,8 +13,10 @@ import RouteSheet from './RouteSheet'
 import SettingsSheet from './SettingsSheet'
 import CategorySheet from './CategorySheet'
 import POIDetailsSheet from './POIDetailsSheet'
+import InstallSheet from './InstallSheet'
 import { useAutoHide } from '../hooks/useAutoHide'
 import { useViewportPOIs } from '../hooks/useViewportPOIs'
+import { useInstallPrompt } from '../hooks/useInstallPrompt'
 import { MAP_CONFIG } from '../constants'
 import type { SearchResult } from '../services/searchService'
 import type { Route, Waypoint } from '../services/routeService'
@@ -74,6 +76,10 @@ const Map = ({ zenMode }: MapProps) => {
   const [settingsSheetOpen, setSettingsSheetOpen] = useState(false)
   const [categorySheetOpen, setCategorySheetOpen] = useState(false)
   const [poiDetailsSheetOpen, setPoiDetailsSheetOpen] = useState(false)
+  const [installSheetOpen, setInstallSheetOpen] = useState(false)
+
+  // PWA Installation
+  const { canInstall, isInstalled, platform, promptInstall } = useInstallPrompt()
 
   // POI/Category state
   const [activeCategories, setActiveCategories] = useState<Set<POICategory>>(new Set())
@@ -253,6 +259,18 @@ const Map = ({ zenMode }: MapProps) => {
         map.current.remove()
         map.current = null
       }
+    }
+  }, [])
+
+  // Handle URL actions from manifest shortcuts
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const action = params.get('action')
+
+    if (action === 'search') {
+      setSearchSheetOpen(true)
+    } else if (action === 'download') {
+      setDownloadSheetOpen(true)
     }
   }, [])
 
@@ -1245,8 +1263,10 @@ const Map = ({ zenMode }: MapProps) => {
             onCategoryClick={handleCategoryClick}
             onLocationClick={handleLocationClick}
             onSettingsClick={handleSettingsClick}
+            onInstallClick={() => setInstallSheetOpen(true)}
+            showInstall={!isInstalled && (canInstall || platform === 'ios')}
             visible={controlsVisible}
-            sheetsOpen={searchSheetOpen || infoSheetOpen || downloadSheetOpen || routeSheetOpen || settingsSheetOpen || categorySheetOpen || poiDetailsSheetOpen}
+            sheetsOpen={searchSheetOpen || infoSheetOpen || downloadSheetOpen || routeSheetOpen || settingsSheetOpen || categorySheetOpen || poiDetailsSheetOpen || installSheetOpen}
           />
 
           {/* Drawing mode banner */}
@@ -1449,6 +1469,14 @@ const Map = ({ zenMode }: MapProps) => {
               setSelectedPOI(null)
             }}
             poi={selectedPOI}
+          />
+
+          <InstallSheet
+            isOpen={installSheetOpen}
+            onClose={() => setInstallSheetOpen(false)}
+            onInstall={promptInstall}
+            canInstall={canInstall}
+            platform={platform}
           />
         </>
       ) : (

@@ -9,6 +9,8 @@ interface FABMenuProps {
   onCategoryClick: () => void
   onLocationClick: () => void
   onSettingsClick: () => void
+  onInstallClick?: () => void
+  showInstall?: boolean
   visible?: boolean
   sheetsOpen?: boolean
 }
@@ -20,7 +22,9 @@ const FABMenu = ({
   onRoutesClick,
   onCategoryClick,
   onLocationClick,
-  onSettingsClick
+  onSettingsClick,
+  onInstallClick,
+  showInstall = false
 }: FABMenuProps) => {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -91,6 +95,17 @@ const FABMenu = ({
             <span className="material-symbols-outlined">search</span>
             <span className="fab-menu-label">Søk</span>
           </button>
+          {showInstall && onInstallClick && (
+            <button
+              className="fab-menu-item"
+              onClick={() => handleMenuItemClick(onInstallClick)}
+              aria-label="Installer"
+              role="menuitem"
+            >
+              <span className="material-symbols-outlined">install_mobile</span>
+              <span className="fab-menu-label">Installer</span>
+            </button>
+          )}
           <button
             className="fab-menu-item"
             onClick={() => handleMenuItemClick(onRoutesClick)}

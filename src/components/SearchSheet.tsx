@@ -14,8 +14,10 @@ const SearchSheet = ({ isOpen, onClose, onResultSelect }: SearchSheetProps) => {
   const [results, setResults] = useState<SearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [includeAddresses, setIncludeAddresses] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(-1)
   const inputRef = useRef<HTMLInputElement>(null)
   const searchTimeoutRef = useRef<number | undefined>(undefined)
+  const resultsListRef = useRef<HTMLDivElement>(null)
 
   // Focus input when opened or when address search is toggled
   useEffect(() => {
@@ -33,6 +35,7 @@ const SearchSheet = ({ isOpen, onClose, onResultSelect }: SearchSheetProps) => {
     if (query.trim().length === 0) {
       setResults([])
       setIsSearching(false)
+      setSelectedIndex(-1)
       return
     }
 
@@ -43,9 +46,11 @@ const SearchSheet = ({ isOpen, onClose, onResultSelect }: SearchSheetProps) => {
           ? await searchService.search(query, 10)
           : await searchService.searchPlaces(query, 10)
         setResults(searchResults)
+        setSelectedIndex(-1) // Reset selection when new results arrive
       } catch (error) {
         console.error('Search error:', error)
         setResults([])
+        setSelectedIndex(-1)
       } finally {
         setIsSearching(false)
       }
@@ -58,6 +63,55 @@ const SearchSheet = ({ isOpen, onClose, onResultSelect }: SearchSheetProps) => {
       }
     }
   }, [query, includeAddresses])
+
+  // Keyboard navigation for search results
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only handle if we're in the search sheet
+      if (!isOpen || results.length === 0) return
+
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault()
+          setSelectedIndex((prev) => (prev < results.length - 1 ? prev + 1 : prev))
+          break
+        case 'ArrowUp':
+          e.preventDefault()
+          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1))
+          break
+        case 'Enter':
+          e.preventDefault()
+          if (selectedIndex >= 0 && selectedIndex < results.length) {
+            handleResultClick(results[selectedIndex])
+          } else if (results.length > 0) {
+            // If no selection, select first result
+            handleResultClick(results[0])
+          }
+          break
+        case 'Tab':
+          e.preventDefault()
+          if (results.length > 0 && selectedIndex < 0) {
+            setSelectedIndex(0)
+          }
+          break
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, results, selectedIndex])
+
+  // Scroll selected item into view
+  useEffect(() => {
+    if (selectedIndex >= 0 && resultsListRef.current) {
+      const selectedElement = resultsListRef.current.children[selectedIndex] as HTMLElement
+      if (selectedElement) {
+        selectedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+      }
+    }
+  }, [selectedIndex])
 
   const handleResultClick = (result: SearchResult) => {
     onResultSelect(result)
@@ -135,11 +189,11 @@ const SearchSheet = ({ isOpen, onClose, onResultSelect }: SearchSheetProps) => {
           )}
 
           {results.length > 0 && (
-            <div className="search-sheet-results-list">
-              {results.map((result) => (
+            <div className="search-sheet-results-list" ref={resultsListRef}>
+              {results.map((result, index) => (
                 <button
                   key={result.id}
-                  className="search-sheet-result-item"
+                  className={`search-sheet-result-item ${index === selectedIndex ? 'selected' : ''}`}
                   onClick={() => handleResultClick(result)}
                 >
                   <div className="result-content">

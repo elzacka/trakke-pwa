@@ -13,6 +13,8 @@ interface FABMenuProps {
   showInstall?: boolean
   visible?: boolean
   sheetsOpen?: boolean
+  menuOpen?: boolean
+  onMenuOpenChange?: (open: boolean) => void
 }
 
 const FABMenu = ({
@@ -24,9 +26,21 @@ const FABMenu = ({
   onLocationClick,
   onSettingsClick,
   onInstallClick,
-  showInstall = false
+  showInstall = false,
+  menuOpen,
+  onMenuOpenChange
 }: FABMenuProps) => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [internalIsOpen, setInternalIsOpen] = useState(false)
+
+  // Use external state if provided, otherwise use internal state
+  const isOpen = menuOpen !== undefined ? menuOpen : internalIsOpen
+  const setIsOpen = (open: boolean) => {
+    if (onMenuOpenChange) {
+      onMenuOpenChange(open)
+    } else {
+      setInternalIsOpen(open)
+    }
+  }
 
   const handlePrimaryClick = () => {
     // Toggle menu open/close

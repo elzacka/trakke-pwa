@@ -193,6 +193,11 @@
   background-color: #f1f5f9;
 }
 
+.search-sheet-result-item.selected {
+  background-color: #e0f2fe;
+  border: 1px solid #38bdf8;
+}
+
 .result-content {
   flex: 1;
   min-width: 0;

@@ -77,6 +77,7 @@ const Map = ({ zenMode }: MapProps) => {
   const [categorySheetOpen, setCategorySheetOpen] = useState(false)
   const [poiDetailsSheetOpen, setPoiDetailsSheetOpen] = useState(false)
   const [installSheetOpen, setInstallSheetOpen] = useState(false)
+  const [fabMenuOpen, setFabMenuOpen] = useState(false)
 
   // PWA Installation
   const { canInstall, isInstalled, platform, promptInstall } = useInstallPrompt()
@@ -337,23 +338,70 @@ const Map = ({ zenMode }: MapProps) => {
     }
   }
 
-  // Handle Escape key to cancel drawing modes
+  // Comprehensive keyboard shortcuts handler
   useEffect(() => {
+    // Skip keyboard shortcuts on mobile devices
+    if (isMobile) return
+
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't intercept if typing in an input field
+      const target = e.target as HTMLElement
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        return
+      }
+
+      // Ctrl+K: Open search
+      if (e.ctrlKey && e.key === 'k') {
+        e.preventDefault()
+        setSearchSheetOpen(true)
+        setFabMenuOpen(false)
+        return
+      }
+
+      // Ctrl+B: Toggle FAB menu
+      if (e.ctrlKey && e.key === 'b') {
+        e.preventDefault()
+        setFabMenuOpen(!fabMenuOpen)
+        return
+      }
+
+      // Escape: Close sheets, cancel drawing modes, or close FAB menu
       if (e.key === 'Escape') {
+        e.preventDefault()
+
+        // Priority order: drawing modes > open sheets > FAB menu
         if (isDrawingRoute) {
           setIsDrawingRoute(false)
           setRoutePoints([])
           cleanupDrawingLayers()
         } else if (isPlacingWaypoint) {
           setIsPlacingWaypoint(false)
+        } else if (searchSheetOpen) {
+          setSearchSheetOpen(false)
+        } else if (routeSheetOpen) {
+          setRouteSheetOpen(false)
+        } else if (downloadSheetOpen) {
+          setDownloadSheetOpen(false)
+        } else if (categorySheetOpen) {
+          setCategorySheetOpen(false)
+        } else if (settingsSheetOpen) {
+          setSettingsSheetOpen(false)
+        } else if (infoSheetOpen) {
+          setInfoSheetOpen(false)
+        } else if (poiDetailsSheetOpen) {
+          setPoiDetailsSheetOpen(false)
+        } else if (installSheetOpen) {
+          setInstallSheetOpen(false)
+        } else if (fabMenuOpen) {
+          setFabMenuOpen(false)
         }
+        return
       }
     }
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isDrawingRoute, isPlacingWaypoint])
+  }, [isMobile, isDrawingRoute, isPlacingWaypoint, searchSheetOpen, routeSheetOpen, downloadSheetOpen, categorySheetOpen, settingsSheetOpen, infoSheetOpen, poiDetailsSheetOpen, installSheetOpen, fabMenuOpen])
 
   // Toggle visibility of routes and waypoints
   useEffect(() => {
@@ -640,6 +688,54 @@ const Map = ({ zenMode }: MapProps) => {
 
   // Handle map clicks when selecting area, drawing routes, or placing waypoints
   const handleMapClick = async (e: maplibregl.MapMouseEvent) => {
+    // Ctrl+Click: Copy coordinates to clipboard (desktop only)
+    if (!isMobile && e.originalEvent.ctrlKey) {
+      const coords = `${e.lngLat.lat.toFixed(6)}, ${e.lngLat.lng.toFixed(6)}`
+      try {
+        await navigator.clipboard.writeText(coords)
+        // Visual feedback
+        const notification = document.createElement('div')
+        notification.style.cssText = `
+          position: fixed;
+          bottom: 80px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #111827;
+          color: white;
+          padding: 12px 20px;
+          border-radius: 8px;
+          font-size: 14px;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          z-index: 10000;
+          pointer-events: none;
+          animation: fadeInOut 2s ease-in-out;
+        `
+        notification.textContent = `Koordinater kopiert: ${coords}`
+        document.body.appendChild(notification)
+
+        // Add fade animation
+        const style = document.createElement('style')
+        style.textContent = `
+          @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, 10px); }
+            15% { opacity: 1; transform: translate(-50%, 0); }
+            85% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -10px); }
+          }
+        `
+        document.head.appendChild(style)
+
+        setTimeout(() => {
+          document.body.removeChild(notification)
+          document.head.removeChild(style)
+        }, 2000)
+      } catch (error) {
+        console.error('Failed to copy coordinates:', error)
+        alert(`Koordinater: ${coords}`)
+      }
+      return
+    }
+
     // Route drawing mode
     if (isDrawingRoute) {
       const newPoint: [number, number] = [e.lngLat.lng, e.lngLat.lat]
@@ -1267,6 +1363,8 @@ const Map = ({ zenMode }: MapProps) => {
             showInstall={!isInstalled && (canInstall || platform === 'ios')}
             visible={controlsVisible}
             sheetsOpen={searchSheetOpen || infoSheetOpen || downloadSheetOpen || routeSheetOpen || settingsSheetOpen || categorySheetOpen || poiDetailsSheetOpen || installSheetOpen}
+            menuOpen={fabMenuOpen}
+            onMenuOpenChange={setFabMenuOpen}
           />
 
           {/* Drawing mode banner */}

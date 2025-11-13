@@ -10,6 +10,9 @@ interface InfoSheetProps {
 const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
 
+  // Detect if mobile device
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+
   const toggleSection = (sectionId: string) => {
     const newExpanded = new Set(expandedSections)
     if (newExpanded.has(sectionId)) {
@@ -145,6 +148,92 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
                       .
                     </p>
                   </section>
+                </div>
+              )}
+            </div>
+
+            {/* Veiledning Section */}
+            <div className="info-section-group">
+              <button
+                className="info-section-header"
+                onClick={() => toggleSection('veiledning')}
+                aria-expanded={expandedSections.has('veiledning')}
+              >
+                <span className="info-section-title">Veiledning</span>
+                <span className="material-symbols-outlined info-section-chevron">
+                  {expandedSections.has('veiledning') ? 'expand_less' : 'expand_more'}
+                </span>
+              </button>
+
+              {expandedSections.has('veiledning') && (
+                <div className="info-section-content">
+                  {/* Desktop: Hurtigtaster */}
+                  {!isMobile && (
+                    <div className="info-section-group">
+                      <button
+                        className="info-section-header"
+                        onClick={() => toggleSection('hurtigtaster')}
+                        aria-expanded={expandedSections.has('hurtigtaster')}
+                      >
+                        <span className="info-section-title">Hurtigtaster</span>
+                        <span className="material-symbols-outlined info-section-chevron">
+                          {expandedSections.has('hurtigtaster') ? 'expand_less' : 'expand_more'}
+                        </span>
+                      </button>
+
+                      {expandedSections.has('hurtigtaster') && (
+                        <div className="info-section-content">
+                          <section className="info-section">
+                            <ul className="info-list">
+                              <li><strong>Ctrl + K</strong> - Søk</li>
+                              <li><strong>Ctrl + B</strong> - Åpne/lukk meny</li>
+                              <li><strong>Esc</strong> - Avbryt/lukk</li>
+                              <li><strong>↑ ↓</strong> - Naviger søkeresultater</li>
+                              <li><strong>Enter</strong> - Velg søkeresultat</li>
+                              <li><strong>Tab</strong> - Fullfør søk</li>
+                              <li><strong>Skyv</strong> - Panorér kart</li>
+                              <li><strong>Rullehjul</strong> - Zoom inn/ut</li>
+                              <li><strong>Shift + rullehjul</strong> - Zoom inn/ut (presis)</li>
+                              <li><strong>Shift + skyv</strong> - Zoom til område</li>
+                              <li><strong>Ctrl + skyv</strong> - Vipp og roter kart</li>
+                              <li><strong>Dobbeltklikk</strong> - Zoom til punkt</li>
+                              <li><strong>Ctrl + klikk</strong> - Kopier koordinater fra kart</li>
+                            </ul>
+                          </section>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Mobile: Bevegelser */}
+                  {isMobile && (
+                    <div className="info-section-group">
+                      <button
+                        className="info-section-header"
+                        onClick={() => toggleSection('bevegelser')}
+                        aria-expanded={expandedSections.has('bevegelser')}
+                      >
+                        <span className="info-section-title">Bevegelser</span>
+                        <span className="material-symbols-outlined info-section-chevron">
+                          {expandedSections.has('bevegelser') ? 'expand_less' : 'expand_more'}
+                        </span>
+                      </button>
+
+                      {expandedSections.has('bevegelser') && (
+                        <div className="info-section-content">
+                          <section className="info-section">
+                            <ul className="info-list">
+                              <li><strong>Dra finger</strong> - Panorér kart</li>
+                              <li><strong>Knip</strong> - Zoom inn/ut</li>
+                              <li><strong>To fingre + vri</strong> - Roter kart</li>
+                              <li><strong>To fingre + skyv opp/ned</strong> - Vipp kart</li>
+                              <li><strong>Dobbeltrykk</strong> - Zoom til punkt</li>
+                            </ul>
+                          </section>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

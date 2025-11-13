@@ -76,7 +76,8 @@ const Map = ({ zenMode }: MapProps) => {
 
   // POI/Category state
   const [activeCategories, setActiveCategories] = useState<Set<POICategory>>(new Set())
-  const [poiMarkers, setPoiMarkers] = useState<maplibregl.Marker[]>([])
+  // Track if POI layers have been added to map
+  const poiLayersInitialized = useRef(false)
   const [selectedPOI, setSelectedPOI] = useState<POI | null>(null)
 
   // Use viewport-based POI loading hook
@@ -327,103 +328,243 @@ const Map = ({ zenMode }: MapProps) => {
     })
   }, [routesVisible, waypointMarkers])
 
-  // Sync POI markers with visible POIs from viewport-based loading
+  // Initialize POI clustering layers (MapLibre native GeoJSON clustering for 60fps performance)
   useEffect(() => {
-    if (!map.current) return
+    if (!map.current || poiLayersInitialized.current) return
 
-    // Build set of POI IDs that should be visible
-    const shouldBeVisible = new Set<string>()
-    const poiLookup = new globalThis.Map<string, POI>()
+    const m = map.current
+
+    const initializePOILayers = () => {
+      if (!map.current || poiLayersInitialized.current) return
+
+      console.log('[Map] Initializing POI clustering layers...')
+
+      try {
+        // Add empty GeoJSON source with clustering enabled
+        map.current.addSource('pois', {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: []
+          },
+          cluster: true,
+          clusterMaxZoom: 14, // Max zoom to cluster points
+          clusterRadius: 50 // Radius of each cluster in pixels
+        })
+
+        // Cluster circles layer
+        map.current.addLayer({
+          id: 'poi-clusters',
+          type: 'circle',
+          source: 'pois',
+          filter: ['has', 'point_count'],
+          paint: {
+            'circle-color': [
+              'step',
+              ['get', 'point_count'],
+              '#fbbf24', // Yellow for small clusters
+              10,
+              '#f59e0b', // Orange for medium
+              30,
+              '#d97706'  // Dark orange for large
+            ],
+            'circle-radius': [
+              'step',
+              ['get', 'point_count'],
+              20,  // 20px for small clusters
+              10,
+              30,  // 30px for medium
+              30,
+              40   // 40px for large
+            ],
+            'circle-stroke-width': 2,
+            'circle-stroke-color': '#111827'
+          }
+        })
+
+        // Cluster count labels
+        map.current.addLayer({
+          id: 'poi-cluster-count',
+          type: 'symbol',
+          source: 'pois',
+          filter: ['has', 'point_count'],
+          layout: {
+            'text-field': '{point_count_abbreviated}',
+            'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+            'text-size': 12
+          },
+          paint: {
+            'text-color': '#111827'
+          }
+        })
+
+        // Unclustered points layer (individual shelter markers)
+        map.current.addLayer({
+          id: 'poi-unclustered',
+          type: 'symbol',
+          source: 'pois',
+          filter: ['!', ['has', 'point_count']],
+          layout: {
+            'icon-image': 'shelter-icon', // Will be added as custom image
+            'icon-size': 1,
+            'icon-allow-overlap': true
+          }
+        })
+
+        // Create custom shelter icon (T marker) as image
+        const size = 24
+        const canvas = document.createElement('canvas')
+        canvas.width = size
+        canvas.height = size
+        const ctx = canvas.getContext('2d')!
+
+        // Draw yellow square with black border (using fillRect for compatibility)
+        ctx.fillStyle = '#fbbf24'
+        ctx.fillRect(2, 2, size - 4, size - 4)
+        ctx.strokeStyle = '#111827'
+        ctx.lineWidth = 2
+        ctx.strokeRect(2, 2, size - 4, size - 4)
+
+        // Draw T letter
+        ctx.fillStyle = '#111827'
+        ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.fillText('T', size / 2, size / 2)
+
+        map.current.addImage('shelter-icon', {
+          width: size,
+          height: size,
+          data: ctx.getImageData(0, 0, size, size).data
+        })
+
+        poiLayersInitialized.current = true
+        console.log('[Map] POI clustering layers initialized successfully')
+      } catch (error) {
+        console.error('[Map] Failed to initialize POI clustering layers:', error)
+      }
+    }
+
+    // Wait for map to be fully loaded
+    if (!m.loaded()) {
+      console.log('[Map] Waiting for map to load before initializing POI layers')
+      m.once('load', () => {
+        initializePOILayers()
+      })
+      return
+    }
+
+    initializePOILayers()
+  }, [])
+
+  // Update GeoJSON source with visible POIs (GPU-accelerated clustering)
+  useEffect(() => {
+    if (!map.current || !poiLayersInitialized.current) return
+
+    // Convert visible POIs to GeoJSON features
+    const features: any[] = []
 
     visiblePOIs.forEach((pois, category) => {
       if (activeCategories.has(category)) {
         pois.forEach(poi => {
-          shouldBeVisible.add(poi.id)
-          poiLookup.set(poi.id, poi)
+          features.push({
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: poi.coordinates
+            },
+            properties: {
+              id: poi.id,
+              category: category,
+              name: poi.name,
+              address: (poi as any).address || '',
+              capacity: (poi as any).capacity || 0
+            }
+          })
         })
       }
     })
 
-    // Remove markers that should no longer be visible
-    setPoiMarkers(prevMarkers => {
-      const markersToKeep: maplibregl.Marker[] = []
-
-      prevMarkers.forEach(marker => {
-        const data = (marker as any)._poiData
-        if (data && shouldBeVisible.has(data.id)) {
-          // Keep this marker
-          markersToKeep.push(marker)
-        } else {
-          // Remove this marker
-          marker.remove()
-        }
+    const source = map.current.getSource('pois') as maplibregl.GeoJSONSource
+    if (source) {
+      source.setData({
+        type: 'FeatureCollection',
+        features: features
       })
+      console.log(`[Map] Updated POI source with ${features.length} features (clustering enabled)`)
+    }
+  }, [visiblePOIs, activeCategories])
 
-      // Find POIs that need new markers
-      const existingIds = new Set(markersToKeep.map(m => (m as any)._poiData?.id))
-      const newMarkers: maplibregl.Marker[] = []
+  // Handle cluster clicks (zoom in) and unclustered point clicks (show details)
+  useEffect(() => {
+    if (!map.current || !poiLayersInitialized.current) return
 
-      shouldBeVisible.forEach(poiId => {
-        if (!existingIds.has(poiId)) {
-          const poi = poiLookup.get(poiId)
-          if (!poi) return
+    const m = map.current
 
-          // Find which category this POI belongs to
-          let category: POICategory | null = null
-          for (const [cat, pois] of visiblePOIs.entries()) {
-            if (pois.some(p => p.id === poiId)) {
-              category = cat
-              break
-            }
-          }
-          if (!category) return
-
-          const categoryConfig = poiService.getCategoryConfig(category)
-
-          // Create marker element
-          const el = document.createElement('div')
-          el.className = 'poi-marker'
-
-          // Use custom T marker for shelters, Material Symbol for others
-          if (categoryConfig.icon === 'custom-t-marker') {
-            el.innerHTML = `
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="1" y="1" width="22" height="22" rx="3" fill="#fbbf24" stroke="#111827" stroke-width="2"/>
-                <text x="12" y="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="400" fill="#111827" text-anchor="middle" dominant-baseline="central">T</text>
-              </svg>
-            `
-          } else {
-            el.innerHTML = `<span class="material-symbols-outlined" style="color: ${categoryConfig.color}">${categoryConfig.icon}</span>`
-          }
-
-          const marker = new maplibregl.Marker({ element: el })
-            .setLngLat(poi.coordinates)
-            .addTo(map.current!)
-
-          // Store POI data on marker for filtering
-          ;(marker as any)._poiData = { category, id: poi.id }
-
-          // Add click handler to show details
-          el.addEventListener('click', (e) => {
-            e.stopPropagation()
-            e.preventDefault()
-            setSelectedPOI(poi)
-            setPoiDetailsSheetOpen(true)
-          })
-
-          newMarkers.push(marker)
-        }
+    // Click on cluster -> zoom in
+    const handleClusterClick = (e: any) => {
+      const features = m.queryRenderedFeatures(e.point, {
+        layers: ['poi-clusters']
       })
+      if (!features.length) return
 
-      if (newMarkers.length > 0) {
-        console.log(`[Map] Added ${newMarkers.length} new POI markers`)
-      }
-      if (prevMarkers.length - markersToKeep.length > 0) {
-        console.log(`[Map] Removed ${prevMarkers.length - markersToKeep.length} POI markers`)
-      }
+      const clusterId = features[0].properties.cluster_id
+      const source = m.getSource('pois') as maplibregl.GeoJSONSource
 
-      return [...markersToKeep, ...newMarkers]
-    })
+      // @ts-ignore - getClusterExpansionZoom types are incorrect
+      source.getClusterExpansionZoom(clusterId, (err: any, zoom: number) => {
+        if (err) return
+        m.easeTo({
+          center: (features[0].geometry as any).coordinates,
+          zoom: zoom
+        })
+      })
+    }
+
+    // Click on unclustered point -> show details
+    const handlePointClick = (e: any) => {
+      const features = m.queryRenderedFeatures(e.point, {
+        layers: ['poi-unclustered']
+      })
+      if (!features.length) return
+
+      const props = features[0].properties
+
+      // Find the full POI object
+      for (const [category, pois] of visiblePOIs.entries()) {
+        const poi = pois.find(p => p.id === props.id)
+        if (poi) {
+          setSelectedPOI(poi)
+          setPoiDetailsSheetOpen(true)
+          break
+        }
+      }
+    }
+
+    // Change cursor on hover
+    const handleMouseEnter = () => {
+      m.getCanvas().style.cursor = 'pointer'
+    }
+
+    const handleMouseLeave = () => {
+      m.getCanvas().style.cursor = ''
+    }
+
+    m.on('click', 'poi-clusters', handleClusterClick)
+    m.on('click', 'poi-unclustered', handlePointClick)
+    m.on('mouseenter', 'poi-clusters', handleMouseEnter)
+    m.on('mouseleave', 'poi-clusters', handleMouseLeave)
+    m.on('mouseenter', 'poi-unclustered', handleMouseEnter)
+    m.on('mouseleave', 'poi-unclustered', handleMouseLeave)
+
+    return () => {
+      m.off('click', 'poi-clusters', handleClusterClick)
+      m.off('click', 'poi-unclustered', handlePointClick)
+      m.off('mouseenter', 'poi-clusters', handleMouseEnter)
+      m.off('mouseleave', 'poi-clusters', handleMouseLeave)
+      m.off('mouseenter', 'poi-unclustered', handleMouseEnter)
+      m.off('mouseleave', 'poi-unclustered', handleMouseLeave)
+    }
   }, [visiblePOIs, activeCategories])
 
   // Register map click handler with current state values (fixes closure issue)

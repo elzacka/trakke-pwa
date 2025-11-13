@@ -195,9 +195,9 @@ class POIService {
       return this.loading.get(cacheKey) as Promise<ShelterPOI[]>
     }
 
-    // Fetch from WFS with BBOX
+    // Fetch from WFS with BBOX (format: minLat,minLon,maxLat,maxLon for EPSG:4326)
     const config = CATEGORIES.shelters
-    const bbox = `${bounds.west},${bounds.south},${bounds.east},${bounds.north},EPSG:4326`
+    const bbox = `${bounds.south},${bounds.west},${bounds.north},${bounds.east},EPSG:4326`
     const url = `${config.wfsUrl}?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TYPENAME=${config.layerName}&SRSNAME=EPSG:4326&BBOX=${bbox}`
 
     console.log(`[POIService] Fetching shelters for viewport: ${cacheKey}`)

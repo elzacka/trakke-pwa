@@ -6,6 +6,7 @@ import './styles/App.css'
 function App() {
   const [zenMode] = useState(true) // Zen Mode enabled by default (not toggleable yet)
   const [showWelcome, setShowWelcome] = useState(true)
+  const [headerCollapsed, setHeaderCollapsed] = useState(false)
 
   useEffect(() => {
     // Initialize IndexedDB on app load
@@ -18,11 +19,16 @@ function App() {
     setShowWelcome(false)
   }
 
+  const toggleHeader = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setHeaderCollapsed(!headerCollapsed)
+  }
+
   return (
     <div className={`app ${zenMode ? 'zen-mode' : ''}`}>
       {showWelcome && zenMode && (
         <header
-          className="app-header welcome-header"
+          className={`app-header welcome-header ${headerCollapsed ? 'collapsed' : ''}`}
           onClick={handleHeaderClick}
         >
           <div className="header-content">
@@ -34,6 +40,15 @@ function App() {
             </div>
             <p className="app-tagline">Oppdag Norge med turskoa på</p>
           </div>
+          <button
+            className="header-toggle"
+            onClick={toggleHeader}
+            aria-label={headerCollapsed ? 'Utvid header' : 'Skjul header'}
+          >
+            <span className="material-symbols-outlined">
+              {headerCollapsed ? 'expand_more' : 'expand_less'}
+            </span>
+          </button>
         </header>
       )}
 

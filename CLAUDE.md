@@ -52,10 +52,17 @@ See [DEVELOPER_GUIDELINES.md](DEVELOPER_GUIDELINES.md) for complete privacy chec
 ### UI Modes
 
 The app has two UI modes controlled by `App.tsx`:
-- **Zen Mode** (default): Auto-hiding controls, FAB menu, bottom sheets
+- **Zen Mode** (default): Auto-hiding controls, collapsible welcome header, FAB menu, bottom sheets
 - **Classic Mode**: Always-visible controls, panels
 
 Current state: Zen Mode is the primary interface.
+
+**Welcome Header** (Zen Mode):
+- Shows on app load with logo, title, and tagline
+- Collapsible via chevron button at bottom center of header
+- When collapsed: only small chevron tab remains visible
+- CSS transitions for smooth collapse/expand animations
+- Clicking header dismisses it completely (showWelcome state)
 
 ### Component Architecture
 
@@ -69,6 +76,9 @@ Current state: Zen Mode is the primary interface.
 ```
 BottomSheet (reusable container)
 ├── SearchSheet (place/address search)
+│   ├── Address filter toggle (home icon button)
+│   ├── Contextual hint text for address filter
+│   └── Auto-focus on open and toggle
 ├── DownloadSheet (offline area download)
 ├── RouteSheet (routes & waypoints management)
 └── InfoSheet (data sources & attribution)
@@ -174,8 +184,15 @@ isSelectingArea: boolean     // Two clicks to select download area
 
 **Markers** (maplibregl.Marker):
 - User location: Blue circle with white border
-- Search result: Green location pin
+- Search result: Green location pin (auto-removes when panned out of viewport)
 - Waypoint: Red pulsing location pin (CSS animation)
+
+**Search Marker Behavior** (Map.tsx):
+- Created when user selects a search result
+- Location stored in `searchMarkerLocation` ref
+- `moveend` event listener checks if marker is still in viewport
+- Auto-removes marker when map is panned outside viewport bounds
+- Also removed when search sheet closes
 
 ### Styling System
 

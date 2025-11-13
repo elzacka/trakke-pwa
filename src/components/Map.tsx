@@ -52,6 +52,7 @@ const Map = ({ zenMode }: MapProps) => {
   const map = useRef<maplibregl.Map | null>(null)
   const userMarker = useRef<maplibregl.Marker | null>(null)
   const searchMarker = useRef<maplibregl.Marker | null>(null)
+  const searchMarkerLocation = useRef<[number, number] | null>(null)
   const navigationControl = useRef<NavigationLocationControl | null>(null)
   const [userLocation, setUserLocation] = useState<GeolocationPosition | null>(null)
   const [isSelectingArea, setIsSelectingArea] = useState(false)
@@ -251,6 +252,41 @@ const Map = ({ zenMode }: MapProps) => {
       if (map.current) {
         map.current.remove()
         map.current = null
+      }
+    }
+  }, [])
+
+  // Monitor map movement and remove search marker when out of view
+  useEffect(() => {
+    if (!map.current) return
+
+    const checkSearchMarkerVisibility = () => {
+      if (!searchMarkerLocation.current || !searchMarker.current || !map.current) return
+
+      const bounds = map.current.getBounds()
+      const [lon, lat] = searchMarkerLocation.current
+
+      // Check if marker is within current viewport
+      const isVisible =
+        lon >= bounds.getWest() &&
+        lon <= bounds.getEast() &&
+        lat >= bounds.getSouth() &&
+        lat <= bounds.getNorth()
+
+      // Remove marker if not visible
+      if (!isVisible) {
+        searchMarker.current.remove()
+        searchMarker.current = null
+        searchMarkerLocation.current = null
+      }
+    }
+
+    // Check on moveend (after panning/zooming completes)
+    map.current.on('moveend', checkSearchMarkerVisibility)
+
+    return () => {
+      if (map.current) {
+        map.current.off('moveend', checkSearchMarkerVisibility)
       }
     }
   }, [])
@@ -791,6 +827,9 @@ const Map = ({ zenMode }: MapProps) => {
     searchMarker.current = new maplibregl.Marker({ element: el })
       .setLngLat([lon, lat])
       .addTo(map.current)
+
+    // Store the marker location for visibility checking
+    searchMarkerLocation.current = [lon, lat]
 
     // Fly to result location
     map.current.flyTo({
@@ -1363,6 +1402,7 @@ const Map = ({ zenMode }: MapProps) => {
               if (searchMarker.current) {
                 searchMarker.current.remove()
                 searchMarker.current = null
+                searchMarkerLocation.current = null
               }
             }}
             onResultSelect={handleSearchResult}

@@ -17,12 +17,12 @@ const SearchSheet = ({ isOpen, onClose, onResultSelect }: SearchSheetProps) => {
   const inputRef = useRef<HTMLInputElement>(null)
   const searchTimeoutRef = useRef<number | undefined>(undefined)
 
-  // Focus input when opened
+  // Focus input when opened or when address search is toggled
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus()
     }
-  }, [isOpen])
+  }, [isOpen, includeAddresses])
 
   // Debounced search
   useEffect(() => {
@@ -93,25 +93,32 @@ const SearchSheet = ({ isOpen, onClose, onResultSelect }: SearchSheetProps) => {
           </button>
         </div>
 
-        <div className="search-sheet-input-wrapper">
-          <span className="material-symbols-outlined search-sheet-icon">search</span>
-          <input
-            ref={inputRef}
-            type="text"
-            className="search-sheet-input"
-            placeholder={includeAddresses ? 'Søk steder, adresser' : 'Søk steder'}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            aria-label="Søkefelt"
-          />
-          <button
-            className={`search-sheet-filter ${includeAddresses ? 'active' : ''}`}
-            onClick={() => setIncludeAddresses(!includeAddresses)}
-            title={includeAddresses ? 'Kun steder' : 'Inkluder adresser'}
-            aria-label={includeAddresses ? 'Kun steder' : 'Inkluder adresser'}
-          >
-            <span className="material-symbols-outlined">home</span>
-          </button>
+        <div className="search-sheet-input-container">
+          <div className="search-sheet-input-wrapper">
+            <span className="material-symbols-outlined search-sheet-icon">search</span>
+            <input
+              ref={inputRef}
+              type="text"
+              className="search-sheet-input"
+              placeholder={includeAddresses ? 'Søk steder, adresser' : 'Søk steder'}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              aria-label="Søkefelt"
+            />
+            <button
+              className={`search-sheet-filter ${includeAddresses ? 'active' : ''}`}
+              onClick={() => setIncludeAddresses(!includeAddresses)}
+              title={includeAddresses ? 'Kun steder' : 'Inkluder adresser'}
+              aria-label={includeAddresses ? 'Kun steder' : 'Inkluder adresser'}
+            >
+              <span className="material-symbols-outlined">home</span>
+            </button>
+          </div>
+          <div className="search-sheet-hint">
+            <span className="hint-text">
+              Trykk <span className="material-symbols-outlined hint-home-icon">home</span> for å inkludere adresser
+            </span>
+          </div>
         </div>
 
         <div className="search-sheet-results">

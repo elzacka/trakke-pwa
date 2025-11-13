@@ -19,9 +19,10 @@ A Progressive Web Application for Norwegian outdoor navigation with offline capa
 
 ✅ **Search & Navigation**
 - Norwegian place name search (Kartverket SSR API)
-- Address search with smart fuzzy matching
+- Address search with smart fuzzy matching (toggleable filter)
 - Outdoor feature prioritization (mountains, lakes, etc.)
-- Search result markers with details
+- Search result markers with auto-removal on viewport change
+- Contextual hint text for address filter
 
 ✅ **Offline Map Downloads**
 - Select custom areas for offline use
@@ -53,6 +54,7 @@ A Progressive Web Application for Norwegian outdoor navigation with offline capa
 
 ✅ **Zen Mode Interface**
 - Auto-hiding controls for immersive map view
+- Collapsible welcome header with toggle chevron
 - Floating Action Button (FAB) menu
 - Bottom sheets for feature access
 - Mobile-first design with desktop support
@@ -250,7 +252,7 @@ See [DEPENDENCIES.md](DEPENDENCIES.md) for complete dependency list with exact v
 - [ ] Compass and bearing tools
 - [ ] Push notifications for weather alerts
 
-**Last Updated**: 2025-01-11
+**Last Updated**: 2025-01-13
 
 ## 🔒 Privacy & Security
 

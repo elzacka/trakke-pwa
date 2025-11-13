@@ -208,10 +208,19 @@ const DownloadSheet = ({
   }
 
   const formatAreaSize = (bounds: { north: number; south: number; east: number; west: number }) => {
-    // Simple area calculation for display
-    const width = Math.abs(bounds.east - bounds.west)
-    const height = Math.abs(bounds.north - bounds.south)
-    return `${width.toFixed(2)}° × ${height.toFixed(2)}°`
+    // Convert degrees to approximate kilometers
+    // At Norway's latitude (~60°N), 1° longitude ≈ 55 km, 1° latitude ≈ 111 km
+    const avgLat = (bounds.north + bounds.south) / 2
+    const latDegreeKm = 111 // ~111 km per degree latitude (constant)
+    const lonDegreeKm = 111 * Math.cos((avgLat * Math.PI) / 180) // Varies by latitude
+
+    const widthDegrees = Math.abs(bounds.east - bounds.west)
+    const heightDegrees = Math.abs(bounds.north - bounds.south)
+
+    const widthKm = widthDegrees * lonDegreeKm
+    const heightKm = heightDegrees * latDegreeKm
+
+    return `${widthKm.toFixed(1)} × ${heightKm.toFixed(1)} km`
   }
 
   return (

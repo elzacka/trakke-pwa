@@ -834,7 +834,7 @@ const Map = ({ zenMode }: MapProps) => {
       const name = validateName(inputName)
       if (name) {
         try {
-          await routeService.createWaypoint({
+          const waypoint = await routeService.createWaypoint({
             name,
             coordinates: [e.lngLat.lng, e.lngLat.lat]
           })
@@ -844,9 +844,12 @@ const Map = ({ zenMode }: MapProps) => {
           el.className = 'waypoint-marker'
           el.innerHTML = '<span class="material-symbols-outlined">location_on</span>'
 
-          new maplibregl.Marker({ element: el })
+          const marker = new maplibregl.Marker({ element: el })
             .setLngLat([e.lngLat.lng, e.lngLat.lat])
             .addTo(map.current!)
+
+          // Track marker in state so it can be toggled and deleted
+          setWaypointMarkers(prev => ({ ...prev, [waypoint.id]: marker }))
 
           setIsPlacingWaypoint(false)
           setRouteSheetOpen(true)
@@ -889,6 +892,44 @@ const Map = ({ zenMode }: MapProps) => {
       essential: true
     })
   }, [userLocation])
+
+  // Load all existing waypoints when map initializes
+  useEffect(() => {
+    const loadExistingWaypoints = async () => {
+      if (!map.current) return
+
+      try {
+        const waypoints = await routeService.getAllWaypoints()
+
+        // Create markers for all waypoints
+        const newMarkers: Record<string, maplibregl.Marker> = {}
+
+        waypoints.forEach(waypoint => {
+          const el = document.createElement('div')
+          el.className = 'waypoint-marker'
+          el.innerHTML = '<span class="material-symbols-outlined">location_on</span>'
+
+          const marker = new maplibregl.Marker({ element: el })
+            .setLngLat(waypoint.coordinates)
+            .addTo(map.current!)
+
+          newMarkers[waypoint.id] = marker
+        })
+
+        setWaypointMarkers(newMarkers)
+        console.log(`Loaded ${waypoints.length} existing waypoints`)
+      } catch (error) {
+        console.error('Failed to load existing waypoints:', error)
+      }
+    }
+
+    // Only load once when map is ready
+    if (map.current && map.current.loaded()) {
+      loadExistingWaypoints()
+    } else if (map.current) {
+      map.current.once('load', loadExistingWaypoints)
+    }
+  }, []) // Empty deps - only run once on mount
 
   // Initialize centered selection overlay when area selection starts
   useEffect(() => {
@@ -1274,25 +1315,9 @@ const Map = ({ zenMode }: MapProps) => {
   }
 
   const handleSelectWaypoint = (waypoint: Waypoint) => {
-    // Navigate to waypoint on map and add marker if not present
+    // Navigate to waypoint on map
     if (map.current) {
-      // Check if marker already exists
-      if (!waypointMarkers[waypoint.id]) {
-        // Create marker element
-        const el = document.createElement('div')
-        el.className = 'waypoint-marker'
-        el.innerHTML = '<span class="material-symbols-outlined">location_on</span>'
-
-        // Add marker to map
-        const marker = new maplibregl.Marker({ element: el })
-          .setLngLat(waypoint.coordinates)
-          .addTo(map.current)
-
-        // Track marker
-        setWaypointMarkers(prev => ({ ...prev, [waypoint.id]: marker }))
-      }
-
-      // Navigate to waypoint
+      // Navigate to waypoint (marker should already exist from initial load)
       map.current.flyTo({
         center: waypoint.coordinates,
         zoom: 14,
@@ -1303,6 +1328,9 @@ const Map = ({ zenMode }: MapProps) => {
       if ('vibrate' in navigator) {
         navigator.vibrate(10)
       }
+
+      // Close route sheet after navigation
+      setRouteSheetOpen(false)
     }
   }
 

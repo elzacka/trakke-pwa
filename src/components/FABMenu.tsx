@@ -127,7 +127,7 @@ const FABMenu = ({
             role="menuitem"
           >
             <span className="material-symbols-outlined">route</span>
-            <span className="fab-menu-label">Ruter</span>
+            <span className="fab-menu-label">Ruter og punkter</span>
           </button>
           <button
             className="fab-menu-item"

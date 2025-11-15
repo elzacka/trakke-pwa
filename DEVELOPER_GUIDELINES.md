@@ -23,7 +23,7 @@ Before writing any code for a new feature, answer these questions:
    ❌ NO → Skip to question 2
 
 ❓ 1a. Is the API provider located in EU/EØS?
-   ✅ YES → Document in PRIVACY_BY_DESIGN.md
+   ✅ YES → Add to [External API Registry](PRIVACY_BY_DESIGN.md#external-api-registry) in PRIVACY_BY_DESIGN.md
    ❌ NO → STOP - Find EU/EØS alternative or implement client-side
 
 ❓ 1b. Does the provider have a Data Processing Agreement (DPA)?
@@ -419,24 +419,30 @@ GA.pageview('/map')
 
 ### For Every New Feature
 
-1. **Update PRIVACY_BY_DESIGN.md**
-   - Add to data flow table
-   - Document external resources
+**Follow this documentation workflow:**
+
+1. **Update [PRIVACY_BY_DESIGN.md](PRIVACY_BY_DESIGN.md)** (if privacy-relevant)
+   - Add external APIs to [External API Registry](PRIVACY_BY_DESIGN.md#external-api-registry)
+   - Update [CSP](PRIVACY_BY_DESIGN.md#2-content-security-policy-csp) if needed
+   - Document data flow in data flow table
    - Update compliance checklist
 
-2. **Update this Document**
-   - Add code patterns if applicable
-   - Document privacy decisions
+2. **Update [README.md](README.md)** (user-facing features)
+   - Add to feature list with checkmark
+   - Update roadmap status
+   - Add to attribution section if using new data source
 
-3. **Update README.md**
-   - Mention feature
-   - Link to privacy docs if relevant
+3. **Update [CLAUDE.md](CLAUDE.md)** (architecture/code patterns)
+   - Add to services layer documentation if new service
+   - Document component patterns if new UI pattern
+   - Update IndexedDB schema if database changes
 
-4. **Code Comments**
+4. **Code Comments** - Privacy rationale
    ```typescript
    /**
     * Fetches map tiles from Kartverket (Norwegian Mapping Authority)
     * Privacy: No user tracking, no cookies, EU/EØS compliant
+    * External API: See PRIVACY_BY_DESIGN.md#external-api-registry
     * GDPR: Article 6(1)(f) - Legitimate interest (map display)
     */
    async function fetchTiles() { ... }
@@ -495,14 +501,18 @@ Use this for all PRs:
 - [ ] No background data collection
 - [ ] CSP allows only necessary sources
 - [ ] New dependencies reviewed for privacy
-- [ ] PRIVACY_BY_DESIGN.md updated
+- [ ] [PRIVACY_BY_DESIGN.md](PRIVACY_BY_DESIGN.md) updated (External API Registry, CSP if needed)
 - [ ] Tests pass including privacy tests
 
 ## Summary
 
 **Remember**: Privacy is not optional. It's a core requirement of Tråkke. When in doubt, err on the side of user privacy.
 
-**Questions?** Consult [PRIVACY_BY_DESIGN.md](PRIVACY_BY_DESIGN.md)
+**Documentation reference**:
+- **External APIs**: [PRIVACY_BY_DESIGN.md - External API Registry](PRIVACY_BY_DESIGN.md#external-api-registry)
+- **CSP configuration**: [PRIVACY_BY_DESIGN.md - CSP](PRIVACY_BY_DESIGN.md#2-content-security-policy-csp)
+- **Privacy checklist**: See [Pre-Implementation Checklist](#pre-implementation-checklist) above
+- **Design system**: [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)
 
 ---
 

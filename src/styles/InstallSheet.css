@@ -15,7 +15,7 @@
 .install-sheet-header h2 {
   font-size: 18px;
   font-weight: 600;
-  color: #111827;
+  color: var(--trk-text);
   margin: 0;
 }
 
@@ -37,7 +37,7 @@
 
 .install-sheet-close .material-symbols-outlined {
   font-size: 24px;
-  color: #64748b;
+  color: var(--trk-text-soft);
 }
 
 .install-sheet-content {
@@ -52,7 +52,7 @@
 .install-benefits p {
   font-size: 15px;
   line-height: 1.6;
-  color: #374151;
+  color: var(--trk-text-muted);
   margin: 8px 0;
   font-weight: 400;
 }
@@ -61,8 +61,8 @@
 .install-button {
   width: 100%;
   padding: 14px 20px;
-  background-color: #3e4533;
-  color: #ffffff;
+  background-color: var(--trk-brand);
+  color: var(--trk-surface);
   border: none;
   border-radius: 8px;
   font-size: 16px;
@@ -73,11 +73,11 @@
 }
 
 .install-button:hover:not(:disabled) {
-  background-color: #2d3225;
+  background-color: var(--trk-brand-soft);
 }
 
 .install-button:active:not(:disabled) {
-  background-color: #1f231b;
+  background-color: var(--trk-text);
 }
 
 .install-button:disabled {
@@ -88,7 +88,7 @@
 /* iOS Instructions - Plain text, no icons */
 .install-instructions-ios {
   padding: 16px;
-  background-color: #f8fafc;
+  background-color: var(--trk-surface-subtle);
   border-radius: 8px;
   margin-top: 16px;
 }
@@ -96,6 +96,6 @@
 .install-instructions-ios p {
   font-size: 14px;
   line-height: 1.6;
-  color: #374151;
+  color: var(--trk-text-muted);
   margin: 0;
 }

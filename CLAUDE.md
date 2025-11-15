@@ -2,6 +2,26 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 📚 Documentation Index - Single Sources of Truth
+
+Tråkke documentation follows a strict "single source of truth" principle. Each document has a specific purpose:
+
+| Document | Purpose | Authoritative For |
+|----------|---------|-------------------|
+| **[README.md](README.md)** | User/contributor overview | Features, roadmap, installation, quick start |
+| **[CLAUDE.md](CLAUDE.md)** (this file) | AI assistant context | Architecture patterns, IndexedDB schema, code examples, component structure |
+| **[PRIVACY_BY_DESIGN.md](PRIVACY_BY_DESIGN.md)** | Privacy/GDPR compliance | [External API Registry](PRIVACY_BY_DESIGN.md#external-api-registry), [CSP configuration](PRIVACY_BY_DESIGN.md#2-content-security-policy-csp), [Service Worker privacy](PRIVACY_BY_DESIGN.md#3-service-worker-privacy-configuration) |
+| **[DEVELOPER_GUIDELINES.md](DEVELOPER_GUIDELINES.md)** | Developer workflow | [Pre-implementation checklist](DEVELOPER_GUIDELINES.md#pre-implementation-checklist), privacy-first development patterns |
+| **[DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)** | Visual design | Nordic Silence colors, typography, icons, spacing, logo specifications |
+
+**When you need information:**
+- External APIs? → [PRIVACY_BY_DESIGN.md - External API Registry](PRIVACY_BY_DESIGN.md#external-api-registry)
+- CSP headers? → [PRIVACY_BY_DESIGN.md - CSP](PRIVACY_BY_DESIGN.md#2-content-security-policy-csp)
+- Privacy checklist? → [DEVELOPER_GUIDELINES.md](DEVELOPER_GUIDELINES.md#pre-implementation-checklist)
+- Database schema? → [CLAUDE.md - IndexedDB Schema](#indexeddb-schema-v3)
+- Roadmap/features? → [README.md - Roadmap](README.md#-roadmap)
+- Design tokens? → [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)
+
 ## ⚠️ CRITICAL DEPLOYMENT WORKFLOW ⚠️
 
 **NEVER push to GitHub without user's explicit approval after local testing.**
@@ -38,14 +58,14 @@ npm run lint         # ESLint check (TypeScript, React)
 ## Critical Privacy Rules
 
 **BEFORE writing any code that:**
-- Makes external API calls → Must be EU/EØS only (currently: cache.kartverket.no, ws.geonorge.no)
+- Makes external API calls → Must be EU/EØS only (see [External API Registry](PRIVACY_BY_DESIGN.md#external-api-registry) in PRIVACY_BY_DESIGN.md)
 - Stores user data → Must use IndexedDB only, never external servers
 - Adds npm packages → Check for telemetry/tracking (read DEVELOPER_GUIDELINES.md)
 - Accesses location → Must require explicit user action (button click)
 
-**Content Security Policy** is enforced in production builds (vite.config.ts). External domains require CSP updates.
+**Content Security Policy**: See authoritative [CSP configuration](PRIVACY_BY_DESIGN.md#2-content-security-policy-csp) in PRIVACY_BY_DESIGN.md. Update CSP when adding external APIs.
 
-See [DEVELOPER_GUIDELINES.md](DEVELOPER_GUIDELINES.md) for complete privacy checklist.
+**Complete privacy checklist**: [DEVELOPER_GUIDELINES.md](DEVELOPER_GUIDELINES.md#pre-implementation-checklist)
 
 ## Architecture
 
@@ -81,6 +101,16 @@ BottomSheet (reusable container)
 │   └── Auto-focus on open and toggle
 ├── DownloadSheet (offline area download)
 ├── RouteSheet (routes & waypoints management)
+├── CategorySheet (POI categories)
+│   ├── Category groups (Service, future: Friluftsliv, Infrastruktur)
+│   ├── Toggle categories on/off
+│   └── Shelters (Tilfluktsrom from DSB)
+├── POIDetailsSheet (POI information)
+│   ├── Shelter details (capacity, address)
+│   └── Coordinate display in multiple formats
+├── SettingsSheet (app settings)
+│   └── Coordinate format selection (DD, DMS, DDM, UTM, MGRS)
+├── InstallSheet (PWA installation prompt)
 └── InfoSheet (data sources & attribution)
 ```
 
@@ -114,6 +144,24 @@ All services are singletons exported as instances:
 - Downloads to IndexedDB via Service Worker cache
 - Respects Norwegian bounds
 
+**poiService.ts** - Points of Interest (POI) management
+- Fetches POI data from external WFS services (DSB Tilfluktsrom)
+- Viewport-aware caching (5-minute TTL)
+- Currently supports: Public shelters (Tilfluktsrom from DSB)
+- Returns GeoJSON-compatible POI objects
+- Category system for future expansion (cabins, trails, parking)
+
+**coordinateService.ts** - Coordinate format conversion
+- Supports 5 formats: DD, DMS, DDM, UTM, MGRS
+- Uses proj4 for UTM conversions
+- MGRS library for military grid reference
+- Norwegian-language format names and descriptions
+
+**settingsService.ts** - User settings management
+- Stores settings in localStorage (non-sensitive data only)
+- Currently manages: coordinate format preference
+- Default format: DD (decimal degrees)
+
 ### State Management Pattern
 
 Uses React hooks for local state. No Redux/global state library.
@@ -130,6 +178,13 @@ isDrawingRoute: boolean      // Click to add points to route
 isPlacingWaypoint: boolean   // Click to place waypoint marker
 isSelectingArea: boolean     // Two clicks to select download area
 ```
+
+**POI Management** (useViewportPOIs hook):
+- Viewport-aware POI loading for performance
+- Fetches POIs only for visible map area
+- Debounced loading on map move/zoom
+- GPU-accelerated clustering using MapLibre native GeoJSON clustering
+- Active categories tracked in state (Set<POICategory>)
 
 ### IndexedDB Schema (v3)
 
@@ -176,16 +231,20 @@ isSelectingArea: boolean     // Two clicks to select download area
 **Base layer**: Kartverket WMTS raster tiles
 
 **Dynamic GeoJSON layers** (added/removed programmatically):
-- `drawing-route` - Line being drawn (green #3e4533, 4px wide)
+- `drawing-route` - Line being drawn (brand green, 4px wide)
 - `drawing-route-line` - LineString layer
 - `drawing-route-points` - Circle layer for points
 - `selection-area` - Download area rectangle
 - `selection-fill` / `selection-outline` - Area styling
 
-**Markers** (maplibregl.Marker):
-- User location: Blue circle with white border
-- Search result: Green location pin (auto-removes when panned out of viewport)
-- Waypoint: Red pulsing location pin (CSS animation)
+**Markers & POI Rendering**:
+- User location: Blue circle with white border (maplibregl.Marker)
+- Search result: Green location pin (maplibregl.Marker, auto-removes when panned out of viewport)
+- Waypoint: Red pulsing location pin (maplibregl.Marker, CSS animation)
+- POI markers: Rendered as GeoJSON layer with GPU clustering
+  - Shelters (Tilfluktsrom): Custom yellow T-marker (#fbbf24)
+  - Cluster circles: Show count of POIs in viewport
+  - Click to view POI details in POIDetailsSheet
 
 **Search Marker Behavior** (Map.tsx):
 - Created when user selects a search result
@@ -203,16 +262,7 @@ isSelectingArea: boolean     // Two clicks to select download area
 - Uses CSS Grid and Flexbox
 - Material Symbols icons (self-hosted, variable fonts)
 
-**Colors**:
-- Primary: `#3e4533` (Tråkke green)
-- Background: `#ffffff` (white)
-- Text: `#111827` (dark gray)
-- Error/Delete: `#ef4444` (red)
-
-**Typography**: System font stack (no external fonts)
-```css
-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-```
+**Design System**: All colors, typography, spacing, and visual design tokens are documented in [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md). The app uses the **Nordic Silence** color palette with CSS custom properties (`--trk-*` prefix).
 
 ## Common Development Patterns
 
@@ -264,12 +314,16 @@ if (oldVersion < 4 && !db.objectStoreNames.contains('myStore')) {
 
 ### Adding External API (RARE - Privacy Review Required)
 
-1. Check DEVELOPER_GUIDELINES.md privacy checklist
-2. Verify API is EU/EØS
-3. Update CSP in vite.config.ts:
-```typescript
-connect-src 'self' https://cache.kartverket.no https://ws.geonorge.no https://new-api.eu
-```
+**IMPORTANT**: Follow this process for any new external API:
+
+1. Review [Pre-Implementation Checklist](DEVELOPER_GUIDELINES.md#pre-implementation-checklist) in DEVELOPER_GUIDELINES.md
+2. Verify API provider is EU/EØS based
+3. Add to [External API Registry](PRIVACY_BY_DESIGN.md#external-api-registry) in PRIVACY_BY_DESIGN.md
+4. Update [CSP configuration](PRIVACY_BY_DESIGN.md#2-content-security-policy-csp) in PRIVACY_BY_DESIGN.md
+5. Update CSP in vite.config.ts to match
+6. Test in production build
+
+**Approved example**: DSB Tilfluktsrom WFS (`ogc.dsb.no`) - Norwegian government agency, no tracking, public data, no API keys
 
 ## Code Quality & Best Practices
 
@@ -439,7 +493,8 @@ try {
 **CSP Injection**:
 - Custom Vite plugin injects CSP meta tag in production only
 - Development has no CSP for HMR/debugging
-- Update CSP in vite.config.ts when adding external resources
+- **Authoritative CSP**: See [PRIVACY_BY_DESIGN.md](PRIVACY_BY_DESIGN.md#2-content-security-policy-csp)
+- Update both PRIVACY_BY_DESIGN.md and vite.config.ts when adding external resources
 
 **Manifest**:
 - Generated in vite.config.ts
@@ -469,16 +524,27 @@ Key files to understand the architecture:
 - `src/services/routeService.ts` - Routes/waypoints CRUD
 - `src/services/searchService.ts` - Kartverket search APIs
 - `src/services/offlineMapService.ts` - Tile downloading
+- `src/services/poiService.ts` - POI fetching and caching (DSB Tilfluktsrom)
+- `src/services/coordinateService.ts` - Coordinate format conversion
+- `src/services/settingsService.ts` - User settings (localStorage)
 
 **UI Components**:
 - `src/components/BottomSheet.tsx` - Reusable sheet container
 - `src/components/FABMenu.tsx` - Floating action button menu
-- `src/components/*Sheet.tsx` - Feature-specific sheets
+- `src/components/SearchSheet.tsx` - Place/address search
+- `src/components/DownloadSheet.tsx` - Offline map downloads
+- `src/components/RouteSheet.tsx` - Routes & waypoints management
+- `src/components/CategorySheet.tsx` - POI category selection
+- `src/components/POIDetailsSheet.tsx` - POI information display
+- `src/components/SettingsSheet.tsx` - App settings
+- `src/components/InstallSheet.tsx` - PWA installation prompt
+- `src/components/InfoSheet.tsx` - Data sources & attribution
 
 **Hooks**:
 - `src/hooks/useAutoHide.ts` - Auto-hiding UI pattern
 - `src/hooks/useHaptics.ts` - Vibration feedback
 - `src/hooks/useGestures.ts` - Touch gesture handling
+- `src/hooks/useViewportPOIs.ts` - Viewport-aware POI loading with debouncing
 
 ## Known Gotchas
 
@@ -494,29 +560,11 @@ Key files to understand the architecture:
 
 6. **MapLibre Source Cleanup**: Always check if source/layer exists before adding. Use map.getSource()/getLayer() to avoid "source already exists" errors.
 
-## Roadmap Context
+## Roadmap & Features
 
-Current status: **Phase 2 in progress**
+**For current feature status and complete roadmap**, see the **[README.md](README.md#-roadmap)** roadmap section.
 
-**Phase 1** (Complete):
-- ✅ Map with Kartverket tiles
-- ✅ GPS location tracking
-- ✅ PWA offline capability
-- ✅ Search (places & addresses)
-- ✅ Offline map downloads
-
-**Phase 2** (Partial):
-- ✅ Route drawing & waypoints (UI complete, save pending)
-- [ ] Projects/tracks management
-- [ ] Route editing & statistics
-- [ ] GPX export
-
-**Phase 3** (Planned):
-- [ ] POI categories
-- [ ] Trail overlays
-- [ ] Elevation profiles
-
-See [README.md](README.md) roadmap section for details.
+**Quick status**: Phase 2 in progress (POI categories, coordinate formats implemented; projects/GPX export pending)
 
 ## Privacy Compliance Reminders
 
@@ -525,7 +573,14 @@ When reviewing or modifying code:
 - No external CDNs (everything self-hosted)
 - No cookies ever
 - Location requires user button click (not automatic)
-- All assets served from same origin or cache.kartverket.no
-- Check Network tab - should only see localhost + Kartverket
+- All assets served from same origin or approved EU/EØS services
+- **Check Network tab** - should only see approved domains from [External API Registry](PRIVACY_BY_DESIGN.md#external-api-registry):
+  - localhost (or your domain)
+  - cache.kartverket.no (map tiles)
+  - ws.geonorge.no (search APIs)
+  - ogc.dsb.no (shelter POI data)
 
-Questions? Read [DEVELOPER_GUIDELINES.md](DEVELOPER_GUIDELINES.md) first.
+**Documentation reference**:
+- Privacy checklist: [DEVELOPER_GUIDELINES.md](DEVELOPER_GUIDELINES.md#pre-implementation-checklist)
+- External APIs: [PRIVACY_BY_DESIGN.md - External API Registry](PRIVACY_BY_DESIGN.md#external-api-registry)
+- CSP configuration: [PRIVACY_BY_DESIGN.md - CSP](PRIVACY_BY_DESIGN.md#2-content-security-policy-csp)

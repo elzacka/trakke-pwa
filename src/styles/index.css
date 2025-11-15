@@ -50,7 +50,7 @@ html {
   height: 100dvh;
   overflow: hidden;
   /* Use map background color to fill safe area */
-  background-color: #f1f5f9;
+  background-color: var(--trk-bg);
 }
 
 body {
@@ -64,8 +64,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* Use map background color to fill safe area */
-  background-color: #f1f5f9;
-  color: #111827;
+  background-color: var(--trk-bg);
+  color: var(--trk-text);
 }
 
 #root {

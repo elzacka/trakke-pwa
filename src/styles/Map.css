@@ -16,8 +16,8 @@
 .user-location-marker {
   width: 16px;
   height: 16px;
-  background-color: #2563eb;
-  border: 3px solid #ffffff;
+  background-color: var(--trk-blue);
+  border: 3px solid var(--trk-surface);
   border-radius: 50%;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.2);
   cursor: pointer;
@@ -33,7 +33,7 @@
 
 .search-result-marker .material-symbols-outlined {
   font-size: 36px;
-  color: #3e4533;
+  color: var(--trk-brand);
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 40;
 }
@@ -49,7 +49,7 @@
 
 .waypoint-marker .material-symbols-outlined {
   font-size: 40px;
-  color: #ef4444;
+  color: var(--trk-red);
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 40;
 }
@@ -82,7 +82,7 @@
 
 /* Only add white circle background for Material Symbol icons, not custom SVG */
 .poi-marker:has(.material-symbols-outlined) {
-  background: #ffffff;
+  background: var(--trk-surface);
   border-radius: 50%;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
@@ -99,7 +99,7 @@
 
 /* MapLibre control styling customization */
 .maplibregl-ctrl-group {
-  background: #ffffff;
+  background: var(--trk-surface);
   border-radius: 12px;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
   border: none;
@@ -110,13 +110,13 @@
   width: 44px;
   height: 44px;
   border: none;
-  background-color: #ffffff;
+  background-color: var(--trk-surface);
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--transition-fast);
 }
 
 .maplibregl-ctrl-group button + button {
@@ -124,11 +124,11 @@
 }
 
 .maplibregl-ctrl-group button:hover {
-  background-color: #f8fafc;
+  background-color: var(--trk-surface-subtle);
 }
 
 .maplibregl-ctrl-group button:active {
-  background-color: #f1f5f9;
+  background-color: var(--trk-bg);
 }
 
 /* iOS safe area support - Classic mode only */
@@ -153,21 +153,21 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: var(--trk-overlay-soft);
   backdrop-filter: blur(4px);
   padding: 4px 8px;
   border-radius: 12px;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   pointer-events: auto !important;
   position: relative;
   z-index: 1000;
 }
 
 .custom-attribution:hover {
-  background-color: rgba(255, 255, 255, 0.85);
+  background-color: var(--trk-overlay-strong);
 }
 
 .custom-attribution:active {
@@ -205,7 +205,7 @@
 
 .attribution-icon {
   font-size: 11px;
-  color: #3e4533;
+  color: var(--trk-brand);
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
   line-height: 1.2;
   flex-shrink: 0;
@@ -216,12 +216,12 @@
 
 .attribution-text {
   font-size: 11px;
-  color: #3e4533;
+  color: var(--trk-brand);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-weight: 400;
   line-height: 1.2;
   white-space: nowrap;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 
@@ -240,7 +240,7 @@
 }
 
 .download-control-container > * {
-  background-color: #ffffff;
+  background-color: var(--trk-surface);
   border-radius: 12px;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
   overflow: hidden;
@@ -264,16 +264,16 @@
 /* Visibility Toggle Button */
 .maplibregl-ctrl-visibility .material-symbols-outlined {
   font-size: 24px;
-  color: #3e4533;
+  color: var(--trk-brand);
   font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
 }
 
 /* Compass Button - Material Symbol */
 .maplibregl-ctrl-compass .material-symbols-outlined {
   font-size: 28px;
-  color: #3e4533;
+  color: var(--trk-brand);
   font-variation-settings: 'FILL' 0, 'wght' 250, 'GRAD' 0, 'opsz' 24;
-  transition: transform 0.3s ease;
+  transition: transform var(--transition-base);
   display: inline-block;
 }
 
@@ -287,8 +287,8 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 13px;
   font-weight: 500;
-  color: #3e4533;
-  background-color: #ffffff;
+  color: var(--trk-brand);
+  background-color: var(--trk-surface);
   cursor: default;
   user-select: none;
 }
@@ -303,8 +303,8 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 13px;
   font-weight: 500;
-  color: #3e4533;
-  background-color: #ffffff;
+  color: var(--trk-brand);
+  background-color: var(--trk-surface);
   cursor: default;
   user-select: none;
 }
@@ -312,28 +312,28 @@
 /* Location Button */
 .maplibregl-ctrl-location .material-symbols-outlined {
   font-size: 24px;
-  color: #3e4533;
+  color: var(--trk-brand);
   font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
 }
 
 .maplibregl-ctrl-location.active {
-  background-color: #3e4533;
+  background-color: var(--trk-brand);
 }
 
 .maplibregl-ctrl-location.active .material-symbols-outlined {
-  color: #ffffff;
+  color: var(--trk-surface);
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
 /* Attribution styling */
 .maplibregl-ctrl-attrib {
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: var(--trk-overlay-soft);
   font-size: 11px;
   padding: 2px 6px;
 }
 
 .maplibregl-ctrl-attrib a {
-  color: #3e4533;
+  color: var(--trk-brand);
   text-decoration: none;
 }
 
@@ -348,15 +348,15 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
-  background: #ffffff;
+  background: var(--trk-surface);
   border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-xl);
   padding: 16px 20px;
   display: flex;
   align-items: center;
   gap: 12px;
   max-width: calc(100% - 40px);
-  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideDown var(--transition-base) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes slideDown {
@@ -380,7 +380,7 @@
 
 .drawing-banner-content > .material-symbols-outlined {
   font-size: 24px;
-  color: #3e4533;
+  color: var(--trk-brand);
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
   flex-shrink: 0;
 }
@@ -396,14 +396,14 @@
 .drawing-banner-text strong {
   font-size: 15px;
   font-weight: 600;
-  color: #111827;
+  color: var(--trk-text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   white-space: nowrap;
 }
 
 .drawing-banner-text span {
   font-size: 13px;
-  color: #64748b;
+  color: var(--trk-text-soft);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   white-space: nowrap;
 }
@@ -414,11 +414,11 @@
   gap: 6px;
   padding: 8px 16px;
   border: none;
-  background: #3e4533;
-  color: #ffffff;
+  background: var(--trk-brand);
+  color: var(--trk-surface);
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   font-size: 13px;
   font-weight: 500;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -426,7 +426,7 @@
 }
 
 .drawing-banner-finish:hover {
-  background: #2d3225;
+  background: var(--trk-brand-soft);
   transform: translateY(-1px);
 }
 
@@ -449,17 +449,17 @@
   justify-content: center;
   cursor: pointer;
   border-radius: 8px;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--transition-fast);
   flex-shrink: 0;
 }
 
 .drawing-banner-close:hover {
-  background-color: #f1f5f9;
+  background-color: var(--trk-bg);
 }
 
 .drawing-banner-close .material-symbols-outlined {
   font-size: 20px;
-  color: #64748b;
+  color: var(--trk-text-soft);
   font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
 }
 
@@ -520,14 +520,14 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 1100;
-  background: rgba(255, 255, 255, 0.98);
+  background: var(--trk-overlay-strong);
   backdrop-filter: blur(8px);
   border-radius: 16px;
   padding: 12px 16px;
   display: flex;
   align-items: center;
   gap: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
   max-width: calc(100vw - 32px);
 }
 
@@ -541,7 +541,7 @@
 
 .selection-banner-content > .material-symbols-outlined {
   font-size: 24px;
-  color: #3e4533;
+  color: var(--trk-brand);
   flex-shrink: 0;
 }
 
@@ -556,13 +556,13 @@
 .selection-banner-text strong {
   font-size: 15px;
   font-weight: 600;
-  color: #111827;
+  color: var(--trk-text);
   white-space: nowrap;
 }
 
 .selection-banner-text span {
   font-size: 12px;
-  color: #64748b;
+  color: var(--trk-text-soft);
   white-space: nowrap;
 }
 
@@ -571,19 +571,19 @@
   height: 32px;
   border-radius: 50%;
   border: none;
-  background: #f1f5f9;
-  color: #64748b;
+  background: var(--trk-bg);
+  color: var(--trk-text-soft);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   flex-shrink: 0;
 }
 
 .selection-banner-close:hover {
-  background: #e2e8f0;
-  color: #111827;
+  background: var(--trk-border);
+  color: var(--trk-text);
 }
 
 .selection-banner-close .material-symbols-outlined {
@@ -593,8 +593,8 @@
 /* Selection overlay box */
 .selection-overlay {
   position: absolute;
-  border: 3px solid #3e4533;
-  background: rgba(62, 69, 51, 0.1);
+  border: 3px solid var(--trk-brand);
+  background: var(--trk-selection);
   pointer-events: none;
   z-index: 1050;
   box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.3);
@@ -605,14 +605,14 @@
   position: absolute;
   width: 32px;
   height: 32px;
-  background: #ffffff;
-  border: 2px solid #3e4533;
+  background: var(--trk-surface);
+  border: 2px solid var(--trk-brand);
   border-radius: 8px;
   pointer-events: all;
   cursor: grab;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   touch-action: none;
-  transition: transform 0.2s ease;
+  transition: transform var(--transition-fast);
 }
 
 .selection-handle:active {
@@ -647,8 +647,8 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 1100;
-  background: #3e4533;
-  color: #ffffff;
+  background: var(--trk-brand);
+  color: var(--trk-surface);
   border: none;
   border-radius: 28px;
   padding: 12px 24px;
@@ -658,12 +658,12 @@
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transition: all 0.2s ease;
+  box-shadow: var(--shadow-lg);
+  transition: all var(--transition-fast);
 }
 
 .selection-confirm-button:hover {
-  background: #4a5440;
+  background: var(--trk-brand-soft);
   transform: translateX(-50%) scale(1.05);
 }
 

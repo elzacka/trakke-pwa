@@ -25,7 +25,7 @@
 .route-sheet-header h2 {
   font-size: 18px;
   font-weight: 600;
-  color: #111827;
+  color: var(--trk-text);
   margin: 0;
   flex: 1;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -54,7 +54,7 @@
 }
 
 .route-visibility-button {
-  color: #3e4533;
+  color: var(--trk-brand);
 }
 
 .route-visibility-button:hover {
@@ -63,13 +63,13 @@
 
 .route-sheet-back:hover,
 .route-sheet-close:hover {
-  background-color: #f1f5f9;
+  background-color: var(--trk-bg);
 }
 
 .route-sheet-back .material-symbols-outlined,
 .route-sheet-close .material-symbols-outlined {
   font-size: 20px;
-  color: #64748b;
+  color: var(--trk-text-soft);
   font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
 }
 
@@ -87,7 +87,7 @@
   align-items: center;
   justify-content: center;
   padding: 40px 0;
-  color: #64748b;
+  color: var(--trk-text-soft);
   font-size: 14px;
 }
 
@@ -105,31 +105,31 @@
   justify-content: center;
   gap: 8px;
   padding: 14px 16px;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
+  border: 1px solid var(--trk-border);
+  background: var(--trk-surface);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: var(--trk-text-muted);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .route-action-button.primary {
-  background: #3e4533;
-  color: #ffffff;
-  border-color: #3e4533;
+  background: var(--trk-brand);
+  color: var(--trk-surface);
+  border-color: var(--trk-brand);
 }
 
 .route-action-button:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
+  background: var(--trk-surface);
+  border-color: var(--trk-border);
 }
 
 .route-action-button.primary:hover {
-  background: #2d3225;
-  border-color: #2d3225;
+  background: var(--trk-brand-soft);
+  border-color: var(--trk-brand-soft);
 }
 
 .route-action-button .material-symbols-outlined {
@@ -152,7 +152,7 @@
 .route-section h3 {
   font-size: 14px;
   font-weight: 600;
-  color: #111827;
+  color: var(--trk-text);
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -170,7 +170,7 @@
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: #f9fafb;
+  background: var(--trk-surface);
   border-radius: 12px;
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -178,14 +178,14 @@
 }
 
 .route-item:hover {
-  background: #f1f5f9;
+  background: var(--trk-bg);
 }
 
 .route-item-icon {
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: #3e4533;
+  background: var(--trk-brand);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -194,7 +194,7 @@
 
 .route-item-icon .material-symbols-outlined {
   font-size: 20px;
-  color: #ffffff;
+  color: var(--trk-surface);
   font-variation-settings: 'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 20;
 }
 
@@ -206,7 +206,7 @@
 .route-item-name {
   font-size: 14px;
   font-weight: 500;
-  color: #111827;
+  color: var(--trk-text);
   margin-bottom: 4px;
   white-space: nowrap;
   overflow: hidden;
@@ -216,7 +216,7 @@
 
 .route-item-meta {
   font-size: 12px;
-  color: #64748b;
+  color: var(--trk-text-soft);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -235,17 +235,17 @@
 }
 
 .route-item-delete:hover {
-  background: #ef4444;
+  background: var(--trk-red);
 }
 
 .route-item-delete .material-symbols-outlined {
   font-size: 18px;
-  color: #ef4444;
+  color: var(--trk-red);
   font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 18;
 }
 
 .route-item-delete:hover .material-symbols-outlined {
-  color: #ffffff;
+  color: var(--trk-surface);
 }
 
 /* Detail view */
@@ -259,7 +259,7 @@
 .route-detail-description {
   font-size: 14px;
   line-height: 1.5;
-  color: #374151;
+  color: var(--trk-text-muted);
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -276,21 +276,21 @@
   flex-direction: column;
   gap: 4px;
   padding: 16px;
-  background: #f9fafb;
+  background: var(--trk-surface);
   border-radius: 12px;
   flex-shrink: 0;
 }
 
 .route-stat-label {
   font-size: 12px;
-  color: #64748b;
+  color: var(--trk-text-soft);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .route-stat-value {
   font-size: 18px;
   font-weight: 600;
-  color: #111827;
+  color: var(--trk-text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -299,13 +299,13 @@
   flex-direction: column;
   gap: 8px;
   padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--trk-border);
   flex-shrink: 0;
 }
 
 .route-detail-meta p {
   font-size: 13px;
-  color: #64748b;
+  color: var(--trk-text-soft);
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -323,20 +323,20 @@
   justify-content: center;
   gap: 8px;
   padding: 14px 16px;
-  border: 1px solid #ef4444;
-  background: #ffffff;
+  border: 1px solid var(--trk-red);
+  background: var(--trk-surface);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 14px;
   font-weight: 500;
-  color: #ef4444;
+  color: var(--trk-red);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .route-detail-button:hover {
-  background: #ef4444;
-  color: #ffffff;
+  background: var(--trk-red);
+  color: var(--trk-surface);
 }
 
 .route-detail-button .material-symbols-outlined {

@@ -90,33 +90,38 @@
   --z-notification: 800;
 
   /* ===== COLORS ===== */
-  /* Primary colors */
-  --color-primary: #3e4533;
-  --color-primary-light: #565e47;
-  --color-primary-dark: #2a2f23;
+  /* Nordic Silence Color System - Tråkke Design System */
 
-  /* Neutral colors */
-  --color-white: #ffffff;
-  --color-gray-50: #f9fafb;
-  --color-gray-100: #f3f4f6;
-  --color-gray-200: #e5e7eb;
-  --color-gray-300: #d1d5db;
-  --color-gray-400: #9ca3af;
-  --color-gray-500: #6b7280;
-  --color-gray-600: #4b5563;
-  --color-gray-700: #374151;
-  --color-gray-800: #1f2937;
-  --color-gray-900: #111827;
+  /* Brand colors */
+  --trk-brand: #3e4533;        /* Primary brand green - Tråkke forest green */
+  --trk-brand-soft: #606756;   /* Softer variant for UI elements */
+  --trk-brand-tint: #e9ece6;   /* Light tint for backgrounds and surfaces */
 
-  /* Semantic colors */
-  --color-error: #ef4444;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-info: #3b82f6;
+  /* Neutrals - warm, paper-like without blue cast */
+  --trk-bg: #fafaf7;              /* Main background */
+  --trk-surface: #ffffff;         /* Cards, panels, overlays */
+  --trk-surface-subtle: #f2f3f0;  /* Subtle background for elements */
+  --trk-border: #e4e5e1;          /* Standard borders */
+  --trk-border-strong: #c9ccc5;   /* Stronger borders for separation */
 
-  /* Map colors */
-  --color-location: #2563eb;
-  --color-location-bg: rgba(37, 99, 235, 0.1);
+  /* Text colors - three levels of hierarchy */
+  --trk-text: #1a1d1b;          /* Primary text (body, headings) */
+  --trk-text-muted: #4a4f47;    /* Secondary text (descriptions) */
+  --trk-text-soft: #7c8278;     /* Tertiary text (help text, labels) */
+
+  /* Functional colors - semantic usage */
+  --trk-blue: #1e6ce0;    /* GPS position, info, focus */
+  --trk-red: #d0443e;     /* Waypoints, warnings, destructive actions */
+  --trk-green: #2e9e5b;   /* Success, confirmations */
+
+  /* Overlays & depth */
+  --trk-overlay-strong: rgba(255, 255, 255, 0.85);  /* Strong overlay for panels */
+  --trk-overlay-soft: rgba(250, 250, 246, 0.6);     /* Soft overlay */
+  --trk-selection: rgba(62, 69, 51, 0.18);          /* Selected routes/areas */
+
+  /* Legacy aliases for backward compatibility (DEPRECATED - use trk-* tokens) */
+  --color-primary: var(--trk-brand);
+  --color-white: var(--trk-surface);
 
   /* ===== SHADOWS ===== */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);

@@ -26,7 +26,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--color-white);
+  background: var(--trk-surface);
   border-radius: var(--sheet-border-radius) var(--sheet-border-radius) 0 0;
   z-index: var(--z-sheet);
   transition: transform var(--transition-slow);
@@ -97,7 +97,7 @@
 .bottom-sheet-handle {
   width: 40px;
   height: 4px;
-  background: #cbd5e1;
+  background: var(--trk-border-strong);
   border-radius: 2px;
   margin: 12px auto 16px;
   cursor: grab;
@@ -130,12 +130,12 @@
 }
 
 .bottom-sheet-content::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--trk-border-strong);
   border-radius: 2px;
 }
 
 .bottom-sheet-content::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--trk-text-soft);
 }
 
 /* Mobile: Position sheets at top instead of bottom */

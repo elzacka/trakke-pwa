@@ -93,14 +93,26 @@ const dbService = {
 | **App state** | Persist user preferences | IndexedDB (local) | Until user clears | ✅ (Never leaves device) |
 | **Fonts** | Display text/icons | Service Worker cache | Permanent | ✅ (Served locally) |
 
-### External Resources Audit
+### External API Registry
 
-| Resource | Provider | Country | Purpose | GDPR Compliant | Justification |
-|----------|----------|---------|---------|----------------|---------------|
-| **Kartverket WMTS** | Kartverket | Norway 🇳🇴 | Map tiles | ✅ | Norwegian government agency, EU/EØS |
-| **None** | - | - | - | - | No other external resources |
+**All external API calls are documented here. This is the single source of truth for approved external services.**
 
-**Note**: All fonts, icons, and assets are self-hosted.
+| Domain | Service | Provider | Country | Purpose | GDPR Compliant | Justification |
+|--------|---------|----------|---------|---------|----------------|---------------|
+| `cache.kartverket.no` | WMTS Tiles | Kartverket | Norway 🇳🇴 | Map tile imagery | ✅ | Norwegian Mapping Authority, EU/EØS government agency |
+| `ws.geonorge.no` | SSR API | Kartverket | Norway 🇳🇴 | Place name search | ✅ | Sentralt Stedsnavnregister (SSR), Norwegian government |
+| `ws.geonorge.no` | Address API | Kartverket | Norway 🇳🇴 | Address geocoding | ✅ | Norwegian address registry, government data |
+| `ogc.dsb.no` | WFS Service | DSB | Norway 🇳🇴 | Public shelter (Tilfluktsrom) locations | ✅ | Direktoratet for samfunnssikkerhet og beredskap, Norwegian government |
+
+**Privacy guarantees for all approved services:**
+- No user tracking or analytics
+- No cookies or session storage
+- No user identification in requests
+- No data retention on external servers
+- Public data only (no personal information)
+- All providers are Norwegian government agencies (EU/EØS)
+
+**Note**: All fonts, icons, and static assets are self-hosted. Zero external CDNs.
 
 ## Technical Implementation
 
@@ -122,7 +134,9 @@ const dbService = {
 
 ### 2. Content Security Policy (CSP)
 
-Implemented via index.html meta tag:
+**This is the authoritative CSP configuration. Update here when adding new external services.**
+
+Implemented via vite.config.ts custom plugin (production builds only):
 
 ```html
 <meta http-equiv="Content-Security-Policy"
@@ -131,27 +145,51 @@ Implemented via index.html meta tag:
                style-src 'self' 'unsafe-inline';
                img-src 'self' data: https://cache.kartverket.no;
                font-src 'self';
-               connect-src 'self' https://cache.kartverket.no;
+               connect-src 'self' https://cache.kartverket.no https://ws.geonorge.no https://ogc.dsb.no;
                worker-src 'self';">
 ```
 
+**CSP Rationale:**
+- `connect-src`: Restricts network requests to approved Norwegian government APIs only
+- `font-src 'self'`: All fonts served locally (Exo 2 variable font)
+- `img-src`: Map tiles from Kartverket only
+- `script-src 'self'`: No external JavaScript (all bundled)
+- `style-src 'unsafe-inline'`: Required for React CSS-in-JS (consider removing in future)
+
+**When adding new external APIs:**
+1. Add to External API Registry above
+2. Update `connect-src` directive here
+3. Update CSP in vite.config.ts
+4. Test in production build
+
 ### 3. Service Worker Privacy Configuration
 
+**Service Worker caching strategy (see vite.config.ts for implementation):**
+
 ```typescript
-// vite.config.ts
-workbox: {
-  runtimeCaching: [
-    {
-      // ONLY external resource: Norwegian government maps
-      urlPattern: /^https:\/\/cache\.kartverket\.no\/.*/i,
-      handler: 'CacheFirst',
-      // No user identification in requests
-      // No cookies sent
-      // No tracking headers
+// Kartverket map tiles - Cache-first strategy
+{
+  urlPattern: /^https:\/\/cache\.kartverket\.no\/.*/i,
+  handler: 'CacheFirst',
+  options: {
+    cacheName: 'kartverket-tiles',
+    expiration: {
+      maxEntries: 500,
+      maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
     }
-  ]
+  }
 }
+
+// Static assets - Precached on install
+// All fonts, icons, and app shell files
 ```
+
+**Privacy guarantees:**
+- No user identification in tile requests
+- No cookies sent to external services
+- No tracking headers
+- All API calls are stateless and anonymous
+- Tile URLs contain only geographic coordinates (public data)
 
 ### 4. Geolocation Privacy
 

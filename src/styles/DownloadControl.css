@@ -2,7 +2,7 @@
 .download-toggle {
   width: 44px;
   height: 44px;
-  background-color: #ffffff;
+  background-color: var(--trk-surface);
   border: none;
   display: flex;
   align-items: center;
@@ -12,16 +12,16 @@
 }
 
 .download-toggle:hover {
-  background-color: #f8fafc;
+  background-color: var(--trk-surface-subtle);
 }
 
 .download-toggle:active {
-  background-color: #f1f5f9;
+  background-color: var(--trk-bg);
 }
 
 .download-toggle .material-symbols-outlined {
   font-size: 24px;
-  color: #3e4533;
+  color: var(--trk-brand);
   font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
 }
 
@@ -31,13 +31,13 @@
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  background-color: #ffffff;
+  background-color: var(--trk-surface);
 }
 
 .instruction-text {
   font-size: 14px;
   font-weight: 500;
-  color: #3e4533;
+  color: var(--trk-brand);
   white-space: nowrap;
 }
 
@@ -55,12 +55,12 @@
 }
 
 .instruction-cancel:hover {
-  background-color: #f1f5f9;
+  background-color: var(--trk-bg);
 }
 
 .instruction-cancel .material-symbols-outlined {
   font-size: 20px;
-  color: #64748b;
+  color: var(--trk-text-soft);
   font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
 }
 
@@ -70,7 +70,7 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  background-color: #ffffff;
+  background-color: var(--trk-surface);
   min-width: 200px;
 }
 
@@ -83,12 +83,12 @@
 .confirm-text {
   font-size: 13px;
   font-weight: 500;
-  color: #111827;
+  color: var(--trk-text);
 }
 
 .confirm-subtext {
   font-size: 12px;
-  color: #64748b;
+  color: var(--trk-text-soft);
 }
 
 .confirm-actions {
@@ -109,30 +109,30 @@
 }
 
 .confirm-button.cancel {
-  background-color: #f1f5f9;
+  background-color: var(--trk-bg);
 }
 
 .confirm-button.cancel:hover {
-  background-color: #e2e8f0;
+  background-color: var(--trk-border);
 }
 
 .confirm-button.cancel .material-symbols-outlined {
   font-size: 20px;
-  color: #64748b;
+  color: var(--trk-text-soft);
   font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
 }
 
 .confirm-button.download {
-  background-color: #3e4533;
+  background-color: var(--trk-brand);
 }
 
 .confirm-button.download:hover {
-  background-color: #2d3325;
+  background-color: var(--trk-brand-soft);
 }
 
 .confirm-button.download .material-symbols-outlined {
   font-size: 20px;
-  color: #ffffff;
+  color: var(--trk-surface);
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
 }
 
@@ -142,7 +142,7 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  background-color: #ffffff;
+  background-color: var(--trk-surface);
   min-width: 200px;
 }
 
@@ -155,25 +155,25 @@
 .progress-text {
   font-size: 13px;
   font-weight: 500;
-  color: #111827;
+  color: var(--trk-text);
 }
 
 .progress-subtext {
   font-size: 12px;
-  color: #64748b;
+  color: var(--trk-text-soft);
 }
 
 .progress-bar {
   width: 100%;
   height: 4px;
-  background-color: #f1f5f9;
+  background-color: var(--trk-bg);
   border-radius: 2px;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  background-color: #3e4533;
+  background-color: var(--trk-brand);
   transition: width 0.3s ease;
   border-radius: 2px;
 }

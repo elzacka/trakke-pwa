@@ -47,13 +47,36 @@ export const OFFLINE_CONFIG = {
   MAX_CACHED_TILES: 500,
 } as const
 
-// Theme Colors
+// Theme Colors - Nordic Silence Design System
 export const COLORS = {
-  PRIMARY: '#3e4533', // Trakke green
-  TEXT_DARK: '#111827',
-  TEXT_GRAY: '#64748b',
-  ERROR: '#ef4444',
-  BACKGROUND: '#ffffff',
+  // Brand
+  BRAND: '#3e4533',           // Primary brand green
+  BRAND_SOFT: '#606756',      // Softer variant for UI
+  BRAND_TINT: '#e9ece6',      // Light tint for backgrounds
+
+  // Neutrals
+  BG: '#fafaf7',              // Main background
+  SURFACE: '#ffffff',         // Cards, panels, overlays
+  SURFACE_SUBTLE: '#f2f3f0',  // Subtle background
+  BORDER: '#e4e5e1',          // Standard borders
+  BORDER_STRONG: '#c9ccc5',   // Stronger borders
+
+  // Text
+  TEXT: '#1a1d1b',            // Primary text
+  TEXT_MUTED: '#4a4f47',      // Secondary text
+  TEXT_SOFT: '#7c8278',       // Tertiary text
+
+  // Functional
+  BLUE: '#1e6ce0',            // GPS, info, focus
+  RED: '#d0443e',             // Waypoints, warnings
+  GREEN: '#2e9e5b',           // Success
+
+  // Legacy aliases (deprecated - use specific tokens above)
+  PRIMARY: '#3e4533',         // Use BRAND instead
+  TEXT_DARK: '#1a1d1b',       // Use TEXT instead
+  TEXT_GRAY: '#7c8278',       // Use TEXT_SOFT instead
+  ERROR: '#d0443e',           // Use RED instead
+  BACKGROUND: '#ffffff',      // Use SURFACE instead
 } as const
 
 // Development Mode

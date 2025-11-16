@@ -1284,11 +1284,16 @@ const Map = ({ zenMode }: MapProps) => {
 
     console.log('[Map] Click detected. isPlacingWaypoint:', isPlacingWaypoint, 'isDrawingRoute:', isDrawingRoute)
 
-    // Ctrl+Click: Copy coordinates to clipboard (desktop only)
-    if (!isMobile && e.originalEvent.ctrlKey) {
+    // Ctrl+Click (or Cmd+Click on Mac): Copy coordinates to clipboard (desktop only)
+    const mouseEvent = e.originalEvent as MouseEvent
+    if (!isMobile && mouseEvent && (mouseEvent.ctrlKey || mouseEvent.metaKey)) {
       const coords = `${e.lngLat.lat.toFixed(6)}, ${e.lngLat.lng.toFixed(6)}`
+      console.log('[Map] Ctrl/Cmd+Click detected, copying coordinates:', coords)
+
       try {
         await navigator.clipboard.writeText(coords)
+        console.log('[Map] Coordinates copied successfully')
+
         // Visual feedback using CSS class (safer than inline styles)
         const notification = document.createElement('div')
         notification.className = 'coordinate-copy-notification'

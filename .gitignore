@@ -51,6 +51,9 @@ temp/
 *.tmp
 *.temp
 
+# Claude Code local settings (personal, don't commit)
+.claude/settings.local.json
+
 # OS generated files
 .DS_Store
 Thumbs.db
@@ -62,6 +65,7 @@ Icon
 .Trashes
 
 # Internal documentation (not for public repo)
+CODE_REVIEW_*.md
 CONTENT_DRAFTS.md
 SETUP_COMPLETE.md
 BROWSER_COMPATIBILITY.md
@@ -70,6 +74,7 @@ TESTING.md
 PRIVACY_COMPLIANCE.md
 *_INTERNAL.md
 *_DRAFT.md
+.obsidian/*
 
 # PWA service worker cache (runtime generated)
 sw.js.map

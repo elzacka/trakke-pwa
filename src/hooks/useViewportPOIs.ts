@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import type { LngLatBounds } from 'maplibre-gl'
 import { poiService, type POI, type POICategory } from '../services/poiService'
+import { UI_DELAYS, VIEWPORT } from '../config/timings'
 
 interface BoundsRect {
   north: number
@@ -12,9 +13,9 @@ interface BoundsRect {
 interface UseViewportPOIsOptions {
   map: maplibregl.Map | null
   activeCategories: Set<POICategory>
-  debounceDelay?: number // Default: 300ms
-  bufferFactor?: number // Default: 1.2 (20% padding around viewport)
-  minZoom?: number // Default: 10 (only show POIs at zoom > minZoom)
+  debounceDelay?: number
+  bufferFactor?: number
+  minZoom?: number
 }
 
 interface UseViewportPOIsReturn {
@@ -32,9 +33,9 @@ interface UseViewportPOIsReturn {
 export const useViewportPOIs = ({
   map,
   activeCategories,
-  debounceDelay = 300,
-  bufferFactor = 1.2,
-  minZoom = 10
+  debounceDelay = UI_DELAYS.POI_DEBOUNCE,
+  bufferFactor = VIEWPORT.POI_BUFFER_FACTOR,
+  minZoom = VIEWPORT.POI_MIN_ZOOM
 }: UseViewportPOIsOptions): UseViewportPOIsReturn => {
   const [visiblePOIs, setVisiblePOIs] = useState<Map<POICategory, POI[]>>(new Map())
   const [isLoading, setIsLoading] = useState(false)
@@ -197,9 +198,64 @@ export const useViewportPOIs = ({
 
   // Reload when active categories change
   useEffect(() => {
+    if (!map) return
     console.log('[useViewportPOIs] Active categories changed, fetching...', Array.from(activeCategories))
-    fetchPOIsForViewport()
-  }, [activeCategories]) // Only depend on activeCategories, not the function
+
+    // Use immediate fetch to avoid stale closure issues
+    const fetchImmediate = async () => {
+      const zoom = map.getZoom()
+
+      if (zoom < minZoom) {
+        setVisiblePOIs(new Map())
+        return
+      }
+
+      const bounds = getBoundsWithBuffer(map.getBounds())
+      previousBoundsRef.current = bounds
+      previousZoomRef.current = zoom
+
+      if (activeCategories.size === 0) {
+        setVisiblePOIs(new Map())
+        return
+      }
+
+      setIsLoading(true)
+      setError(null)
+
+      try {
+        const newVisiblePOIs = new Map<POICategory, POI[]>()
+
+        const fetchPromises = Array.from(activeCategories).map(async (category) => {
+          try {
+            const pois = await poiService.getPOIs(category, bounds, zoom)
+            return { category, pois }
+          } catch (err) {
+            console.error(`Failed to fetch POIs for category ${category}:`, err)
+            return { category, pois: [] }
+          }
+        })
+
+        const results = await Promise.all(fetchPromises)
+
+        results.forEach(({ category, pois }) => {
+          newVisiblePOIs.set(category, pois)
+        })
+
+        if (mountedRef.current) {
+          setVisiblePOIs(newVisiblePOIs)
+          setIsLoading(false)
+        }
+      } catch (err) {
+        console.error('Failed to fetch viewport POIs:', err)
+        if (mountedRef.current) {
+          setError(err instanceof Error ? err.message : 'Failed to load POIs')
+          setIsLoading(false)
+        }
+      }
+    }
+
+    fetchImmediate()
+  }, [activeCategories, map, minZoom, getBoundsWithBuffer])
 
   return {
     visiblePOIs,

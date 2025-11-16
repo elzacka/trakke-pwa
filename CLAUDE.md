@@ -35,8 +35,6 @@ Tråkke documentation follows a strict "single source of truth" principle. Each 
 
 **Exception**: Only push immediately if user explicitly says "and push to GitHub" in the same request.
 
-See `.claude/workflow-reminder.md` for complete details.
-
 ## Project Overview
 
 **Tråkke** is a privacy-first Progressive Web Application for Norwegian outdoor navigation. It's built with React 19.2, TypeScript 5.9.3, and Vite 5.4.21, using MapLibre GL JS for mapping with Kartverket (Norwegian government) tiles.

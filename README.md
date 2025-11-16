@@ -200,11 +200,11 @@ Tråkke uses the **Nordic Silence** design system - a minimalist, nature-inspire
 ## 🧪 Testing
 
 ### Browser Compatibility
-Tested and supported on current browsers as of November 2025:
-- Chrome 142+ (current: 142.0.7444.134)
-- Edge 142+ (current: 142.0.3595.65)
-- Firefox 144+ (current: 144.0.2)
-- Safari 26+ / iOS 26+ (current: Safari 26.1)
+Tested and supported on modern browsers:
+- Chrome 100+
+- Edge 100+
+- Firefox 100+
+- Safari 15+ / iOS 15+
 
 See [BROWSER_COMPATIBILITY.md](BROWSER_COMPATIBILITY.md) for detailed compatibility information, testing requirements, and browser-specific notes.
 
@@ -277,8 +277,6 @@ See [DEPENDENCIES.md](DEPENDENCIES.md) for complete dependency list with exact v
 - [ ] GPX import functionality
 - [ ] Compass and bearing tools
 - [ ] Push notifications for weather alerts
-
-**Last Updated**: 2025-01-13
 
 ## 🔒 Privacy & Security
 

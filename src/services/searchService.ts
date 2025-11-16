@@ -35,21 +35,24 @@ class SearchService {
 
       const data = await response.json()
 
-      const results = (data.adresser || []).map((addr: any, index: number): SearchResult => ({
-        id: `addr-${addr.adressenavn || ''}-${addr.nummer || ''}-${addr.bokstav || ''}-${addr.postnummer || ''}-${index}`,
-        name: this.formatAddressName(addr),
-        type: 'address',
-        coordinates: [
-          addr.representasjonspunkt?.lon || 0,
-          addr.representasjonspunkt?.lat || 0
-        ],
-        displayName: this.formatAddressName(addr),
-        subtext: this.formatAddressSubtext(addr),
-        _rawAddr: addr as any // Keep for smart filtering
-      } as SearchResult))
+      // Map results with raw data for filtering
+      const resultsWithRaw = (data.adresser || []).map((addr: any, index: number) => ({
+        result: {
+          id: `addr-${addr.adressenavn || ''}-${addr.nummer || ''}-${addr.bokstav || ''}-${addr.postnummer || ''}-${index}`,
+          name: this.formatAddressName(addr),
+          type: 'address' as const,
+          coordinates: [
+            addr.representasjonspunkt?.lon || 0,
+            addr.representasjonspunkt?.lat || 0
+          ] as [number, number],
+          displayName: this.formatAddressName(addr),
+          subtext: this.formatAddressSubtext(addr)
+        },
+        rawAddr: addr
+      }))
 
       // Smart filtering for addresses
-      return this.smartFilterAddresses(results, query, limit)
+      return this.smartFilterAddresses(resultsWithRaw, query, limit)
     } catch (error) {
       console.error('Address search error:', error)
       return []
@@ -60,7 +63,7 @@ class SearchService {
    * Smart filter addresses to match user intent
    * Example: "Radarveien 25" should match exactly, not "Radarveien 2"
    */
-  private smartFilterAddresses(results: SearchResult[], query: string, limit: number): SearchResult[] {
+  private smartFilterAddresses(resultsWithRaw: Array<{ result: SearchResult; rawAddr: any }>, query: string, limit: number): SearchResult[] {
     const queryLower = query.toLowerCase().trim()
 
     // Extract house number from query if present
@@ -73,12 +76,11 @@ class SearchService {
       ? queryLower.substring(0, houseNumberMatch.index).trim()
       : queryLower
 
-    const scored = results.map(result => {
-      const raw = (result as any)._rawAddr
+    const scored = resultsWithRaw.map(({ result, rawAddr }) => {
       const addrLower = result.displayName.toLowerCase()
-      const streetName = (raw.adressenavn || '').toLowerCase()
-      const houseNum = raw.nummer?.toString() || ''
-      const letter = (raw.bokstav || '').toLowerCase()
+      const streetName = (rawAddr.adressenavn || '').toLowerCase()
+      const houseNum = rawAddr.nummer?.toString() || ''
+      const letter = (rawAddr.bokstav || '').toLowerCase()
 
       let score = 0
 
@@ -124,18 +126,12 @@ class SearchService {
       return { result, score }
     })
 
-    // Sort by score and return top results
-    const filtered = scored
+    // Sort by score and return top results (raw data automatically dropped)
+    return scored
       .filter(item => item.score > -400) // Filter out poor matches
       .sort((a, b) => b.score - a.score)
       .slice(0, limit)
-      .map(item => {
-        const cleaned = { ...item.result }
-        delete (cleaned as any)._rawAddr
-        return cleaned
-      })
-
-    return filtered
+      .map(item => item.result)
   }
 
   /**
@@ -158,21 +154,24 @@ class SearchService {
 
       const data = await response.json()
 
-      const results = (data.navn || []).map((place: any): SearchResult => ({
-        id: `place-${place.stedsnummer || Math.random()}`,
-        name: place.skrivemåte || '',
-        type: 'place',
-        coordinates: [
-          place.representasjonspunkt?.øst || 0,  // øst = longitude in WGS84
-          place.representasjonspunkt?.nord || 0   // nord = latitude in WGS84
-        ],
-        displayName: place.skrivemåte || '',
-        subtext: this.formatPlaceSubtext(place),
-        _rawPlace: place as any // Keep for smart filtering
-      } as SearchResult))
+      // Map results with raw data for filtering
+      const resultsWithRaw = (data.navn || []).map((place: any) => ({
+        result: {
+          id: `place-${place.stedsnummer || Math.random()}`,
+          name: place.skrivemåte || '',
+          type: 'place' as const,
+          coordinates: [
+            place.representasjonspunkt?.øst || 0,  // øst = longitude in WGS84
+            place.representasjonspunkt?.nord || 0   // nord = latitude in WGS84
+          ] as [number, number],
+          displayName: place.skrivemåte || '',
+          subtext: this.formatPlaceSubtext(place)
+        },
+        rawPlace: place
+      }))
 
       // Smart fuzzy filtering for places
-      return this.smartFilterPlaces(results, query, limit)
+      return this.smartFilterPlaces(resultsWithRaw, query, limit)
     } catch (error) {
       console.error('Place search error:', error)
       return []
@@ -183,12 +182,11 @@ class SearchService {
    * Smart filter places with fuzzy matching
    * Example: "Ulsrudvann" should match "Ulsrud" partially typed
    */
-  private smartFilterPlaces(results: SearchResult[], query: string, limit: number): SearchResult[] {
+  private smartFilterPlaces(resultsWithRaw: Array<{ result: SearchResult; rawPlace: any }>, query: string, limit: number): SearchResult[] {
     const queryLower = query.toLowerCase().trim()
 
-    const scored = results.map(result => {
+    const scored = resultsWithRaw.map(({ result, rawPlace }) => {
       const nameLower = result.displayName.toLowerCase()
-      const raw = (result as any)._rawPlace
 
       let score = 0
 
@@ -233,7 +231,7 @@ class SearchService {
       }
 
       // Bonus for popular outdoor place types
-      const placeType = (raw.navneobjekttype || '').toLowerCase()
+      const placeType = (rawPlace.navneobjekttype || '').toLowerCase()
       if (['fjell', 'vann', 'dal', 'bre', 'fjord', 'øy'].includes(placeType)) {
         score += 50 // Higher bonus for outdoor/nature features
       }
@@ -251,18 +249,12 @@ class SearchService {
       return { result, score }
     })
 
-    // Sort by score and return top results
-    const filtered = scored
+    // Sort by score and return top results (raw data automatically dropped)
+    return scored
       .filter(item => item.score > 100) // Higher threshold to filter noise
       .sort((a, b) => b.score - a.score)
       .slice(0, limit)
-      .map(item => {
-        const cleaned = { ...item.result }
-        delete (cleaned as any)._rawPlace
-        return cleaned
-      })
-
-    return filtered
+      .map(item => item.result)
   }
 
   /**

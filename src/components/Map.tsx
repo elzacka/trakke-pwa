@@ -14,10 +14,13 @@ import SettingsSheet from './SettingsSheet'
 import CategorySheet from './CategorySheet'
 import POIDetailsSheet from './POIDetailsSheet'
 import InstallSheet from './InstallSheet'
+import WaypointDetailsSheet from './WaypointDetailsSheet'
+import RouteDetailsSheet from './RouteDetailsSheet'
 import { useAutoHide } from '../hooks/useAutoHide'
 import { useViewportPOIs } from '../hooks/useViewportPOIs'
 import { useInstallPrompt } from '../hooks/useInstallPrompt'
 import { MAP_CONFIG } from '../constants'
+import { VALIDATION, UI_DELAYS, GESTURES } from '../config/timings'
 import type { SearchResult } from '../services/searchService'
 import type { Route, Waypoint } from '../services/routeService'
 import { routeService } from '../services/routeService'
@@ -29,24 +32,46 @@ interface MapProps {
 }
 
 // Utility function to validate and sanitize user input
-function validateName(name: string | null, maxLength: number = 100): string | null {
+// Prevents XSS attacks by rejecting any input with HTML/script-related characters
+function validateName(name: string | null, maxLength: number = VALIDATION.MAX_NAME_LENGTH): string | null {
   if (!name) return null
   const trimmed = name.trim()
+
   if (trimmed.length === 0) {
     alert('Navn kan ikke være tomt')
     return null
   }
+
   if (trimmed.length > maxLength) {
     alert(`Navn kan ikke være lengre enn ${maxLength} tegn`)
     return null
   }
-  // Sanitize HTML/script tags
-  const sanitized = trimmed.replace(/<[^>]*>/g, '')
-  if (sanitized !== trimmed) {
-    alert('Ugyldige tegn i navn')
+
+  // Strict XSS protection: reject any input with HTML/script-related characters
+  // This includes: <, >, ", ', /, \, and common script keywords
+  const dangerousPatterns = [
+    /</, />/, /"/, /'/, // HTML/attribute delimiters
+    /&lt;/, /&gt;/, /&quot;/, /&#/, // HTML entities
+    /javascript:/i, /on\w+=/i, // Event handlers
+    /<script/i, /<iframe/i, /<object/i, /<embed/i, // Script tags
+    /\\/  // Backslash (escape sequences)
+  ]
+
+  for (const pattern of dangerousPatterns) {
+    if (pattern.test(trimmed)) {
+      alert('Navn inneholder ugyldige tegn. Kun bokstaver, tall og vanlige tegn er tillatt.')
+      return null
+    }
+  }
+
+  // Additional check: ensure only safe characters (letters, numbers, spaces, basic punctuation)
+  const safePattern = /^[a-zA-ZæøåÆØÅ0-9\s\-_.,()']+$/
+  if (!safePattern.test(trimmed)) {
+    alert('Navn inneholder ugyldige tegn. Kun bokstaver, tall og vanlige tegn er tillatt.')
     return null
   }
-  return sanitized
+
+  return trimmed
 }
 
 const Map = ({ zenMode }: MapProps) => {
@@ -104,6 +129,21 @@ const Map = ({ zenMode }: MapProps) => {
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null)
   const [waypointMarkers, setWaypointMarkers] = useState<Record<string, maplibregl.Marker>>({})
   const [routesVisible, setRoutesVisible] = useState(true)
+
+  // Temporary waypoint state (before save)
+  const tempWaypointMarker = useRef<maplibregl.Marker | null>(null)
+  const [tempWaypointCoords, setTempWaypointCoords] = useState<[number, number] | null>(null)
+  const [waypointDetailsSheetOpen, setWaypointDetailsSheetOpen] = useState(false)
+
+  // Route details sheet state
+  const [routeDetailsSheetOpen, setRouteDetailsSheetOpen] = useState(false)
+
+  // Editing state
+  const [editingRoute, setEditingRoute] = useState<Route | null>(null)
+  const [editingWaypoint, setEditingWaypoint] = useState<Waypoint | null>(null)
+
+  // Data change trigger for RouteSheet to reload
+  const [dataChangeTrigger, setDataChangeTrigger] = useState(0)
 
   const { visible: controlsVisible, show: showControls, hide: hideControls } = useAutoHide({
     delay: 5000,
@@ -226,28 +266,47 @@ const Map = ({ zenMode }: MapProps) => {
 
     // Bottom-edge swipe detection for revealing FAB
     let touchStartY = 0
+    let activeTouchMoveHandler: ((e: TouchEvent) => void) | null = null
+    let activeTouchEndHandler: (() => void) | null = null
+
     const handleBottomEdgeSwipe = (e: TouchEvent) => {
       const touch = e.touches[0]
       touchStartY = touch.clientY
       const windowHeight = window.innerHeight
 
-      // Only track if touch starts near bottom edge (bottom 50px)
-      if (touchStartY > windowHeight - 50) {
+      // Only track if touch starts near bottom edge
+      if (touchStartY > windowHeight - GESTURES.BOTTOM_EDGE_ZONE) {
         const handleTouchMove = (moveEvent: TouchEvent) => {
           const touchY = moveEvent.touches[0].clientY
           const swipeDistance = touchStartY - touchY
 
           // Swipe up from bottom edge
-          if (swipeDistance > 30) {
+          if (swipeDistance > GESTURES.BOTTOM_EDGE_SWIPE_MIN) {
             showControls()
-            document.removeEventListener('touchmove', handleTouchMove)
+            cleanupTouchHandlers()
           }
         }
 
+        const handleTouchEnd = () => {
+          cleanupTouchHandlers()
+        }
+
+        const cleanupTouchHandlers = () => {
+          if (activeTouchMoveHandler) {
+            document.removeEventListener('touchmove', activeTouchMoveHandler)
+            activeTouchMoveHandler = null
+          }
+          if (activeTouchEndHandler) {
+            document.removeEventListener('touchend', activeTouchEndHandler)
+            activeTouchEndHandler = null
+          }
+        }
+
+        activeTouchMoveHandler = handleTouchMove
+        activeTouchEndHandler = handleTouchEnd
+
         document.addEventListener('touchmove', handleTouchMove, { passive: true })
-        document.addEventListener('touchend', () => {
-          document.removeEventListener('touchmove', handleTouchMove)
-        }, { once: true })
+        document.addEventListener('touchend', handleTouchEnd, { once: true })
       }
     }
 
@@ -256,6 +315,18 @@ const Map = ({ zenMode }: MapProps) => {
     // Cleanup on unmount
     return () => {
       document.removeEventListener('touchstart', handleBottomEdgeSwipe)
+      // Clean up any active touch handlers
+      if (activeTouchMoveHandler) {
+        document.removeEventListener('touchmove', activeTouchMoveHandler)
+      }
+      if (activeTouchEndHandler) {
+        document.removeEventListener('touchend', activeTouchEndHandler)
+      }
+      // Clean up temporary waypoint marker
+      if (tempWaypointMarker.current) {
+        tempWaypointMarker.current.remove()
+        tempWaypointMarker.current = null
+      }
       if (map.current) {
         map.current.remove()
         map.current = null
@@ -276,6 +347,9 @@ const Map = ({ zenMode }: MapProps) => {
   }, [])
 
   // Monitor map movement and remove search marker when out of view
+  // DISABLED FOR NOW - was removing marker during flyTo animation
+  // TODO: Re-implement with proper flyTo completion detection
+  /*
   useEffect(() => {
     if (!map.current) return
 
@@ -309,6 +383,29 @@ const Map = ({ zenMode }: MapProps) => {
       }
     }
   }, [])
+  */
+
+  // Clean up temporary waypoint marker on map navigation
+  useEffect(() => {
+    if (!map.current) return
+
+    const cleanupTempWaypoint = () => {
+      // Only clean up if the sheet is not open (user is navigating away)
+      if (!waypointDetailsSheetOpen && tempWaypointMarker.current) {
+        tempWaypointMarker.current.remove()
+        tempWaypointMarker.current = null
+        setTempWaypointCoords(null)
+      }
+    }
+
+    map.current.on('movestart', cleanupTempWaypoint)
+
+    return () => {
+      if (map.current) {
+        map.current.off('movestart', cleanupTempWaypoint)
+      }
+    }
+  }, [waypointDetailsSheetOpen])
 
   // Keep FAB visible when any sheet is open
   useEffect(() => {
@@ -335,6 +432,23 @@ const Map = ({ zenMode }: MapProps) => {
       if (map.current.getSource('drawing-route-points')) {
         map.current.removeSource('drawing-route-points')
       }
+    }
+  }
+
+  // Helper function to clean up navigation-specific markers
+  const cleanupNavigationMarkers = () => {
+    // Remove search marker
+    if (searchMarker.current) {
+      searchMarker.current.remove()
+      searchMarker.current = null
+      searchMarkerLocation.current = null
+    }
+
+    // Remove temporary waypoint marker
+    if (tempWaypointMarker.current) {
+      tempWaypointMarker.current.remove()
+      tempWaypointMarker.current = null
+      setTempWaypointCoords(null)
     }
   }
 
@@ -669,11 +783,18 @@ const Map = ({ zenMode }: MapProps) => {
     }
   }, [visiblePOIs, activeCategories])
 
-  // Register map click handler with current state values (fixes closure issue)
+  // Use refs to store current state and avoid event listener re-registrations
+  const drawingStateRef = useRef({ isDrawingRoute, isPlacingWaypoint, isSelectingArea })
+  useEffect(() => {
+    drawingStateRef.current = { isDrawingRoute, isPlacingWaypoint, isSelectingArea }
+  }, [isDrawingRoute, isPlacingWaypoint, isSelectingArea])
+
+  // Register map click handler ONCE with stable ref (avoids frequent re-registrations)
   useEffect(() => {
     if (!map.current) return
 
     const clickHandler = (e: maplibregl.MapMouseEvent) => {
+      // Use current ref values instead of closure values
       handleMapClick(e)
     }
 
@@ -684,51 +805,118 @@ const Map = ({ zenMode }: MapProps) => {
         map.current.off('click', clickHandler)
       }
     }
-  }, [isDrawingRoute, isPlacingWaypoint, isSelectingArea]) // Removed routePoints to reduce re-registrations
+  }, []) // Empty deps - register once
+
+  // Helper function to update route drawing layers (prevents stale closure issues)
+  const updateRouteDrawingLayers = (points: Array<[number, number]>) => {
+    if (!map.current) return
+
+    const lineSourceId = 'drawing-route-line'
+    const pointsSourceId = 'drawing-route-points'
+    const lineLayerId = 'drawing-route-line-layer'
+    const pointsLayerId = 'drawing-route-points-layer'
+
+    // Update or create line (only if 2+ points)
+    if (points.length >= 2) {
+      if (map.current.getSource(lineSourceId)) {
+        const source = map.current.getSource(lineSourceId) as maplibregl.GeoJSONSource
+        source.setData({
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'LineString',
+            coordinates: points
+          }
+        })
+      } else {
+        map.current.addSource(lineSourceId, {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'LineString',
+              coordinates: points
+            }
+          }
+        })
+
+        map.current.addLayer({
+          id: lineLayerId,
+          type: 'line',
+          source: lineSourceId,
+          paint: {
+            'line-color': '#3e4533',
+            'line-width': 4,
+            'line-opacity': 0.8
+          }
+        })
+      }
+    }
+
+    // Update or create points (works with 1+ points)
+    const pointFeatures = points.map(coord => ({
+      type: 'Feature' as const,
+      properties: {},
+      geometry: {
+        type: 'Point' as const,
+        coordinates: coord
+      }
+    }))
+
+    console.log('[Route Drawing] Updating points:', points.length, 'features:', pointFeatures.length)
+
+    if (map.current.getSource(pointsSourceId)) {
+      const source = map.current.getSource(pointsSourceId) as maplibregl.GeoJSONSource
+      source.setData({
+        type: 'FeatureCollection',
+        features: pointFeatures
+      })
+      console.log('[Route Drawing] Updated existing points source with', pointFeatures.length, 'features')
+    } else {
+      console.log('[Route Drawing] Creating new points source with', pointFeatures.length, 'features')
+      map.current.addSource(pointsSourceId, {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: pointFeatures
+        }
+      })
+
+      map.current.addLayer({
+        id: pointsLayerId,
+        type: 'circle',
+        source: pointsSourceId,
+        paint: {
+          'circle-radius': 6,
+          'circle-color': '#3e4533',
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': 2
+        }
+      })
+    }
+  }
 
   // Handle map clicks when selecting area, drawing routes, or placing waypoints
   const handleMapClick = async (e: maplibregl.MapMouseEvent) => {
+    console.log('[Map] Click detected. isPlacingWaypoint:', isPlacingWaypoint, 'isDrawingRoute:', isDrawingRoute)
+
     // Ctrl+Click: Copy coordinates to clipboard (desktop only)
     if (!isMobile && e.originalEvent.ctrlKey) {
       const coords = `${e.lngLat.lat.toFixed(6)}, ${e.lngLat.lng.toFixed(6)}`
       try {
         await navigator.clipboard.writeText(coords)
-        // Visual feedback
+        // Visual feedback using CSS class (safer than inline styles)
         const notification = document.createElement('div')
-        notification.style.cssText = `
-          position: fixed;
-          bottom: 80px;
-          left: 50%;
-          transform: translateX(-50%);
-          background: #111827;
-          color: white;
-          padding: 12px 20px;
-          border-radius: 8px;
-          font-size: 14px;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          z-index: 10000;
-          pointer-events: none;
-          animation: fadeInOut 2s ease-in-out;
-        `
+        notification.className = 'coordinate-copy-notification'
         notification.textContent = `Koordinater kopiert: ${coords}`
         document.body.appendChild(notification)
 
-        // Add fade animation
-        const style = document.createElement('style')
-        style.textContent = `
-          @keyframes fadeInOut {
-            0% { opacity: 0; transform: translate(-50%, 10px); }
-            15% { opacity: 1; transform: translate(-50%, 0); }
-            85% { opacity: 1; transform: translate(-50%, 0); }
-            100% { opacity: 0; transform: translate(-50%, -10px); }
-          }
-        `
-        document.head.appendChild(style)
-
         setTimeout(() => {
-          document.body.removeChild(notification)
-          document.head.removeChild(style)
-        }, 2000)
+          if (notification.parentNode) {
+            document.body.removeChild(notification)
+          }
+        }, UI_DELAYS.NOTIFICATION_DISPLAY)
       } catch (error) {
         console.error('Failed to copy coordinates:', error)
         alert(`Koordinater: ${coords}`)
@@ -739,127 +927,74 @@ const Map = ({ zenMode }: MapProps) => {
     // Route drawing mode
     if (isDrawingRoute) {
       const newPoint: [number, number] = [e.lngLat.lng, e.lngLat.lat]
-      const updatedPoints = [...routePoints, newPoint]
-      setRoutePoints(updatedPoints)
 
-      // Update route line and points on map
-      if (map.current) {
-        const lineSourceId = 'drawing-route-line'
-        const pointsSourceId = 'drawing-route-points'
-        const lineLayerId = 'drawing-route-line-layer'
-        const pointsLayerId = 'drawing-route-points-layer'
+      // Use functional update to avoid stale closure
+      setRoutePoints(prevPoints => {
+        const updatedPoints = [...prevPoints, newPoint]
 
-        // Update or create line (only if 2+ points)
-        if (updatedPoints.length >= 2) {
-          if (map.current.getSource(lineSourceId)) {
-            const source = map.current.getSource(lineSourceId) as maplibregl.GeoJSONSource
-            source.setData({
-              type: 'Feature',
-              properties: {},
-              geometry: {
-                type: 'LineString',
-                coordinates: updatedPoints
-              }
-            })
-          } else {
-            map.current.addSource(lineSourceId, {
-              type: 'geojson',
-              data: {
-                type: 'Feature',
-                properties: {},
-                geometry: {
-                  type: 'LineString',
-                  coordinates: updatedPoints
-                }
-              }
-            })
+        // Update map layers with the new points
+        updateRouteDrawingLayers(updatedPoints)
 
-            map.current.addLayer({
-              id: lineLayerId,
-              type: 'line',
-              source: lineSourceId,
-              paint: {
-                'line-color': '#3e4533',
-                'line-width': 4,
-                'line-opacity': 0.8
-              }
-            })
-          }
-        }
+        return updatedPoints
+      })
 
-        // Update or create points (works with 1+ points)
-        const pointFeatures = updatedPoints.map(coord => ({
-          type: 'Feature' as const,
-          properties: {},
-          geometry: {
-            type: 'Point' as const,
-            coordinates: coord
-          }
-        }))
-
-        if (map.current.getSource(pointsSourceId)) {
-          const source = map.current.getSource(pointsSourceId) as maplibregl.GeoJSONSource
-          source.setData({
-            type: 'FeatureCollection',
-            features: pointFeatures
-          })
-        } else {
-          map.current.addSource(pointsSourceId, {
-            type: 'geojson',
-            data: {
-              type: 'FeatureCollection',
-              features: pointFeatures
-            }
-          })
-
-          map.current.addLayer({
-            id: pointsLayerId,
-            type: 'circle',
-            source: pointsSourceId,
-            paint: {
-              'circle-radius': 6,
-              'circle-color': '#3e4533',
-              'circle-stroke-color': '#ffffff',
-              'circle-stroke-width': 2
-            }
-          })
-        }
-      }
       return
     }
 
-    // Waypoint placement mode
+    // Waypoint placement mode - create temporary marker instantly
     if (isPlacingWaypoint) {
-      const inputName = prompt('Navn på punkt:')
-      const name = validateName(inputName)
-      if (name) {
-        try {
-          const waypoint = await routeService.createWaypoint({
-            name,
-            coordinates: [e.lngLat.lng, e.lngLat.lat]
-          })
+      console.log('[Waypoint] Placing waypoint at:', [e.lngLat.lng, e.lngLat.lat])
 
-          // Add marker to map
-          const el = document.createElement('div')
-          el.className = 'waypoint-marker'
-          el.innerHTML = '<span class="material-symbols-outlined">location_on</span>'
-
-          const marker = new maplibregl.Marker({ element: el })
-            .setLngLat([e.lngLat.lng, e.lngLat.lat])
-            .addTo(map.current!)
-
-          // Track marker in state so it can be toggled and deleted
-          setWaypointMarkers(prev => ({ ...prev, [waypoint.id]: marker }))
-
-          setIsPlacingWaypoint(false)
-          setRouteSheetOpen(true)
-        } catch (error) {
-          console.error('Failed to create waypoint:', error)
-          alert('Kunne ikke lagre punkt')
-        }
-      } else {
-        setIsPlacingWaypoint(false)
+      // Remove any existing temporary marker
+      if (tempWaypointMarker.current) {
+        console.log('[Waypoint] Removing existing temp marker')
+        tempWaypointMarker.current.remove()
+        tempWaypointMarker.current = null
       }
+
+      // Create temporary marker element
+      const el = document.createElement('div')
+      el.className = 'waypoint-marker temp-waypoint'
+      el.innerHTML = '<span class="material-symbols-outlined">location_on</span>'
+
+      console.log('[Waypoint] Created marker element:', el.className)
+
+      // Create marker instantly
+      const marker = new maplibregl.Marker({
+        element: el,
+        anchor: 'bottom'
+      })
+        .setLngLat([e.lngLat.lng, e.lngLat.lat])
+        .addTo(map.current!)
+
+      console.log('[Waypoint] Marker added to map')
+
+      // Store temporary marker and coordinates
+      tempWaypointMarker.current = marker
+      setTempWaypointCoords([e.lngLat.lng, e.lngLat.lat])
+
+      // Add right-click handler (desktop)
+      el.addEventListener('contextmenu', (event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        setWaypointDetailsSheetOpen(true)
+      })
+
+      // Add long-press handler (mobile)
+      let pressTimer: number | undefined
+      el.addEventListener('touchstart', (event) => {
+        pressTimer = window.setTimeout(() => {
+          setWaypointDetailsSheetOpen(true)
+        }, UI_DELAYS.LONG_PRESS)
+      })
+      el.addEventListener('touchend', () => {
+        if (pressTimer) clearTimeout(pressTimer)
+      })
+      el.addEventListener('touchmove', () => {
+        if (pressTimer) clearTimeout(pressTimer)
+      })
+
+      setIsPlacingWaypoint(false)
       return
     }
 
@@ -895,21 +1030,27 @@ const Map = ({ zenMode }: MapProps) => {
 
   // Load all existing waypoints when map initializes
   useEffect(() => {
-    const loadExistingWaypoints = async () => {
-      if (!map.current) return
+    if (!map.current) return
 
+    const loadExistingWaypoints = async () => {
+      console.log('[Waypoints] Loading existing waypoints...')
       try {
         const waypoints = await routeService.getAllWaypoints()
+        console.log(`[Waypoints] Found ${waypoints.length} waypoints in database`)
 
         // Create markers for all waypoints
         const newMarkers: Record<string, maplibregl.Marker> = {}
 
         waypoints.forEach(waypoint => {
+          console.log(`[Waypoints] Creating marker for "${waypoint.name}" at`, waypoint.coordinates)
           const el = document.createElement('div')
           el.className = 'waypoint-marker'
           el.innerHTML = '<span class="material-symbols-outlined">location_on</span>'
 
-          const marker = new maplibregl.Marker({ element: el })
+          const marker = new maplibregl.Marker({
+            element: el,
+            anchor: 'bottom' // Pin tip at coordinate
+          })
             .setLngLat(waypoint.coordinates)
             .addTo(map.current!)
 
@@ -917,17 +1058,22 @@ const Map = ({ zenMode }: MapProps) => {
         })
 
         setWaypointMarkers(newMarkers)
-        console.log(`Loaded ${waypoints.length} existing waypoints`)
+        console.log(`[Waypoints] Successfully loaded ${waypoints.length} waypoint markers`)
       } catch (error) {
-        console.error('Failed to load existing waypoints:', error)
+        console.error('[Waypoints] Failed to load existing waypoints:', error)
       }
     }
 
-    // Only load once when map is ready
-    if (map.current && map.current.loaded()) {
+    // Wait for map to be fully loaded before adding markers
+    if (map.current.loaded()) {
+      console.log('[Waypoints] Map already loaded, loading waypoints now')
       loadExistingWaypoints()
-    } else if (map.current) {
-      map.current.once('load', loadExistingWaypoints)
+    } else {
+      console.log('[Waypoints] Waiting for map to load...')
+      map.current.once('load', () => {
+        console.log('[Waypoints] Map loaded, loading waypoints')
+        loadExistingWaypoints()
+      })
     }
   }, []) // Empty deps - only run once on mount
 
@@ -969,29 +1115,45 @@ const Map = ({ zenMode }: MapProps) => {
 
     const [lon, lat] = result.coordinates
 
-    // Remove existing search marker
-    if (searchMarker.current) {
-      searchMarker.current.remove()
-    }
+    // Clean up all navigation markers before showing new search result
+    cleanupNavigationMarkers()
 
     // Create marker for search result
     const el = document.createElement('div')
     el.className = 'search-result-marker'
     el.innerHTML = '<span class="material-symbols-outlined">location_on</span>'
 
-    searchMarker.current = new maplibregl.Marker({ element: el })
+    console.log('[Search] Creating search marker at:', [lon, lat])
+    console.log('[Search] Map instance exists:', !!map.current)
+    console.log('[Search] Element created:', el, el.className)
+
+    searchMarker.current = new maplibregl.Marker({
+      element: el
+      // No anchor - let MapLibre handle positioning
+    })
       .setLngLat([lon, lat])
       .addTo(map.current)
 
-    // Store the marker location for visibility checking
-    searchMarkerLocation.current = [lon, lat]
+    console.log('[Search] Search marker added to map')
+    console.log('[Search] Marker instance:', searchMarker.current)
 
-    // Fly to result location
+    // Check if element is in DOM after a short delay
+    setTimeout(() => {
+      console.log('[Search] Marker element in DOM after 100ms:', document.querySelector('.search-result-marker'))
+    }, 100)
+
+    // Fly to result location FIRST
     map.current.flyTo({
       center: [lon, lat],
       zoom: result.type === 'address' ? 16 : 13,
       essential: true
     })
+
+    // Store the marker location AFTER flyTo starts
+    // This prevents the moveend listener from removing the marker during animation
+    setTimeout(() => {
+      searchMarkerLocation.current = [lon, lat]
+    }, 50)
   }
 
   // Handle download area selection
@@ -1224,16 +1386,25 @@ const Map = ({ zenMode }: MapProps) => {
 
   const handleStartDrawing = () => {
     setIsDrawingRoute(true)
+    setIsPlacingWaypoint(false) // Ensure mutually exclusive
     setRoutePoints([])
     // Clear existing drawing
     cleanupDrawingLayers()
   }
 
   const handleStartWaypointPlacement = () => {
+    console.log('[Waypoint] Starting waypoint placement mode')
     setIsPlacingWaypoint(true)
+    setIsDrawingRoute(false) // Ensure mutually exclusive
+    // Clear any route drawing in progress
+    setRoutePoints([])
+    cleanupDrawingLayers()
   }
 
   const handleSelectRoute = (route: Route) => {
+    // Clean up navigation markers when selecting a route
+    cleanupNavigationMarkers()
+
     setSelectedRoute(route)
     // Render route on map
     if (map.current && route.coordinates.length > 0) {
@@ -1315,9 +1486,35 @@ const Map = ({ zenMode }: MapProps) => {
   }
 
   const handleSelectWaypoint = (waypoint: Waypoint) => {
+    console.log('[Waypoints] Selecting waypoint:', waypoint.name, waypoint.id)
+    console.log('[Waypoints] Current waypointMarkers:', Object.keys(waypointMarkers))
+
+    // Clean up navigation markers when selecting a waypoint
+    cleanupNavigationMarkers()
+
     // Navigate to waypoint on map
     if (map.current) {
-      // Navigate to waypoint (marker should already exist from initial load)
+      // Check if marker exists
+      if (waypointMarkers[waypoint.id]) {
+        console.log('[Waypoints] Marker exists for', waypoint.id)
+      } else {
+        console.warn('[Waypoints] Marker NOT found for', waypoint.id, '- creating new marker')
+        // Create marker if it doesn't exist
+        const el = document.createElement('div')
+        el.className = 'waypoint-marker'
+        el.innerHTML = '<span class="material-symbols-outlined">location_on</span>'
+
+        const marker = new maplibregl.Marker({
+          element: el,
+          anchor: 'bottom' // Pin tip at coordinate
+        })
+          .setLngLat(waypoint.coordinates)
+          .addTo(map.current)
+
+        setWaypointMarkers(prev => ({ ...prev, [waypoint.id]: marker }))
+      }
+
+      // Navigate to waypoint
       map.current.flyTo({
         center: waypoint.coordinates,
         zoom: 14,
@@ -1374,6 +1571,172 @@ const Map = ({ zenMode }: MapProps) => {
     }
   }
 
+  const handleSaveWaypoint = async (name: string, category: string) => {
+    if (!tempWaypointCoords) return
+
+    try {
+      // Save waypoint to database
+      const waypoint = await routeService.createWaypoint({
+        name,
+        coordinates: tempWaypointCoords,
+        icon: 'location_on',
+        category: category || undefined
+      })
+
+      // Convert temporary marker to permanent marker
+      if (tempWaypointMarker.current) {
+        // Remove temporary marker
+        tempWaypointMarker.current.remove()
+
+        // Create permanent marker
+        const el = document.createElement('div')
+        el.className = 'waypoint-marker'
+        el.innerHTML = '<span class="material-symbols-outlined">location_on</span>'
+
+        const marker = new maplibregl.Marker({
+          element: el,
+          anchor: 'bottom'
+        })
+          .setLngLat(tempWaypointCoords)
+          .addTo(map.current!)
+
+        // Track permanent marker
+        setWaypointMarkers(prev => ({ ...prev, [waypoint.id]: marker }))
+
+        // Clean up temporary state
+        tempWaypointMarker.current = null
+        setTempWaypointCoords(null)
+      }
+    } catch (error) {
+      console.error('Failed to save waypoint:', error)
+      alert('Kunne ikke lagre punkt')
+    }
+  }
+
+  // Save route from route details sheet
+  const handleSaveRoute = async (name: string, description: string) => {
+    try {
+      const distance = routeService.calculateDistance(routePoints)
+      await routeService.createRoute({
+        name,
+        description: description || undefined,
+        coordinates: routePoints,
+        distance,
+        waypoints: []
+      })
+
+      // Clean up drawing
+      setIsDrawingRoute(false)
+      setRoutePoints([])
+      cleanupDrawingLayers()
+
+      // Show success and open route sheet
+      console.log('[Route] Route saved successfully:', name)
+      setRouteSheetOpen(true)
+    } catch (error) {
+      console.error('Failed to save route:', error)
+      alert('Kunne ikke lagre ruten')
+    }
+  }
+
+  // Handle editing a route
+  const handleEditRoute = (route: Route) => {
+    setEditingRoute(route)
+    setRouteDetailsSheetOpen(true)
+  }
+
+  // Handle editing a waypoint
+  const handleEditWaypoint = (waypoint: Waypoint) => {
+    setEditingWaypoint(waypoint)
+    setWaypointDetailsSheetOpen(true)
+  }
+
+  // Update existing route
+  const handleUpdateRoute = async (name: string, description: string) => {
+    if (!editingRoute) return
+
+    try {
+      await routeService.updateRoute(editingRoute.id, {
+        name,
+        description: description || undefined,
+        updatedAt: Date.now()
+      })
+
+      console.log('[Route] Route updated successfully:', name)
+      setEditingRoute(null)
+      // Trigger RouteSheet to reload data
+      setDataChangeTrigger(prev => prev + 1)
+    } catch (error) {
+      console.error('Failed to update route:', error)
+      alert('Kunne ikke oppdatere ruten')
+    }
+  }
+
+  // Update existing waypoint
+  const handleUpdateWaypoint = async (name: string, category: string) => {
+    if (!editingWaypoint) return
+
+    try {
+      await routeService.updateWaypoint(editingWaypoint.id, {
+        name,
+        category: category || undefined,
+        updatedAt: Date.now()
+      })
+
+      console.log('[Waypoint] Waypoint updated successfully:', name)
+      setEditingWaypoint(null)
+      // Trigger RouteSheet to reload data and re-group categories
+      setDataChangeTrigger(prev => prev + 1)
+    } catch (error) {
+      console.error('Failed to update waypoint:', error)
+      alert('Kunne ikke oppdatere punktet')
+    }
+  }
+
+  // Clear currently displayed route from map
+  const handleClearMapRoute = () => {
+    if (!map.current || !selectedRoute) return
+
+    const lineSourceId = `route-${selectedRoute.id}-line`
+    const pointsSourceId = `route-${selectedRoute.id}-points`
+    const lineLayerId = `route-${selectedRoute.id}-line-layer`
+    const pointsLayerId = `route-${selectedRoute.id}-points-layer`
+
+    // Remove layers if they exist
+    if (map.current.getLayer(lineLayerId)) {
+      map.current.removeLayer(lineLayerId)
+    }
+    if (map.current.getLayer(pointsLayerId)) {
+      map.current.removeLayer(pointsLayerId)
+    }
+
+    // Remove sources if they exist
+    if (map.current.getSource(lineSourceId)) {
+      map.current.removeSource(lineSourceId)
+    }
+    if (map.current.getSource(pointsSourceId)) {
+      map.current.removeSource(pointsSourceId)
+    }
+
+    // Clear selected route state
+    setSelectedRoute(null)
+
+    console.log('[Map] Cleared route from map:', selectedRoute.name)
+  }
+
+  // Clear all waypoint markers from map
+  const handleClearMapWaypoints = () => {
+    // Remove all waypoint markers
+    Object.values(waypointMarkers).forEach(marker => {
+      marker.remove()
+    })
+
+    // Clear waypoint markers state
+    setWaypointMarkers({})
+
+    console.log('[Map] Cleared all waypoint markers from map')
+  }
+
   return (
     <div className={`map-wrapper ${controlsVisible ? 'controls-visible' : ''}`}>
       {zenMode ? (
@@ -1408,32 +1771,9 @@ const Map = ({ zenMode }: MapProps) => {
               {routePoints.length >= 2 && (
                 <button
                   className="drawing-banner-finish"
-                  onClick={async () => {
-                    const inputName = prompt('Navn på ruten:')
-                    const name = validateName(inputName)
-                    if (name) {
-                      try {
-                        const distance = routeService.calculateDistance(routePoints)
-                        await routeService.createRoute({
-                          name,
-                          coordinates: routePoints,
-                          distance,
-                          waypoints: []
-                        })
-
-                        // Clean up drawing
-                        setIsDrawingRoute(false)
-                        setRoutePoints([])
-                        cleanupDrawingLayers()
-
-                        // Show success and open route sheet
-                        alert('Rute lagret!')
-                        setRouteSheetOpen(true)
-                      } catch (error) {
-                        console.error('Failed to save route:', error)
-                        alert('Kunne ikke lagre ruten')
-                      }
-                    }
+                  onClick={() => {
+                    // Open route details sheet to save with name and description
+                    setRouteDetailsSheetOpen(true)
                   }}
                   aria-label="Fullfør rute"
                 >
@@ -1544,12 +1884,7 @@ const Map = ({ zenMode }: MapProps) => {
             isOpen={searchSheetOpen}
             onClose={() => {
               setSearchSheetOpen(false)
-              // Remove search marker when sheet closes
-              if (searchMarker.current) {
-                searchMarker.current.remove()
-                searchMarker.current = null
-                searchMarkerLocation.current = null
-              }
+              // Don't remove search marker - keep it visible
             }}
             onResultSelect={handleSearchResult}
           />
@@ -1576,6 +1911,11 @@ const Map = ({ zenMode }: MapProps) => {
             onSelectWaypoint={handleSelectWaypoint}
             onDeleteRoute={handleDeleteRoute}
             onDeleteWaypoint={handleDeleteWaypoint}
+            onEditRoute={handleEditRoute}
+            onEditWaypoint={handleEditWaypoint}
+            onClearMapRoute={handleClearMapRoute}
+            onClearMapWaypoints={handleClearMapWaypoints}
+            onDataChanged={dataChangeTrigger}
             routesVisible={routesVisible}
             onToggleVisibility={() => setRoutesVisible(!routesVisible)}
           />
@@ -1595,6 +1935,39 @@ const Map = ({ zenMode }: MapProps) => {
               setSelectedPOI(null)
             }}
             poi={selectedPOI}
+          />
+          <WaypointDetailsSheet
+            isOpen={waypointDetailsSheetOpen}
+            onClose={() => {
+              setWaypointDetailsSheetOpen(false)
+              setEditingWaypoint(null)
+              // Remove temporary marker if cancelled
+              if (tempWaypointMarker.current) {
+                tempWaypointMarker.current.remove()
+                tempWaypointMarker.current = null
+                setTempWaypointCoords(null)
+              }
+            }}
+            onSave={editingWaypoint ? handleUpdateWaypoint : handleSaveWaypoint}
+            coordinates={editingWaypoint ? editingWaypoint.coordinates : (tempWaypointCoords || [0, 0])}
+            initialName={editingWaypoint?.name}
+            initialCategory={editingWaypoint?.category}
+            isEditing={!!editingWaypoint}
+          />
+
+          <RouteDetailsSheet
+            isOpen={routeDetailsSheetOpen}
+            onClose={() => {
+              setRouteDetailsSheetOpen(false)
+              setEditingRoute(null)
+              // Don't clean up route points - user might want to continue editing
+            }}
+            onSave={editingRoute ? handleUpdateRoute : handleSaveRoute}
+            distance={editingRoute ? editingRoute.distance : routeService.calculateDistance(routePoints)}
+            pointCount={editingRoute ? editingRoute.coordinates.length : routePoints.length}
+            initialName={editingRoute?.name}
+            initialDescription={editingRoute?.description}
+            isEditing={!!editingRoute}
           />
 
           <InstallSheet

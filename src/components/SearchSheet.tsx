@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import BottomSheet from './BottomSheet'
 import { searchService, SearchResult } from '../services/searchService'
+import { UI_DELAYS } from '../config/timings'
 import '../styles/SearchSheet.css'
 
 interface SearchSheetProps {
@@ -54,7 +55,7 @@ const SearchSheet = ({ isOpen, onClose, onResultSelect }: SearchSheetProps) => {
       } finally {
         setIsSearching(false)
       }
-    }, 300)
+    }, UI_DELAYS.SEARCH_DEBOUNCE)
 
     return () => {
       if (searchTimeoutRef.current) {
@@ -64,18 +65,24 @@ const SearchSheet = ({ isOpen, onClose, onResultSelect }: SearchSheetProps) => {
     }
   }, [query, includeAddresses])
 
-  // Keyboard navigation for search results
+  // Use refs to avoid frequent event listener re-registrations
+  const keyboardStateRef = useRef({ isOpen, results, selectedIndex })
   useEffect(() => {
-    if (!isOpen) return
+    keyboardStateRef.current = { isOpen, results, selectedIndex }
+  }, [isOpen, results, selectedIndex])
 
+  // Keyboard navigation for search results (stable handler)
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const { isOpen: currentIsOpen, results: currentResults, selectedIndex: currentIndex } = keyboardStateRef.current
+
       // Only handle if we're in the search sheet
-      if (!isOpen || results.length === 0) return
+      if (!currentIsOpen || currentResults.length === 0) return
 
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault()
-          setSelectedIndex((prev) => (prev < results.length - 1 ? prev + 1 : prev))
+          setSelectedIndex((prev) => (prev < currentResults.length - 1 ? prev + 1 : prev))
           break
         case 'ArrowUp':
           e.preventDefault()
@@ -83,16 +90,16 @@ const SearchSheet = ({ isOpen, onClose, onResultSelect }: SearchSheetProps) => {
           break
         case 'Enter':
           e.preventDefault()
-          if (selectedIndex >= 0 && selectedIndex < results.length) {
-            handleResultClick(results[selectedIndex])
-          } else if (results.length > 0) {
+          if (currentIndex >= 0 && currentIndex < currentResults.length) {
+            handleResultClick(currentResults[currentIndex])
+          } else if (currentResults.length > 0) {
             // If no selection, select first result
-            handleResultClick(results[0])
+            handleResultClick(currentResults[0])
           }
           break
         case 'Tab':
           e.preventDefault()
-          if (results.length > 0 && selectedIndex < 0) {
+          if (currentResults.length > 0 && currentIndex < 0) {
             setSelectedIndex(0)
           }
           break
@@ -101,7 +108,7 @@ const SearchSheet = ({ isOpen, onClose, onResultSelect }: SearchSheetProps) => {
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, results, selectedIndex])
+  }, []) // Empty deps - register once
 
   // Scroll selected item into view
   useEffect(() => {

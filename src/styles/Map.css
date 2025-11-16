@@ -12,6 +12,15 @@
   left: 0;
 }
 
+/* Fix MapLibre marker wrapper to ensure visibility */
+.maplibregl-marker {
+  pointer-events: auto !important;
+}
+
+.maplibregl-marker > * {
+  display: block;
+}
+
 /* User location marker - Simple blue dot */
 .user-location-marker {
   width: 16px;
@@ -25,10 +34,15 @@
 
 /* Search result marker */
 .search-result-marker {
-  display: flex;
+  position: relative;
+  display: flex !important;
   align-items: center;
   justify-content: center;
+  width: 36px;
+  height: 36px;
   cursor: pointer;
+  pointer-events: auto !important;
+  z-index: 10;
 }
 
 .search-result-marker .material-symbols-outlined {
@@ -36,22 +50,31 @@
   color: var(--trk-brand);
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 40;
+  display: block;
 }
 
-/* Waypoint marker */
+/* Waypoint marker - Material Symbol location pin */
 .waypoint-marker {
+  position: relative;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  animation: waypointPulse 2s ease-in-out infinite;
+  pointer-events: auto;
 }
 
 .waypoint-marker .material-symbols-outlined {
-  font-size: 40px;
+  font-size: 36px;
   color: var(--trk-red);
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 40;
+  animation: waypointPulse 2s ease-in-out infinite;
+}
+
+.waypoint-marker.temp-waypoint .material-symbols-outlined {
+  color: var(--trk-brand);
 }
 
 @keyframes waypointPulse {
@@ -717,5 +740,41 @@
 
   .selection-confirm-button .material-symbols-outlined {
     font-size: 18px;
+  }
+}
+
+/* Coordinate copy notification (Ctrl+Click) */
+.coordinate-copy-notification {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--trk-gray-900, #111827);
+  color: var(--trk-surface, white);
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  z-index: 10000;
+  pointer-events: none;
+  animation: coordinateFadeInOut 2s ease-in-out;
+}
+
+@keyframes coordinateFadeInOut {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  85% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -10px);
   }
 }

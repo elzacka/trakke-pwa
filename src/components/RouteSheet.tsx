@@ -12,6 +12,11 @@ interface RouteSheetProps {
   onSelectWaypoint: (waypoint: Waypoint) => void
   onDeleteRoute: (routeId: string) => void
   onDeleteWaypoint: (waypointId: string) => void
+  onEditRoute: (route: Route) => void
+  onEditWaypoint: (waypoint: Waypoint) => void
+  onClearMapRoute: () => void
+  onClearMapWaypoints: () => void
+  onDataChanged?: number
   routesVisible: boolean
   onToggleVisibility: () => void
 }
@@ -27,6 +32,11 @@ const RouteSheet = ({
   onSelectWaypoint,
   onDeleteRoute,
   onDeleteWaypoint,
+  onEditRoute,
+  onEditWaypoint,
+  onClearMapRoute,
+  onClearMapWaypoints,
+  onDataChanged,
   routesVisible,
   onToggleVisibility
 }: RouteSheetProps) => {
@@ -35,13 +45,14 @@ const RouteSheet = ({
   const [waypoints, setWaypoints] = useState<Waypoint[]>([])
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set())
 
-  // Load routes and waypoints when sheet opens
+  // Load routes and waypoints when sheet opens or data changes
   useEffect(() => {
     if (isOpen) {
       loadData()
     }
-  }, [isOpen])
+  }, [isOpen, onDataChanged])
 
   const loadData = async () => {
     setIsLoading(true)
@@ -142,30 +153,64 @@ const RouteSheet = ({
     })
   }
 
+  // Group waypoints by category
+  const groupWaypointsByCategory = () => {
+    const grouped = new Map<string, Waypoint[]>()
+
+    waypoints.forEach(waypoint => {
+      const category = waypoint.category || 'Ukategorisert'
+      if (!grouped.has(category)) {
+        grouped.set(category, [])
+      }
+      grouped.get(category)!.push(waypoint)
+    })
+
+    // Sort categories alphabetically
+    const sortedCategories = Array.from(grouped.keys()).sort((a, b) => {
+      // Put "Ukategorisert" last
+      if (a === 'Ukategorisert') return 1
+      if (b === 'Ukategorisert') return -1
+      return a.localeCompare(b, 'no')
+    })
+
+    return sortedCategories.map(category => ({
+      category,
+      waypoints: grouped.get(category)!
+    }))
+  }
+
+  const toggleCategory = (category: string) => {
+    setCollapsedCategories(prev => {
+      const next = new Set(prev)
+      if (next.has(category)) {
+        next.delete(category)
+      } else {
+        next.add(category)
+      }
+      return next
+    })
+  }
+
+  // Initialize all categories as collapsed
+  useEffect(() => {
+    if (waypoints.length > 0 && collapsedCategories.size === 0) {
+      const categories = new Set(waypoints.map(w => w.category || 'Ukategorisert'))
+      setCollapsedCategories(categories)
+    }
+  }, [waypoints])
+
   // List view
   const renderListView = () => (
     <div className="route-sheet">
       <div className="route-sheet-header">
         <h2>Ruter og punkter</h2>
-        <div className="route-sheet-header-actions">
-          <button
-            className="route-visibility-button"
-            onClick={onToggleVisibility}
-            aria-label={routesVisible ? 'Skjul ruter og punkter' : 'Vis ruter og punkter'}
-            title={routesVisible ? 'Skjul på kartet' : 'Vis på kartet'}
-          >
-            <span className="material-symbols-outlined">
-              {routesVisible ? 'visibility' : 'visibility_off'}
-            </span>
-          </button>
-          <button
-            className="route-sheet-close"
-            onClick={onClose}
-            aria-label="Lukk"
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
+        <button
+          className="route-sheet-close"
+          onClick={onClose}
+          aria-label="Lukk"
+        >
+          <span className="material-symbols-outlined">close</span>
+        </button>
       </div>
 
       <div className="route-sheet-content">
@@ -195,6 +240,26 @@ const RouteSheet = ({
               </button>
             </section>
 
+            {/* Clear map buttons */}
+            <section className="route-actions">
+              <button
+                type="button"
+                className="route-action-button secondary"
+                onClick={onClearMapRoute}
+              >
+                <span className="material-symbols-outlined">layers_clear</span>
+                <span>Fjern rute fra kart</span>
+              </button>
+              <button
+                type="button"
+                className="route-action-button secondary"
+                onClick={onClearMapWaypoints}
+              >
+                <span className="material-symbols-outlined">wrong_location</span>
+                <span>Fjern punkter fra kart</span>
+              </button>
+            </section>
+
             {/* Routes list */}
             <section className="route-section">
               <h3>Mine ruter ({routes.length})</h3>
@@ -215,57 +280,103 @@ const RouteSheet = ({
                           {formatDistance(route.distance)} • {formatDate(route.createdAt)}
                         </div>
                       </div>
-                      <button
-                        className="route-item-delete"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleDeleteRoute(route.id)
-                        }}
-                        aria-label="Slett rute"
-                      >
-                        <span className="material-symbols-outlined">delete</span>
-                      </button>
+                      <div className="route-item-actions">
+                        <button
+                          className="route-item-edit"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onEditRoute(route)
+                          }}
+                          aria-label="Rediger rute"
+                        >
+                          <span className="material-symbols-outlined">edit</span>
+                        </button>
+                        <button
+                          className="route-item-delete"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeleteRoute(route.id)
+                          }}
+                          aria-label="Slett rute"
+                        >
+                          <span className="material-symbols-outlined">delete</span>
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
               )}
             </section>
 
-            {/* Waypoints list */}
+            {/* Waypoints list - Hierarchical by category */}
             <section className="route-section">
               <h3>Mine punkter ({waypoints.length})</h3>
               {waypoints.length > 0 && (
-                <div className="route-list">
-                  {waypoints.map((waypoint) => (
-                    <div
-                      key={waypoint.id}
-                      className="route-item"
-                      onClick={() => onSelectWaypoint(waypoint)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <div className="route-item-icon">
-                        <span className="material-symbols-outlined">
-                          {waypoint.icon || 'location_on'}
-                        </span>
+                <div className="waypoint-categories">
+                  {groupWaypointsByCategory().map(({ category, waypoints: categoryWaypoints }) => {
+                    const isCollapsed = collapsedCategories.has(category)
+                    return (
+                      <div key={category} className="waypoint-category">
+                        <button
+                          className="category-header"
+                          onClick={() => toggleCategory(category)}
+                          aria-expanded={!isCollapsed}
+                        >
+                          <span className="material-symbols-outlined category-chevron">
+                            {isCollapsed ? 'chevron_right' : 'expand_more'}
+                          </span>
+                          <span className="category-name">{category}</span>
+                          <span className="category-count">({categoryWaypoints.length})</span>
+                        </button>
+                        {!isCollapsed && (
+                          <div className="route-list">
+                            {categoryWaypoints.map((waypoint) => (
+                              <div
+                                key={waypoint.id}
+                                className="route-item"
+                                onClick={() => onSelectWaypoint(waypoint)}
+                                style={{ cursor: 'pointer' }}
+                              >
+                                <div className="route-item-icon">
+                                  <span className="material-symbols-outlined">
+                                    {waypoint.icon || 'location_on'}
+                                  </span>
+                                </div>
+                                <div className="route-item-content">
+                                  <div className="route-item-name">{waypoint.name}</div>
+                                  <div className="route-item-meta">
+                                    {formatDate(waypoint.createdAt)}
+                                  </div>
+                                </div>
+                                <div className="route-item-actions">
+                                  <button
+                                    className="route-item-edit"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      onEditWaypoint(waypoint)
+                                    }}
+                                    aria-label="Rediger punkt"
+                                  >
+                                    <span className="material-symbols-outlined">edit</span>
+                                  </button>
+                                  <button
+                                    className="route-item-delete"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleDeleteWaypoint(waypoint.id)
+                                    }}
+                                    aria-label="Slett punkt"
+                                  >
+                                    <span className="material-symbols-outlined">delete</span>
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      <div className="route-item-content">
-                        <div className="route-item-name">{waypoint.name}</div>
-                        <div className="route-item-meta">
-                          {formatDate(waypoint.createdAt)}
-                        </div>
-                      </div>
-                      <button
-                        className="route-item-delete"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleDeleteWaypoint(waypoint.id)
-                        }}
-                        aria-label="Slett punkt"
-                      >
-                        <span className="material-symbols-outlined">delete</span>
-                      </button>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </section>

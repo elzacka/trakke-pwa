@@ -1,6 +1,8 @@
 // POI (Point of Interest) Service for fetching and managing category data
 // Currently supports: Public shelters (Tilfluktsrom)
 
+import { CACHE_CONFIG } from '../config/timings'
+
 export interface ShelterPOI {
   id: string
   type: 'shelter'
@@ -53,7 +55,7 @@ class POIService {
   // Viewport-aware cache: key = "category-north,south,east,west-z##"
   private cache: Map<string, CacheEntry> = new Map()
   private loading: Map<string, Promise<POI[]>> = new Map()
-  private readonly CACHE_TTL = 300000 // 5 minutes
+  private readonly CACHE_TTL = CACHE_CONFIG.POI_TTL
 
   // Get category configuration
   getCategoryConfig(category: POICategory): CategoryConfig {

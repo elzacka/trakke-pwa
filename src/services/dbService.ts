@@ -20,7 +20,7 @@ class DatabaseService {
       const request = indexedDB.open(DB_NAME, DB_VERSION)
 
       request.onerror = () => {
-        reject(new Error('Failed to open database'))
+        reject(new Error(`Failed to open database: ${request.error?.message || 'Unknown error'}`))
       }
 
       request.onsuccess = () => {
@@ -128,7 +128,7 @@ class DatabaseService {
       }
 
       request.onerror = () => {
-        reject(new Error('Failed to save data'))
+        reject(new Error(`Failed to save data (type: ${type}): ${request.error?.message || 'Unknown error'}`))
       }
     })
   }
@@ -148,7 +148,7 @@ class DatabaseService {
       }
 
       request.onerror = () => {
-        reject(new Error('Failed to retrieve data'))
+        reject(new Error(`Failed to retrieve data (type: ${type}): ${request.error?.message || 'Unknown error'}`))
       }
     })
   }
@@ -168,7 +168,7 @@ class DatabaseService {
       }
 
       request.onerror = () => {
-        reject(new Error('Failed to clear database'))
+        reject(new Error(`Failed to clear database: ${request.error?.message || 'Unknown error'}`))
       }
     })
   }
@@ -188,7 +188,7 @@ class DatabaseService {
       }
 
       request.onerror = () => {
-        reject(new Error('Failed to save downloaded area'))
+        reject(new Error(`Failed to save downloaded area: ${request.error?.message || 'Unknown error'}`))
       }
     })
   }
@@ -207,7 +207,7 @@ class DatabaseService {
       }
 
       request.onerror = () => {
-        reject(new Error('Failed to retrieve downloaded areas'))
+        reject(new Error(`Failed to retrieve downloaded areas: ${request.error?.message || 'Unknown error'}`))
       }
     })
   }
@@ -226,7 +226,7 @@ class DatabaseService {
       }
 
       request.onerror = () => {
-        reject(new Error('Failed to delete downloaded area'))
+        reject(new Error(`Failed to delete downloaded area (ID: ${areaId}): ${request.error?.message || 'Unknown error'}`))
       }
     })
   }

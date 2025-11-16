@@ -1,18 +1,18 @@
-# Tråkke Design System
+# Tråkke designsystem
 
-**Nordic Silence** – En rolig, naturinspirert design for privacy-first friluftsnavigasjon.
+**Nordisk ro** – Et dempet design som fremhever kartet og lar brukeren utforske i fred.
 
 ## Filosofi
 
-Tråkkes designsystem bygger på prinsippet **"Nordic Silence"** – et rolig, minimalistisk uttrykk som lar kartet og naturen stå i fokus. Designet er inspirert av norsk natur med dempede, naturlige farger som ikke distraherer fra brukerens hovedmål: å utforske naturen.
+Tråkkes designsystem bygger på prinsippet **"Nordisk ro"**. Designet er inspirert av stillheten i norsk natur og bygger på et bevisst fravær av støy. Kartet får være sentrum, mens grensesnittet holder seg diskret i bakgrunnen. Fargepaletten er dempet og naturlig, slik at brukerens oppmerksomhet forblir der den skal: ute i terrenget, ikke på skjermen.
 
 ### Designprinsipper
 
-1. **Minimalistisk** – Kun essensielle UI-elementer vises
-2. **Kartfokusert** – Kartet er hovedinnholdet, UI-en skal ikke konkurrere
-3. **Naturinspirert** – Farger og former hentet fra norsk natur
-4. **Privacy-first** – Ingen unødvendige distraksjoner eller tracking
-5. **WCAG-bevisst** – Tilgjengelige kontraster og lesbarhet
+1. **Minimalistisk** – Brukeren ser bare det som faktisk trengs.
+2. **Kartet i sentrum** – Kartet er hovedinnholdet uten konkurranse fra andre elementer.
+3. **Naturinspirert** – Farger og former hentet fra norsk natur.
+4. **Personvern som standard** – Ingen støy. Ingen sporing.
+5. **Tilgjengelighet som praksis** – Kontraster, typografi og struktur følger WCAG for lesbarhet og brukervennlighet.
 
 ---
 
@@ -20,7 +20,7 @@ Tråkkes designsystem bygger på prinsippet **"Nordic Silence"** – et rolig, m
 
 ### Tråkke-logoen
 
-Tråkke-logoen består av to elementer: **symbolet** (skogikon) og **navnet** (typografi).
+Tråkke-logoen består av to elementer: **symbolet** og **navnet**. Sammen skaper de et uttrykk som er lett å kjenne igjen og enkelt å bruke i alle flater.
 
 #### Symbol (Brand Mark)
 

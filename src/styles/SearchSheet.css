@@ -195,7 +195,8 @@
 
 .search-sheet-result-item.selected {
   background-color: var(--trk-surface-subtle);
-  border: 1px solid var(--trk-blue);
+  outline: 2px solid var(--trk-brand);
+  outline-offset: -2px;
 }
 
 .result-content {

@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
+import { UI_DELAYS } from '../config/timings'
 
 interface UseAutoHideOptions {
   delay?: number
@@ -6,7 +7,7 @@ interface UseAutoHideOptions {
 }
 
 export const useAutoHide = (options: UseAutoHideOptions = {}) => {
-  const { delay = 5000, initialVisible = true } = options
+  const { delay = UI_DELAYS.AUTO_HIDE_CONTROLS, initialVisible = true } = options
   const [visible, setVisible] = useState(initialVisible)
   const timerRef = useRef<number | undefined>(undefined)
 
@@ -40,7 +41,7 @@ export const useAutoHide = (options: UseAutoHideOptions = {}) => {
     return () => {
       clearTimeout(timerRef.current)
     }
-  }, [initialVisible]) // Removed show from dependencies - it's stable enough
+  }, [initialVisible, show]) // Include show to avoid stale closure
 
   return { visible, show, hide, toggle }
 }

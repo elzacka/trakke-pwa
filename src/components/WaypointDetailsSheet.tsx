@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import BottomSheet from './BottomSheet'
 import { coordinateService, type CoordinateFormat } from '../services/coordinateService'
-import { settingsService } from '../services/settingsService'
+import { mapPreferencesService } from '../services/mapPreferencesService'
 import '../styles/WaypointDetailsSheet.css'
 
 interface WaypointDetailsSheetProps {
@@ -29,7 +29,8 @@ const WaypointDetailsSheet = ({
 
   // Load coordinate format preference
   useEffect(() => {
-    setCoordinateFormat(settingsService.getCoordinateFormat())
+    const preferences = mapPreferencesService.getPreferences()
+    setCoordinateFormat(preferences.coordinateFormat)
   }, [])
 
   // Reset form when opening

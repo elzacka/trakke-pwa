@@ -8,7 +8,8 @@ interface FABMenuProps {
   onRoutesClick: () => void
   onCategoryClick: () => void
   onLocationClick: () => void
-  onSettingsClick: () => void
+  onMapPreferencesClick: () => void
+  onMeasurementClick: () => void
   onInstallClick?: () => void
   showInstall?: boolean
   visible?: boolean
@@ -24,7 +25,8 @@ const FABMenu = ({
   onRoutesClick,
   onCategoryClick,
   onLocationClick,
-  onSettingsClick,
+  onMapPreferencesClick,
+  onMeasurementClick,
   onInstallClick,
   showInstall = false,
   menuOpen,
@@ -91,6 +93,16 @@ const FABMenu = ({
     <div className="fab-container">
       {isOpen && (
         <div className="fab-menu" role="menu">
+          {/* Group 1: Core Navigation */}
+          <button
+            className="fab-menu-item"
+            onClick={() => handleMenuItemClick(onSearchClick)}
+            aria-label="Søk"
+            role="menuitem"
+          >
+            <span className="material-symbols-outlined">search</span>
+            <span className="fab-menu-label">Søk</span>
+          </button>
           <button
             className="fab-menu-item"
             onClick={() => handleMenuItemClick(onLocationClick)}
@@ -101,14 +113,67 @@ const FABMenu = ({
             <span className="fab-menu-label">Min posisjon</span>
           </button>
           <button
-            className="fab-menu-item"
-            onClick={() => handleMenuItemClick(onSearchClick)}
-            aria-label="Søk"
+            className="fab-menu-item group-separator"
+            onClick={() => handleMenuItemClick(onRoutesClick)}
+            aria-label="Ruter og punkter"
             role="menuitem"
           >
-            <span className="material-symbols-outlined">search</span>
-            <span className="fab-menu-label">Søk</span>
+            <span className="material-symbols-outlined">route</span>
+            <span className="fab-menu-label">Ruter og punkter</span>
           </button>
+
+          {/* Group 2: Active Tools */}
+          <button
+            className="fab-menu-item"
+            onClick={() => handleMenuItemClick(onCategoryClick)}
+            aria-label="Kategorier"
+            role="menuitem"
+          >
+            <span className="material-symbols-outlined">layers</span>
+            <span className="fab-menu-label">Kategorier</span>
+          </button>
+          <button
+            className="fab-menu-item group-separator"
+            onClick={() => handleMenuItemClick(onMeasurementClick)}
+            aria-label="Måleverktøy"
+            role="menuitem"
+          >
+            <span className="material-symbols-outlined">straighten</span>
+            <span className="fab-menu-label">Måleverktøy</span>
+          </button>
+
+          {/* Group 3: Configuration */}
+          <button
+            className="fab-menu-item"
+            onClick={() => handleMenuItemClick(onDownloadClick)}
+            aria-label="Offline kart"
+            role="menuitem"
+          >
+            <span className="material-symbols-outlined">download</span>
+            <span className="fab-menu-label">Offline kart</span>
+          </button>
+          <button
+            className="fab-menu-item group-separator"
+            onClick={() => handleMenuItemClick(onMapPreferencesClick)}
+            aria-label="Innstillinger"
+            role="menuitem"
+          >
+            <span className="material-symbols-outlined">settings</span>
+            <span className="fab-menu-label">Innstillinger</span>
+          </button>
+
+          {/* Group 4: Meta/Help */}
+          <button
+            className="fab-menu-item"
+            onClick={() => handleMenuItemClick(onInfoClick)}
+            aria-label="Informasjon"
+            role="menuitem"
+          >
+            <span className="material-symbols-outlined">info</span>
+            <span className="fab-menu-label">Info</span>
+          </button>
+
+          {/* Special: Install PWA (conditional) */}
           {showInstall && onInstallClick && (
             <button
               className="fab-menu-item"
@@ -120,51 +185,6 @@ const FABMenu = ({
               <span className="fab-menu-label">Installer</span>
             </button>
           )}
-          <button
-            className="fab-menu-item"
-            onClick={() => handleMenuItemClick(onRoutesClick)}
-            aria-label="Ruter og punkter"
-            role="menuitem"
-          >
-            <span className="material-symbols-outlined">route</span>
-            <span className="fab-menu-label">Ruter og punkter</span>
-          </button>
-          <button
-            className="fab-menu-item"
-            onClick={() => handleMenuItemClick(onCategoryClick)}
-            aria-label="Kategorier"
-            role="menuitem"
-          >
-            <span className="material-symbols-outlined">layers</span>
-            <span className="fab-menu-label">Kategorier</span>
-          </button>
-          <button
-            className="fab-menu-item"
-            onClick={() => handleMenuItemClick(onDownloadClick)}
-            aria-label="Offline kart"
-            role="menuitem"
-          >
-            <span className="material-symbols-outlined">download</span>
-            <span className="fab-menu-label">Offline kart</span>
-          </button>
-          <button
-            className="fab-menu-item"
-            onClick={() => handleMenuItemClick(onSettingsClick)}
-            aria-label="Innstillinger"
-            role="menuitem"
-          >
-            <span className="material-symbols-outlined">settings</span>
-            <span className="fab-menu-label">Innstillinger</span>
-          </button>
-          <button
-            className="fab-menu-item"
-            onClick={() => handleMenuItemClick(onInfoClick)}
-            aria-label="Informasjon"
-            role="menuitem"
-          >
-            <span className="material-symbols-outlined">info</span>
-            <span className="fab-menu-label">Info</span>
-          </button>
         </div>
       )}
 

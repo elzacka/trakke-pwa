@@ -10,12 +10,13 @@ import SearchSheet from './SearchSheet'
 import InfoSheet from './InfoSheet'
 import DownloadSheet from './DownloadSheet'
 import RouteSheet from './RouteSheet'
-import SettingsSheet from './SettingsSheet'
 import CategorySheet from './CategorySheet'
 import POIDetailsSheet from './POIDetailsSheet'
 import InstallSheet from './InstallSheet'
 import WaypointDetailsSheet from './WaypointDetailsSheet'
 import RouteDetailsSheet from './RouteDetailsSheet'
+import MapPreferencesSheet from './MapPreferencesSheet'
+import MeasurementTools, { type MeasurementMode } from './MeasurementTools'
 import { useAutoHide } from '../hooks/useAutoHide'
 import { useViewportPOIs } from '../hooks/useViewportPOIs'
 import { useInstallPrompt } from '../hooks/useInstallPrompt'
@@ -25,6 +26,7 @@ import type { SearchResult } from '../services/searchService'
 import type { Route, Waypoint } from '../services/routeService'
 import { routeService } from '../services/routeService'
 import { poiService, type POICategory, type POI } from '../services/poiService'
+import { mapPreferencesService, type MapPreferences } from '../services/mapPreferencesService'
 import '../styles/Map.css'
 
 interface MapProps {
@@ -90,19 +92,16 @@ const Map = ({ zenMode }: MapProps) => {
   const [overlayRect, setOverlayRect] = useState<{ top: number; left: number; width: number; height: number } | null>(null)
   const [isDragging, setIsDragging] = useState<string | null>(null) // 'nw' | 'ne' | 'sw' | 'se' | null
 
-  // Detect mobile device
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-
   // Zen Mode UI state
   const [searchSheetOpen, setSearchSheetOpen] = useState(false)
   const [infoSheetOpen, setInfoSheetOpen] = useState(false)
   const [downloadSheetOpen, setDownloadSheetOpen] = useState(false)
   const [routeSheetOpen, setRouteSheetOpen] = useState(false)
-  const [settingsSheetOpen, setSettingsSheetOpen] = useState(false)
   const [categorySheetOpen, setCategorySheetOpen] = useState(false)
   const [poiDetailsSheetOpen, setPoiDetailsSheetOpen] = useState(false)
   const [installSheetOpen, setInstallSheetOpen] = useState(false)
   const [fabMenuOpen, setFabMenuOpen] = useState(false)
+  const [mapPreferencesSheetOpen, setMapPreferencesSheetOpen] = useState(false)
 
   // PWA Installation
   const { canInstall, isInstalled, platform, promptInstall } = useInstallPrompt()
@@ -128,7 +127,11 @@ const Map = ({ zenMode }: MapProps) => {
   const [routePoints, setRoutePoints] = useState<Array<[number, number]>>([])
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null)
   const [waypointMarkers, setWaypointMarkers] = useState<Record<string, maplibregl.Marker>>({})
-  const [routesVisible, setRoutesVisible] = useState(true)
+  const [routesVisible, setRoutesVisible] = useState(() => {
+    // Load routesVisible preference from localStorage
+    const saved = localStorage.getItem('trakke_routes_visible')
+    return saved !== null ? saved === 'true' : true // Default to true if not set
+  })
 
   // Temporary waypoint state (before save)
   const tempWaypointMarker = useRef<maplibregl.Marker | null>(null)
@@ -144,6 +147,39 @@ const Map = ({ zenMode }: MapProps) => {
 
   // Data change trigger for RouteSheet to reload
   const [dataChangeTrigger, setDataChangeTrigger] = useState(0)
+
+  // Map preferences state
+  const [mapPreferences, setMapPreferences] = useState<MapPreferences>(
+    mapPreferencesService.getPreferences()
+  )
+
+  // Map control refs (for scale bar, compass)
+  const scaleControl = useRef<maplibregl.ScaleControl | null>(null)
+  const compassControl = useRef<maplibregl.NavigationControl | null>(null)
+
+  // Measurement tools state
+  const [measurementActive, setMeasurementActive] = useState(false)
+  const [measurementMode, setMeasurementMode] = useState<MeasurementMode>(null)
+  const [measurementPoints, setMeasurementPoints] = useState<Array<[number, number]>>([])
+
+  // Refs for map click handler (to avoid stale closures with empty deps)
+  const clickStateRef = useRef({
+    isDrawingRoute: false,
+    isPlacingWaypoint: false,
+    isSelectingArea: false,
+    measurementActive: false,
+    measurementMode: null as MeasurementMode,
+    isMobile: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+  })
+
+  // Update refs whenever state changes
+  useEffect(() => {
+    clickStateRef.current.isDrawingRoute = isDrawingRoute
+    clickStateRef.current.isPlacingWaypoint = isPlacingWaypoint
+    clickStateRef.current.isSelectingArea = isSelectingArea
+    clickStateRef.current.measurementActive = measurementActive
+    clickStateRef.current.measurementMode = measurementMode
+  }, [isDrawingRoute, isPlacingWaypoint, isSelectingArea, measurementActive, measurementMode])
 
   const { visible: controlsVisible, show: showControls, hide: hideControls } = useAutoHide({
     delay: 5000,
@@ -334,6 +370,81 @@ const Map = ({ zenMode }: MapProps) => {
     }
   }, [])
 
+  // Apply map preferences (scale bar, compass, rotation)
+  useEffect(() => {
+    if (!map.current) return
+
+    const currentMap = map.current
+
+    // Scale bar
+    if (mapPreferences.showScaleBar) {
+      if (!scaleControl.current) {
+        scaleControl.current = new maplibregl.ScaleControl({
+          maxWidth: 100,
+          unit: 'metric'
+        })
+        currentMap.addControl(scaleControl.current, 'bottom-right')
+      }
+    } else {
+      if (scaleControl.current) {
+        try {
+          currentMap.removeControl(scaleControl.current)
+        } catch (error) {
+          console.error('Failed to remove scale control:', error)
+        } finally {
+          scaleControl.current = null
+        }
+      }
+    }
+
+    // Compass/Navigation control (rotation + zoom buttons)
+    if (mapPreferences.showCompass) {
+      if (!compassControl.current) {
+        compassControl.current = new maplibregl.NavigationControl({
+          showCompass: true,
+          showZoom: false,
+          visualizePitch: false
+        })
+        currentMap.addControl(compassControl.current, 'top-right')
+      }
+    } else {
+      if (compassControl.current) {
+        try {
+          currentMap.removeControl(compassControl.current)
+        } catch (error) {
+          console.error('Failed to remove compass control:', error)
+        } finally {
+          compassControl.current = null
+        }
+      }
+    }
+
+    // Rotation (bearing/pitch interaction)
+    // Note: We only disable rotation, NOT zoom
+    if (mapPreferences.enableRotation) {
+      currentMap.dragRotate.enable()
+      currentMap.touchPitch.enable()
+      currentMap.touchZoomRotate.enableRotation()
+    } else {
+      currentMap.dragRotate.disable()
+      currentMap.touchPitch.disable()
+      currentMap.touchZoomRotate.disableRotation()
+    }
+
+    // User location marker size (enlargePointer)
+    if (userMarker.current) {
+      const markerElement = userMarker.current.getElement()
+      if (mapPreferences.enlargePointer) {
+        markerElement.classList.add('enlarged-pointer')
+      } else {
+        markerElement.classList.remove('enlarged-pointer')
+      }
+    }
+
+    // Note: offlineOnly preference is handled by Service Worker cache strategy
+    // and would require coordination with offlineMapService
+  }, [mapPreferences])
+
   // Handle URL actions from manifest shortcuts
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -345,6 +456,12 @@ const Map = ({ zenMode }: MapProps) => {
       setDownloadSheetOpen(true)
     }
   }, [])
+
+  // Update measurement layers when points change (e.g., when cleared by Nullstill button)
+  useEffect(() => {
+    if (!map.current || !measurementActive || !measurementMode) return
+    updateMeasurementLayers(measurementPoints)
+  }, [measurementPoints, measurementActive, measurementMode])
 
   // Monitor map movement and remove search marker when out of view
   // DISABLED FOR NOW - was removing marker during flyTo animation
@@ -455,7 +572,7 @@ const Map = ({ zenMode }: MapProps) => {
   // Comprehensive keyboard shortcuts handler
   useEffect(() => {
     // Skip keyboard shortcuts on mobile devices
-    if (isMobile) return
+    if (clickStateRef.current.isMobile) return
 
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't intercept if typing in an input field
@@ -498,8 +615,8 @@ const Map = ({ zenMode }: MapProps) => {
           setDownloadSheetOpen(false)
         } else if (categorySheetOpen) {
           setCategorySheetOpen(false)
-        } else if (settingsSheetOpen) {
-          setSettingsSheetOpen(false)
+        } else if (mapPreferencesSheetOpen) {
+          setMapPreferencesSheetOpen(false)
         } else if (infoSheetOpen) {
           setInfoSheetOpen(false)
         } else if (poiDetailsSheetOpen) {
@@ -515,7 +632,7 @@ const Map = ({ zenMode }: MapProps) => {
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isMobile, isDrawingRoute, isPlacingWaypoint, searchSheetOpen, routeSheetOpen, downloadSheetOpen, categorySheetOpen, settingsSheetOpen, infoSheetOpen, poiDetailsSheetOpen, installSheetOpen, fabMenuOpen])
+  }, [isDrawingRoute, isPlacingWaypoint, searchSheetOpen, routeSheetOpen, downloadSheetOpen, categorySheetOpen, mapPreferencesSheetOpen, infoSheetOpen, poiDetailsSheetOpen, installSheetOpen, fabMenuOpen])
 
   // Toggle visibility of routes and waypoints
   useEffect(() => {
@@ -536,13 +653,25 @@ const Map = ({ zenMode }: MapProps) => {
     }
 
     // Toggle waypoint markers
+    console.log(`[Waypoints] Visibility effect running. routesVisible: ${routesVisible}, markers count: ${Object.keys(waypointMarkers).length}`)
     Object.values(waypointMarkers).forEach((marker) => {
       const element = marker.getElement()
       if (element) {
-        element.style.display = routesVisible ? 'block' : 'none'
+        if (routesVisible) {
+          element.classList.remove('hidden')
+        } else {
+          element.classList.add('hidden')
+        }
+        console.log(`[Waypoints] Set marker visibility to: ${routesVisible ? 'visible' : 'hidden'}`)
       }
     })
   }, [routesVisible, waypointMarkers])
+
+  // Persist routesVisible preference to localStorage
+  useEffect(() => {
+    localStorage.setItem('trakke_routes_visible', String(routesVisible))
+    console.log(`[Waypoints] Saved routesVisible to localStorage: ${routesVisible}`)
+  }, [routesVisible])
 
   // Initialize POI clustering layers (MapLibre native GeoJSON clustering for 60fps performance)
   useEffect(() => {
@@ -897,8 +1026,166 @@ const Map = ({ zenMode }: MapProps) => {
     }
   }
 
+  // Update measurement layers on map
+  const updateMeasurementLayers = (points: Array<[number, number]>) => {
+    if (!map.current) return
+
+    const sourceId = measurementMode === 'distance' ? 'measurement-line' : 'measurement-polygon'
+    const layerId = measurementMode === 'distance' ? 'measurement-line-layer' : 'measurement-polygon-layer'
+    const pointsSourceId = 'measurement-points'
+    const pointsLayerId = 'measurement-points-layer'
+
+    // Clear old layers if mode changed
+    const otherSourceId = measurementMode === 'distance' ? 'measurement-polygon' : 'measurement-line'
+    const otherLayerId = measurementMode === 'distance' ? 'measurement-polygon-layer' : 'measurement-line-layer'
+    if (map.current.getLayer(otherLayerId)) {
+      map.current.removeLayer(otherLayerId)
+    }
+    if (map.current.getSource(otherSourceId)) {
+      map.current.removeSource(otherSourceId)
+    }
+
+    // Update or create line/polygon layer
+    if (points.length >= (measurementMode === 'distance' ? 2 : 3)) {
+      const geometry = measurementMode === 'distance'
+        ? { type: 'LineString' as const, coordinates: points }
+        : { type: 'Polygon' as const, coordinates: [[...points, points[0]]] } // Close polygon
+
+      if (map.current.getSource(sourceId)) {
+        const source = map.current.getSource(sourceId) as maplibregl.GeoJSONSource
+        source.setData({
+          type: 'Feature',
+          properties: {},
+          geometry
+        })
+      } else {
+        map.current.addSource(sourceId, {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry
+          }
+        })
+
+        if (measurementMode === 'distance') {
+          map.current.addLayer({
+            id: layerId,
+            type: 'line',
+            source: sourceId,
+            paint: {
+              'line-color': '#f59e0b', // Amber for measurement
+              'line-width': 3,
+              'line-dasharray': [2, 2]
+            }
+          })
+        } else {
+          map.current.addLayer({
+            id: layerId,
+            type: 'fill',
+            source: sourceId,
+            paint: {
+              'fill-color': '#f59e0b',
+              'fill-opacity': 0.2
+            }
+          })
+          map.current.addLayer({
+            id: `${layerId}-outline`,
+            type: 'line',
+            source: sourceId,
+            paint: {
+              'line-color': '#f59e0b',
+              'line-width': 2
+            }
+          })
+        }
+      }
+    } else {
+      // Remove line/polygon layers when not enough points (e.g., when Nullstill is clicked)
+      if (map.current.getLayer(layerId)) {
+        map.current.removeLayer(layerId)
+      }
+      if (measurementMode === 'area' && map.current.getLayer(`${layerId}-outline`)) {
+        map.current.removeLayer(`${layerId}-outline`)
+      }
+      if (map.current.getSource(sourceId)) {
+        map.current.removeSource(sourceId)
+      }
+    }
+
+    // Update or create points
+    const pointFeatures = points.map(coord => ({
+      type: 'Feature' as const,
+      properties: {},
+      geometry: {
+        type: 'Point' as const,
+        coordinates: coord
+      }
+    }))
+
+    if (map.current.getSource(pointsSourceId)) {
+      const source = map.current.getSource(pointsSourceId) as maplibregl.GeoJSONSource
+      source.setData({
+        type: 'FeatureCollection',
+        features: pointFeatures
+      })
+    } else {
+      map.current.addSource(pointsSourceId, {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: pointFeatures
+        }
+      })
+
+      map.current.addLayer({
+        id: pointsLayerId,
+        type: 'circle',
+        source: pointsSourceId,
+        paint: {
+          'circle-radius': 5,
+          'circle-color': '#f59e0b',
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': 2
+        }
+      })
+    }
+  }
+
+  // Clean up measurement layers
+  const cleanupMeasurementLayers = () => {
+    if (!map.current) return
+
+    const layersToRemove = [
+      'measurement-line-layer',
+      'measurement-polygon-layer',
+      'measurement-polygon-layer-outline',
+      'measurement-points-layer'
+    ]
+    const sourcesToRemove = [
+      'measurement-line',
+      'measurement-polygon',
+      'measurement-points'
+    ]
+
+    layersToRemove.forEach(layerId => {
+      if (map.current!.getLayer(layerId)) {
+        map.current!.removeLayer(layerId)
+      }
+    })
+
+    sourcesToRemove.forEach(sourceId => {
+      if (map.current!.getSource(sourceId)) {
+        map.current!.removeSource(sourceId)
+      }
+    })
+  }
+
   // Handle map clicks when selecting area, drawing routes, or placing waypoints
   const handleMapClick = async (e: maplibregl.MapMouseEvent) => {
+    // Use ref values to avoid stale closures
+    const { isPlacingWaypoint, isDrawingRoute, isSelectingArea, measurementActive, measurementMode, isMobile } = clickStateRef.current
+
     console.log('[Map] Click detected. isPlacingWaypoint:', isPlacingWaypoint, 'isDrawingRoute:', isDrawingRoute)
 
     // Ctrl+Click: Copy coordinates to clipboard (desktop only)
@@ -921,6 +1208,17 @@ const Map = ({ zenMode }: MapProps) => {
         console.error('Failed to copy coordinates:', error)
         alert(`Koordinater: ${coords}`)
       }
+      return
+    }
+
+    // Measurement mode
+    if (measurementActive && measurementMode) {
+      const newPoint: [number, number] = [e.lngLat.lng, e.lngLat.lat]
+      setMeasurementPoints(prevPoints => {
+        const updatedPoints = [...prevPoints, newPoint]
+        updateMeasurementLayers(updatedPoints)
+        return updatedPoints
+      })
       return
     }
 
@@ -1038,6 +1336,11 @@ const Map = ({ zenMode }: MapProps) => {
         const waypoints = await routeService.getAllWaypoints()
         console.log(`[Waypoints] Found ${waypoints.length} waypoints in database`)
 
+        // Read current visibility preference from localStorage
+        const savedRoutesVisible = localStorage.getItem('trakke_routes_visible')
+        const shouldShowRoutes = savedRoutesVisible !== null ? savedRoutesVisible === 'true' : true
+        console.log(`[Waypoints] Visibility preference from localStorage: "${savedRoutesVisible}" -> shouldShowRoutes: ${shouldShowRoutes}`)
+
         // Create markers for all waypoints
         const newMarkers: Record<string, maplibregl.Marker> = {}
 
@@ -1053,6 +1356,12 @@ const Map = ({ zenMode }: MapProps) => {
           })
             .setLngLat(waypoint.coordinates)
             .addTo(map.current!)
+
+          // Apply initial visibility state based on saved preference
+          if (!shouldShowRoutes) {
+            el.classList.add('hidden')
+          }
+          console.log(`[Waypoints] Set marker "${waypoint.name}" visibility to: ${shouldShowRoutes ? 'visible' : 'hidden'}`)
 
           newMarkers[waypoint.id] = marker
         })
@@ -1354,8 +1663,22 @@ const Map = ({ zenMode }: MapProps) => {
     setInfoSheetOpen(true)
   }
 
-  const handleSettingsClick = () => {
-    setSettingsSheetOpen(true)
+
+  const handleMapPreferencesClick = () => {
+    setMapPreferencesSheetOpen(true)
+  }
+
+  const handleMeasurementClick = () => {
+    setMeasurementActive(true)
+    setMeasurementMode(null) // User chooses mode in the component
+    setMeasurementPoints([])
+  }
+
+  const handleMeasurementClose = () => {
+    setMeasurementActive(false)
+    setMeasurementMode(null)
+    setMeasurementPoints([])
+    cleanupMeasurementLayers()
   }
 
   const handleCategoryClick = () => {
@@ -1749,11 +2072,12 @@ const Map = ({ zenMode }: MapProps) => {
             onRoutesClick={handleRoutesClick}
             onCategoryClick={handleCategoryClick}
             onLocationClick={handleLocationClick}
-            onSettingsClick={handleSettingsClick}
+            onMapPreferencesClick={handleMapPreferencesClick}
+            onMeasurementClick={handleMeasurementClick}
             onInstallClick={() => setInstallSheetOpen(true)}
             showInstall={!isInstalled && (canInstall || platform === 'ios')}
             visible={controlsVisible}
-            sheetsOpen={searchSheetOpen || infoSheetOpen || downloadSheetOpen || routeSheetOpen || settingsSheetOpen || categorySheetOpen || poiDetailsSheetOpen || installSheetOpen}
+            sheetsOpen={searchSheetOpen || infoSheetOpen || downloadSheetOpen || routeSheetOpen || categorySheetOpen || poiDetailsSheetOpen || installSheetOpen || mapPreferencesSheetOpen}
             menuOpen={fabMenuOpen}
             onMenuOpenChange={setFabMenuOpen}
           />
@@ -1813,6 +2137,16 @@ const Map = ({ zenMode }: MapProps) => {
               </button>
             </div>
           )}
+
+          {/* Measurement Tools */}
+          <MeasurementTools
+            isActive={measurementActive}
+            onClose={handleMeasurementClose}
+            mode={measurementMode}
+            onModeChange={setMeasurementMode}
+            points={measurementPoints}
+            onPointsChange={setMeasurementPoints}
+          />
 
           {/* Area selection overlay */}
           {isSelectingArea && overlayRect && (
@@ -1919,10 +2253,6 @@ const Map = ({ zenMode }: MapProps) => {
             routesVisible={routesVisible}
             onToggleVisibility={() => setRoutesVisible(!routesVisible)}
           />
-          <SettingsSheet
-            isOpen={settingsSheetOpen}
-            onClose={() => setSettingsSheetOpen(false)}
-          />
           <CategorySheet
             isOpen={categorySheetOpen}
             onClose={() => setCategorySheetOpen(false)}
@@ -1976,6 +2306,12 @@ const Map = ({ zenMode }: MapProps) => {
             onInstall={promptInstall}
             canInstall={canInstall}
             platform={platform}
+          />
+
+          <MapPreferencesSheet
+            isOpen={mapPreferencesSheetOpen}
+            onClose={() => setMapPreferencesSheetOpen(false)}
+            onPreferencesChange={(newPreferences) => setMapPreferences(newPreferences)}
           />
         </>
       ) : (

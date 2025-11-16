@@ -23,58 +23,65 @@
 
 /* User location marker - Simple blue dot */
 .user-location-marker {
-  width: 16px;
-  height: 16px;
-  background-color: var(--trk-blue);
-  border: 3px solid var(--trk-surface);
-  border-radius: 50%;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
+  width: 16px !important;
+  height: 16px !important;
+  background-color: var(--trk-blue) !important;
+  border: 3px solid var(--trk-surface) !important;
+  border-radius: 50% !important;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+  cursor: pointer !important;
+  display: block !important;
 }
 
 /* Search result marker */
 .search-result-marker {
-  position: relative;
+  position: relative !important;
   display: flex !important;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  cursor: pointer;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  cursor: pointer !important;
   pointer-events: auto !important;
-  z-index: 10;
+  z-index: 10 !important;
 }
 
 .search-result-marker .material-symbols-outlined {
-  font-size: 36px;
-  color: var(--trk-brand);
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 40;
-  display: block;
+  font-size: 36px !important;
+  color: var(--trk-brand) !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2)) !important;
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 40 !important;
+  display: block !important;
 }
 
 /* Waypoint marker - Material Symbol location pin */
 .waypoint-marker {
-  position: relative;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  pointer-events: auto;
+  position: relative !important;
+  width: 36px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+/* Hidden state for waypoint markers */
+.waypoint-marker.hidden {
+  display: none !important;
 }
 
 .waypoint-marker .material-symbols-outlined {
-  font-size: 36px;
-  color: var(--trk-red);
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
-  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 40;
-  animation: waypointPulse 2s ease-in-out infinite;
+  font-size: 36px !important;
+  color: var(--trk-red) !important;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4)) !important;
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 40 !important;
+  animation: waypointPulse 2s ease-in-out infinite !important;
+  display: block !important;
 }
 
 .waypoint-marker.temp-waypoint .material-symbols-outlined {
-  color: var(--trk-brand);
+  color: var(--trk-brand) !important;
 }
 
 @keyframes waypointPulse {
@@ -166,6 +173,11 @@
   display: none;
 }
 
+/* Show compass in Zen Mode when enabled via preferences */
+.zen-mode .maplibregl-ctrl-top-right:has(.maplibregl-ctrl-compass) {
+  display: block !important;
+}
+
 /* Zen Mode: Custom Attribution in bottom-left, aligned with FAB */
 .zen-mode .maplibregl-ctrl-bottom-left {
   bottom: max(var(--space-xl), calc(var(--space-xl) + var(--safe-area-inset-bottom)));
@@ -249,7 +261,7 @@
 
 
 .maplibregl-ctrl-bottom-right {
-  bottom: max(10px, env(safe-area-inset-bottom));
+  bottom: max(90px, calc(90px + env(safe-area-inset-bottom))); /* Above FAB menu */
   right: max(10px, env(safe-area-inset-right));
 }
 
@@ -282,6 +294,14 @@
 
 .maplibregl-ctrl-icon svg {
   display: none !important;
+}
+
+/* Exception: Show compass icon (background-image on .maplibregl-ctrl-icon) */
+.maplibregl-ctrl-compass .maplibregl-ctrl-icon {
+  display: block !important;
+  background-image: url("data:image/svg+xml,%3csvg width='29' height='29' viewBox='0 0 29 29' xmlns='http://www.w3.org/2000/svg' fill='%23333'%3e %3cpath d='M10.5 14l4-8 4 8h-8z'/%3e %3cpath d='M10.5 16l4 8 4-8h-8z' fill='%23ccc'/%3e %3c/svg%3e") !important;
+  background-size: contain !important;
+  /* Icon renders via background-image from maplibre-gl.css */
 }
 
 /* Visibility Toggle Button */
@@ -777,4 +797,16 @@
     opacity: 0;
     transform: translate(-50%, -10px);
   }
+}
+
+/* Enlarged user location pointer (map preference) */
+.enlarged-pointer {
+  width: 28px !important;
+  height: 28px !important;
+}
+
+.enlarged-pointer::before {
+  width: 28px !important;
+  height: 28px !important;
+  border-width: 4px !important;
 }

@@ -253,10 +253,15 @@ const RouteSheet = ({
               <button
                 type="button"
                 className="route-action-button secondary"
-                onClick={onClearMapWaypoints}
+                onClick={() => {
+                  console.log('[RouteSheet] Toggle button clicked, current routesVisible:', routesVisible)
+                  onToggleVisibility()
+                }}
               >
-                <span className="material-symbols-outlined">wrong_location</span>
-                <span>Fjern punkter fra kart</span>
+                <span className="material-symbols-outlined">
+                  {routesVisible ? 'visibility_off' : 'visibility'}
+                </span>
+                <span>{routesVisible ? 'Fjern punkter fra kart' : 'Vis punkter på kart'}</span>
               </button>
             </section>
 

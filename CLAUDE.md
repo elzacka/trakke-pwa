@@ -113,9 +113,14 @@ BottomSheet (reusable container)
 ```
 
 **FABMenu** (Floating Action Button):
-- Primary action: Center on user location (single tap)
-- Long-press: Opens radial menu
-- Menu items: Search, Routes, Download, Reset North, Info
+- Primary action: Opens menu (tap hamburger icon)
+- Menu organized in 4 logical groups (with subtle spacing):
+  - **Group 1 (Core Navigation)**: Søk, Min posisjon, Ruter og punkter
+  - **Group 2 (Active Tools)**: Kategorier, Måleverktøy
+  - **Group 3 (Configuration)**: Offline kart, Innstillinger
+  - **Group 4 (Meta/Help)**: Info, [Installer - conditional]
+- Responsive spacing: 16px separators (desktop), 8px (mobile)
+- Accessibility: Full ARIA support, keyboard navigation, haptic feedback
 
 ### Services Layer
 

@@ -167,6 +167,90 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
 
               {expandedSections.has('veiledning') && (
                 <div className="info-section-content">
+                  {/* Bruke appen - User Guide */}
+                  <div className="info-section-group">
+                    <button
+                      className="info-section-header"
+                      onClick={() => toggleSection('bruke-appen')}
+                      aria-expanded={expandedSections.has('bruke-appen')}
+                    >
+                      <span className="info-section-title">Bruke appen</span>
+                      <span className="material-symbols-outlined info-section-chevron">
+                        {expandedSections.has('bruke-appen') ? 'expand_less' : 'expand_more'}
+                      </span>
+                    </button>
+
+                    {expandedSections.has('bruke-appen') && (
+                      <div className="info-section-content">
+                        <section className="info-section">
+                          <h4>Legge til punkt på kartet</h4>
+                          <ul className="info-list">
+                            <li>Åpne <strong>Ruter og punkter</strong> fra menyen</li>
+                            <li>Trykk <strong>Legg til punkt</strong></li>
+                            <li>Klikk på kartet der du vil plassere punktet</li>
+                            <li>{isMobile ? 'Trykk og hold' : 'Høyreklikk'} på punktmarkøren for å gi navn og kategori</li>
+                          </ul>
+
+                          <h4>Måle avstand og areal</h4>
+                          <ul className="info-list">
+                            <li>Åpne <strong>Måleverktøy</strong> fra menyen</li>
+                            <li>Velg <strong>Avstand</strong> eller <strong>Areal</strong></li>
+                            <li>Klikk på kartet for å legge til målepunkter</li>
+                            <li>Bruk <strong>Angre</strong> for å fjerne siste punkt</li>
+                            <li>Bruk <strong>Nullstill</strong> for å starte på nytt</li>
+                          </ul>
+
+                          <h4>Laste ned kart for offline bruk</h4>
+                          <ul className="info-list">
+                            <li>Åpne <strong>Offline kart</strong> fra menyen</li>
+                            <li>Klikk to ganger på kartet for å velge område</li>
+                            <li>Velg zoom-nivå (høyere nivå = mer detaljer, større nedlasting)</li>
+                            <li>Trykk <strong>Last ned</strong> og vent til ferdig</li>
+                          </ul>
+
+                          <h4>Vise og skjule punkter</h4>
+                          <ul className="info-list">
+                            <li>Åpne <strong>Ruter og punkter</strong></li>
+                            <li>Trykk <strong>Fjern punkter fra kart</strong> for å skjule alle punkter</li>
+                            <li>Trykk <strong>Vis punkter på kart</strong> for å vise dem igjen</li>
+                            <li>Innstillingen lagres og huskes når du åpner appen neste gang</li>
+                          </ul>
+
+                          <h4>Vise tilfluktsrom og andre POI</h4>
+                          <ul className="info-list">
+                            <li>Åpne <strong>Kategorier</strong> fra menyen</li>
+                            <li>Aktiver <strong>Tilfluktsrom</strong> eller andre kategorier</li>
+                            <li>Zoom inn på kartet for å se markører</li>
+                            <li>Klikk på markør for å se detaljer</li>
+                          </ul>
+
+                          <h4>Endre koordinatformat</h4>
+                          <ul className="info-list">
+                            <li>Åpne <strong>Innstillinger</strong> fra menyen</li>
+                            <li>Rull ned til <strong>Koordinatformat</strong></li>
+                            <li>Velg mellom DD, DMS, DDM, UTM eller MGRS</li>
+                            <li>Formatet brukes i søkeresultater og punktdetaljer</li>
+                          </ul>
+
+                          <h4>Kopiere koordinater fra kartet</h4>
+                          <ul className="info-list">
+                            <li>{isMobile ? 'Trykk og hold' : 'Ctrl + klikk'} på kartet</li>
+                            <li>Koordinater kopieres automatisk til utklippstavlen</li>
+                            <li>En melding vises nederst på kartet</li>
+                          </ul>
+
+                          <h4>Søke etter steder</h4>
+                          <ul className="info-list">
+                            <li>Trykk <strong>Søk</strong> fra menyen (eller {isMobile ? 'søkeknapp' : 'Ctrl + K'})</li>
+                            <li>Skriv stedsnavn eller adresse</li>
+                            <li>Bruk {isMobile ? 'filterknapp' : 'hjem-ikon'} for å søke kun i adresser</li>
+                            <li>Klikk på resultat for å sentrere kartet</li>
+                          </ul>
+                        </section>
+                      </div>
+                    )}
+                  </div>
+
                   {/* Desktop: Hurtigtaster */}
                   {!isMobile && (
                     <div className="info-section-group">

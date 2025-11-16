@@ -936,6 +936,102 @@ const Map = ({ zenMode }: MapProps) => {
     }
   }, []) // Empty deps - register once
 
+  // Register long-press handler for mobile coordinate copying
+  useEffect(() => {
+    if (!map.current) return
+
+    const canvas = map.current.getCanvas()
+    let pressTimer: number | undefined
+    let touchStartPos: { x: number; y: number } | null = null
+    let longPressTriggered = false
+
+    const handleTouchStart = (e: TouchEvent) => {
+      // Only handle single-finger touch (not pinch/pan)
+      if (e.touches.length !== 1) return
+
+      const touch = e.touches[0]
+      touchStartPos = { x: touch.clientX, y: touch.clientY }
+      longPressTriggered = false
+
+      pressTimer = window.setTimeout(async () => {
+        // Check if finger hasn't moved much (5px tolerance)
+        if (touchStartPos && e.touches.length === 1) {
+          const currentTouch = e.touches[0]
+          const dx = Math.abs(currentTouch.clientX - touchStartPos.x)
+          const dy = Math.abs(currentTouch.clientY - touchStartPos.y)
+
+          if (dx < 5 && dy < 5) {
+            longPressTriggered = true
+
+            // Get coordinates from map
+            const point = map.current!.unproject([touchStartPos.x, touchStartPos.y])
+            const coords = `${point.lat.toFixed(6)}, ${point.lng.toFixed(6)}`
+
+            try {
+              await navigator.clipboard.writeText(coords)
+
+              // Haptic feedback
+              if ('vibrate' in navigator) {
+                navigator.vibrate(50)
+              }
+
+              // Visual feedback
+              const notification = document.createElement('div')
+              notification.className = 'coordinate-copy-notification'
+              notification.textContent = `Koordinater kopiert: ${coords}`
+              document.body.appendChild(notification)
+
+              setTimeout(() => {
+                if (notification.parentNode) {
+                  document.body.removeChild(notification)
+                }
+              }, UI_DELAYS.NOTIFICATION_DISPLAY)
+            } catch (error) {
+              console.error('Failed to copy coordinates:', error)
+              alert(`Koordinater: ${coords}`)
+            }
+          }
+        }
+      }, UI_DELAYS.LONG_PRESS)
+    }
+
+    const handleTouchEnd = () => {
+      if (pressTimer) {
+        clearTimeout(pressTimer)
+      }
+      touchStartPos = null
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      // Cancel long-press if finger moves too much
+      if (touchStartPos && e.touches.length === 1) {
+        const touch = e.touches[0]
+        const dx = Math.abs(touch.clientX - touchStartPos.x)
+        const dy = Math.abs(touch.clientY - touchStartPos.y)
+
+        if (dx > 5 || dy > 5) {
+          if (pressTimer) {
+            clearTimeout(pressTimer)
+          }
+          touchStartPos = null
+        }
+      }
+    }
+
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: true })
+    canvas.addEventListener('touchend', handleTouchEnd)
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: true })
+
+    return () => {
+      if (pressTimer) {
+        clearTimeout(pressTimer)
+      }
+      canvas.removeEventListener('touchstart', handleTouchStart)
+      canvas.removeEventListener('touchend', handleTouchEnd)
+      canvas.removeEventListener('touchmove', handleTouchMove)
+    }
+  }, []) // Empty deps - register once
+
   // Helper function to update route drawing layers (prevents stale closure issues)
   const updateRouteDrawingLayers = (points: Array<[number, number]>) => {
     if (!map.current) return

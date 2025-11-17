@@ -13,17 +13,17 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 20px 16px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   position: sticky;
   top: 0;
-  background: var(--color-white);
+  background: var(--trk-surface);
   z-index: 10;
   flex-shrink: 0;
   gap: 12px;
 }
 
 .search-sheet-header h2 {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--trk-text);
   margin: 0;
@@ -41,7 +41,7 @@
   justify-content: center;
   cursor: pointer;
   border-radius: 8px;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--transition-base);
   flex-shrink: 0;
 }
 
@@ -71,7 +71,7 @@
   padding: 10px 12px;
   background: var(--trk-surface-subtle);
   border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   flex-shrink: 0;
 }
 
@@ -133,7 +133,7 @@
   justify-content: center;
   cursor: pointer;
   border-radius: 8px;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--transition-base);
   flex-shrink: 0;
 }
 

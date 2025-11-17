@@ -13,15 +13,15 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 20px 16px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   position: sticky;
   top: 0;
-  background: var(--color-white);
+  background: var(--trk-surface);
   z-index: 10;
 }
 
 .download-sheet-header h2 {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--trk-text);
   margin: 0;
@@ -38,7 +38,7 @@
   justify-content: center;
   cursor: pointer;
   border-radius: 8px;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--transition-base);
 }
 
 .download-sheet-close:hover:not(:disabled) {
@@ -165,7 +165,7 @@
   font-weight: 500;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-base);
   flex: 1;
 }
 
@@ -241,7 +241,7 @@
   font-size: 15px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: var(--trk-text);
-  transition: border-color 0.2s ease;
+  transition: border-color var(--transition-base);
 }
 
 .area-name-input:focus {
@@ -276,7 +276,7 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: var(--trk-text);
   text-align: center;
-  transition: border-color 0.2s ease;
+  transition: border-color var(--transition-base);
 }
 
 .zoom-input-group input:focus {
@@ -347,7 +347,7 @@
   background: var(--trk-surface-subtle);
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--transition-base);
 }
 
 .area-item:hover {
@@ -385,7 +385,7 @@
   justify-content: center;
   cursor: pointer;
   border-radius: 6px;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--transition-base);
   flex-shrink: 0;
 }
 

@@ -28,7 +28,7 @@
   background-color: var(--trk-blue) !important;
   border: 3px solid var(--trk-surface) !important;
   border-radius: 50% !important;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+  box-shadow: var(--shadow-md) !important;
   cursor: pointer !important;
   display: block !important;
 }
@@ -114,7 +114,7 @@
 .poi-marker:has(.material-symbols-outlined) {
   background: var(--trk-surface);
   border-radius: 50%;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-lg);
 }
 
 .poi-marker .material-symbols-outlined {
@@ -130,8 +130,8 @@
 /* MapLibre control styling customization */
 .maplibregl-ctrl-group {
   background: var(--trk-surface);
-  border-radius: 12px;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   border: none;
   overflow: hidden;
 }
@@ -187,12 +187,12 @@
 .custom-attribution {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-xs);
   background-color: var(--trk-overlay-soft);
   backdrop-filter: blur(4px);
-  padding: 4px 8px;
-  border-radius: 12px;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   border: none;
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -276,8 +276,8 @@
 
 .download-control-container > * {
   background-color: var(--trk-surface);
-  border-radius: 12px;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
 }
 
@@ -650,10 +650,10 @@
   height: 32px;
   background: var(--trk-surface);
   border: 2px solid var(--trk-brand);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   pointer-events: all;
   cursor: grab;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-md);
   touch-action: none;
   transition: transform var(--transition-fast);
 }
@@ -763,21 +763,31 @@
   }
 }
 
-/* Coordinate copy notification (Ctrl+Click) */
+/* Coordinate copy notification (Ctrl+Click / Long-press) */
 .coordinate-copy-notification {
   position: fixed;
-  bottom: 80px;
+  bottom: max(80px, calc(80px + var(--safe-area-inset-bottom, 0px)));
   left: 50%;
   transform: translateX(-50%);
-  background: var(--trk-gray-900, #111827);
-  color: var(--trk-surface, white);
+  background: var(--trk-text);
+  color: var(--trk-surface);
   padding: 12px 20px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 14px;
+  font-weight: 500;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  box-shadow: var(--trk-shadow-soft);
   z-index: 10000;
   pointer-events: none;
-  animation: coordinateFadeInOut 2s ease-in-out;
+  animation: coordinateFadeInOut 2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (max-width: 768px) {
+  .coordinate-copy-notification {
+    bottom: max(64px, calc(64px + var(--safe-area-inset-bottom, 0px)));
+    font-size: 13px;
+    padding: 10px 16px;
+  }
 }
 
 @keyframes coordinateFadeInOut {
@@ -785,11 +795,11 @@
     opacity: 0;
     transform: translate(-50%, 10px);
   }
-  15% {
+  10% {
     opacity: 1;
     transform: translate(-50%, 0);
   }
-  85% {
+  90% {
     opacity: 1;
     transform: translate(-50%, 0);
   }

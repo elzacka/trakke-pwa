@@ -13,7 +13,7 @@
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   position: sticky;
   top: 0;
-  background: var(--color-white);
+  background: var(--trk-surface);
   z-index: 10;
   flex-shrink: 0;
 }
@@ -35,7 +35,7 @@
   justify-content: center;
   cursor: pointer;
   border-radius: 8px;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--transition-base);
   flex-shrink: 0;
 }
 
@@ -111,7 +111,7 @@
   justify-content: center;
   cursor: pointer;
   border-radius: 8px;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--transition-base);
   flex-shrink: 0;
   color: var(--trk-brand);
 }
@@ -123,7 +123,7 @@
 .poi-details-copy-button .material-symbols-outlined {
   font-size: 20px;
   font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
-  transition: all 0.2s ease;
+  transition: all var(--transition-base);
 }
 
 /* Copied confirmation state */

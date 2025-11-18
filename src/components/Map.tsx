@@ -463,45 +463,6 @@ const Map = ({ zenMode }: MapProps) => {
     updateMeasurementLayers(measurementPoints)
   }, [measurementPoints, measurementActive, measurementMode])
 
-  // Monitor map movement and remove search marker when out of view
-  // DISABLED FOR NOW - was removing marker during flyTo animation
-  // TODO: Re-implement with proper flyTo completion detection
-  /*
-  useEffect(() => {
-    if (!map.current) return
-
-    const checkSearchMarkerVisibility = () => {
-      if (!searchMarkerLocation.current || !searchMarker.current || !map.current) return
-
-      const bounds = map.current.getBounds()
-      const [lon, lat] = searchMarkerLocation.current
-
-      // Check if marker is within current viewport
-      const isVisible =
-        lon >= bounds.getWest() &&
-        lon <= bounds.getEast() &&
-        lat >= bounds.getSouth() &&
-        lat <= bounds.getNorth()
-
-      // Remove marker if not visible
-      if (!isVisible) {
-        searchMarker.current.remove()
-        searchMarker.current = null
-        searchMarkerLocation.current = null
-      }
-    }
-
-    // Check on moveend (after panning/zooming completes)
-    map.current.on('moveend', checkSearchMarkerVisibility)
-
-    return () => {
-      if (map.current) {
-        map.current.off('moveend', checkSearchMarkerVisibility)
-      }
-    }
-  }, [])
-  */
-
   // Clean up temporary waypoint marker on map navigation
   useEffect(() => {
     if (!map.current) return

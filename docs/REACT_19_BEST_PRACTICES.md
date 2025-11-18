@@ -264,6 +264,5 @@ Future: Consider self-hosted Sentry instance (GDPR compliant)
 
 ---
 
-**Last Updated**: 2025-11-17
 **React Version**: 19.2
 **TypeScript Version**: 5.9.3

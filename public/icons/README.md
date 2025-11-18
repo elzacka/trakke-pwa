@@ -175,6 +175,5 @@ Proprietary, part of Tråkke codebase under project license.
 
 ---
 
-**Last Updated**: 2025-01-17
-**Osmic Version**: Latest from github.com/gmgeo/osmic (2025-01)
-**Material Symbols Version**: Self-hosted from Google Fonts (2024)
+**Osmic Version**: Latest from github.com/gmgeo/osmic
+**Material Symbols Version**: Self-hosted from Google Fonts

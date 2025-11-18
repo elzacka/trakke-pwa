@@ -906,22 +906,3 @@ All tokens are defined in `:root` in `index.css`:
 ```css
 /* See src/index.css for complete list */
 ```
-
-### Figma (future)
-
-Design files will be available when Phase 2 is complete.
-
----
-
-## Changelog
-
-### v1.0 (2025-01-15)
-
-- Initial design system documentation
-- Nordisk ro color palette established
-- CSS custom properties for all tokens
-- Accessibility guidelines documented
-
----
-
-**Made for Tråkke** – Privacy-first outdoor navigation

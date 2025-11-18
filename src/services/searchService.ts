@@ -239,65 +239,7 @@ class SearchService {
     const queryLower = query.toLowerCase().trim()
 
     const scored = resultsWithRaw.map(({ result, rawPlace }) => {
-      const nameLower = result.displayName.toLowerCase()
-
-      let score = 0
-
-      // Exact match (highest priority)
-      if (nameLower === queryLower) {
-        score += this.SCORE_PLACE_EXACT
-      }
-
-      // Direct prefix match (very high priority for autocomplete)
-      // Example: "ulsrud" matches "ulsrudvannet"
-      if (nameLower.startsWith(queryLower)) {
-        score += this.SCORE_PLACE_PREFIX
-        // Stronger bonus for closer length match
-        const lengthDiff = nameLower.length - queryLower.length
-        score += Math.max(0, this.SCORE_PLACE_PREFIX_LENGTH_BONUS_MAX - lengthDiff * 2)
-      }
-
-      // Word boundary prefix match (also high priority)
-      // Example: "ulsr" could match "Ulsrudvannet" at word start
-      const words = nameLower.split(/\s+/)
-      let hasWordMatch = false
-      for (const word of words) {
-        if (word.startsWith(queryLower)) {
-          score += this.SCORE_PLACE_WORD_MATCH
-          hasWordMatch = true
-          break
-        }
-      }
-
-      // Substring match within name (medium priority)
-      if (!hasWordMatch && nameLower.includes(queryLower)) {
-        score += this.SCORE_PLACE_SUBSTRING
-      }
-
-      // Character-by-character prefix fuzzy match
-      // Example: "ulsru" very close to "ulsrud" in "ulsrudvannet"
-      const namePrefix = nameLower.substring(0, Math.min(queryLower.length + 5, nameLower.length))
-      const distance = levenshteinDistance(queryLower, namePrefix)
-      if (distance <= this.SCORE_PLACE_FUZZY_MAX_DISTANCE) {
-        score += Math.max(0, this.SCORE_PLACE_FUZZY_BASE - (distance * this.SCORE_PLACE_FUZZY_PENALTY_PER_CHAR))
-      }
-
-      // Bonus for popular outdoor place types
-      const placeType = (rawPlace.navneobjekttype || '').toLowerCase()
-      if (['fjell', 'vann', 'dal', 'bre', 'fjord', 'øy'].includes(placeType)) {
-        score += this.SCORE_PLACE_OUTDOOR_TYPE_BONUS
-      }
-
-      // Bonus for shorter names (more specific/likely what user wants)
-      if (nameLower.length <= this.SHORT_NAME_THRESHOLD) {
-        score += this.SCORE_PLACE_SHORT_NAME_BONUS
-      }
-
-      // Penalty for very long names (less specific)
-      if (nameLower.length > this.LONG_NAME_THRESHOLD) {
-        score += this.SCORE_PLACE_LONG_NAME_PENALTY
-      }
-
+      const score = this.scorePlace(result, rawPlace, queryLower)
       return { result, score }
     })
 
@@ -307,6 +249,76 @@ class SearchService {
       .sort((a, b) => b.score - a.score)
       .slice(0, limit)
       .map(item => item.result)
+  }
+
+  /**
+   * Score a place result based on how well it matches the query
+   */
+  private scorePlace(
+    result: SearchResult,
+    rawPlace: any,
+    queryLower: string
+  ): number {
+    const nameLower = result.displayName.toLowerCase()
+
+    let score = 0
+
+    // Exact match (highest priority)
+    if (nameLower === queryLower) {
+      score += this.SCORE_PLACE_EXACT
+    }
+
+    // Direct prefix match (very high priority for autocomplete)
+    // Example: "ulsrud" matches "ulsrudvannet"
+    if (nameLower.startsWith(queryLower)) {
+      score += this.SCORE_PLACE_PREFIX
+      // Stronger bonus for closer length match
+      const lengthDiff = nameLower.length - queryLower.length
+      score += Math.max(0, this.SCORE_PLACE_PREFIX_LENGTH_BONUS_MAX - lengthDiff * 2)
+    }
+
+    // Word boundary prefix match (also high priority)
+    // Example: "ulsr" could match "Ulsrudvannet" at word start
+    const words = nameLower.split(/\s+/)
+    let hasWordMatch = false
+    for (const word of words) {
+      if (word.startsWith(queryLower)) {
+        score += this.SCORE_PLACE_WORD_MATCH
+        hasWordMatch = true
+        break
+      }
+    }
+
+    // Substring match within name (medium priority)
+    if (!hasWordMatch && nameLower.includes(queryLower)) {
+      score += this.SCORE_PLACE_SUBSTRING
+    }
+
+    // Character-by-character prefix fuzzy match
+    // Example: "ulsru" very close to "ulsrud" in "ulsrudvannet"
+    const namePrefix = nameLower.substring(0, Math.min(queryLower.length + 5, nameLower.length))
+    const distance = levenshteinDistance(queryLower, namePrefix)
+    if (distance <= this.SCORE_PLACE_FUZZY_MAX_DISTANCE) {
+      score += Math.max(0, this.SCORE_PLACE_FUZZY_BASE - (distance * this.SCORE_PLACE_FUZZY_PENALTY_PER_CHAR))
+    }
+
+    // Bonus for popular outdoor place types
+    const placeType = (rawPlace.navneobjekttype || '').toLowerCase()
+    if (['fjell', 'vann', 'dal', 'bre', 'fjord', 'øy'].includes(placeType)) {
+      score += this.SCORE_PLACE_OUTDOOR_TYPE_BONUS
+    }
+
+    // Bonus for shorter names (more specific/likely what user wants)
+    if (nameLower.length <= this.SHORT_NAME_THRESHOLD) {
+      score += this.SCORE_PLACE_SHORT_NAME_BONUS
+    }
+
+    // Penalty for very long names (less specific)
+    if (nameLower.length > this.LONG_NAME_THRESHOLD) {
+      score += this.SCORE_PLACE_LONG_NAME_PENALTY
+    }
+
+    return score
   }
 
   /**

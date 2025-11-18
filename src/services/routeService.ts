@@ -2,6 +2,7 @@
 // Manages hiking routes, waypoints, and track recording
 
 import { calculateHaversineDistance } from '../utils/haversine'
+import { devLog } from '../constants'
 
 export interface Waypoint {
   id: string
@@ -79,7 +80,7 @@ class RouteService {
       const request = store.add(newWaypoint)
 
       request.onsuccess = () => {
-        console.log('Waypoint created:', newWaypoint.id)
+        devLog('Waypoint created:', newWaypoint.id)
         resolve(newWaypoint)
       }
 
@@ -156,7 +157,7 @@ class RouteService {
       const request = store.put(updated)
 
       request.onsuccess = () => {
-        console.log('Waypoint updated:', id)
+        devLog('Waypoint updated:', id)
         resolve(updated)
       }
 
@@ -176,7 +177,7 @@ class RouteService {
       const request = store.delete(id)
 
       request.onsuccess = () => {
-        console.log('Waypoint deleted:', id)
+        devLog('Waypoint deleted:', id)
         resolve()
       }
 
@@ -204,7 +205,7 @@ class RouteService {
       const request = store.add(newRoute)
 
       request.onsuccess = () => {
-        console.log('Route created:', newRoute.id)
+        devLog('Route created:', newRoute.id)
         resolve(newRoute)
       }
 
@@ -281,7 +282,7 @@ class RouteService {
       const request = store.put(updated)
 
       request.onsuccess = () => {
-        console.log('Route updated:', id)
+        devLog('Route updated:', id)
         resolve(updated)
       }
 
@@ -301,7 +302,7 @@ class RouteService {
       const request = store.delete(id)
 
       request.onsuccess = () => {
-        console.log('Route deleted:', id)
+        devLog('Route deleted:', id)
         resolve()
       }
 
@@ -329,7 +330,7 @@ class RouteService {
       const request = store.add(newProject)
 
       request.onsuccess = () => {
-        console.log('Project created:', newProject.id)
+        devLog('Project created:', newProject.id)
         resolve(newProject)
       }
 
@@ -406,7 +407,7 @@ class RouteService {
       const request = store.put(updated)
 
       request.onsuccess = () => {
-        console.log('Project updated:', id)
+        devLog('Project updated:', id)
         resolve(updated)
       }
 
@@ -426,7 +427,7 @@ class RouteService {
       const request = store.delete(id)
 
       request.onsuccess = () => {
-        console.log('Project deleted:', id)
+        devLog('Project deleted:', id)
         resolve()
       }
 

@@ -1174,11 +1174,11 @@ const Map = ({ zenMode }: MapProps) => {
           // Get coordinates from map
           const point = map.current.unproject([e.clientX, e.clientY])
           const coords = `${point.lat.toFixed(6)}, ${point.lng.toFixed(6)}`
-          console.log('[Map] ✅ Direct Ctrl+Click detected! Copying coordinates:', coords)
+          console.log('[Map] Direct Ctrl+Click detected - Copying coordinates:', coords)
 
           try {
             await navigator.clipboard.writeText(coords)
-            console.log('[Map] ✅ Coordinates copied successfully')
+            console.log('[Map] Coordinates copied successfully')
 
             // Haptic feedback
             if ('vibrate' in navigator) {
@@ -1485,11 +1485,11 @@ const Map = ({ zenMode }: MapProps) => {
     if (!isMobile && mouseEvent && mouseEvent.ctrlKey) {
       e.preventDefault()
       const coords = `${e.lngLat.lat.toFixed(6)}, ${e.lngLat.lng.toFixed(6)}`
-      console.log('[Map] ✅ Ctrl+Click detected! Copying coordinates:', coords)
+      console.log('[Map] Ctrl+Click detected - Copying coordinates:', coords)
 
       try {
         await navigator.clipboard.writeText(coords)
-        console.log('[Map] ✅ Coordinates copied successfully to clipboard')
+        console.log('[Map] Coordinates copied successfully to clipboard')
 
         // Visual feedback using CSS class (safer than inline styles)
         const notification = document.createElement('div')

@@ -199,6 +199,20 @@ class POIService {
     return null
   }
 
+  /**
+   * Extract property value from XML feature with namespace fallback
+   * Tries multiple selector variations to handle namespaced elements
+   */
+  private extractXMLProperty(feature: Element, propertyName: string, defaultValue: string = ''): string {
+    return (
+      feature.querySelector(propertyName)?.textContent ||
+      feature.querySelector(`ms\\:${propertyName}`)?.textContent ||
+      feature.getElementsByTagName(propertyName)[0]?.textContent ||
+      feature.getElementsByTagName(`ms:${propertyName}`)[0]?.textContent ||
+      defaultValue
+    )
+  }
+
   // Parse shelters from GML response
   private parseShelterGML(gmlText: string): ShelterPOI[] {
     const shelters: ShelterPOI[] = []
@@ -221,34 +235,11 @@ class POIService {
       for (let i = 0; i < features.length; i++) {
         const feature = features[i]
 
-        // Extract properties - try both with and without namespace
-        const romnr =
-          feature.querySelector('romnr')?.textContent ||
-          feature.querySelector('ms\\:romnr')?.textContent ||
-          feature.getElementsByTagName('romnr')[0]?.textContent ||
-          feature.getElementsByTagName('ms:romnr')[0]?.textContent ||
-          `shelter-${i}`
-
-        const adresse =
-          feature.querySelector('adresse')?.textContent ||
-          feature.querySelector('ms\\:adresse')?.textContent ||
-          feature.getElementsByTagName('adresse')[0]?.textContent ||
-          feature.getElementsByTagName('ms:adresse')[0]?.textContent ||
-          'Ukjent adresse'
-
-        const plasser =
-          feature.querySelector('plasser')?.textContent ||
-          feature.querySelector('ms\\:plasser')?.textContent ||
-          feature.getElementsByTagName('plasser')[0]?.textContent ||
-          feature.getElementsByTagName('ms:plasser')[0]?.textContent ||
-          '0'
-
-        const kategori =
-          feature.querySelector('t_kategori')?.textContent ||
-          feature.querySelector('ms\\:t_kategori')?.textContent ||
-          feature.getElementsByTagName('t_kategori')[0]?.textContent ||
-          feature.getElementsByTagName('ms:t_kategori')[0]?.textContent ||
-          'Ukjent'
+        // Extract properties using helper
+        const romnr = this.extractXMLProperty(feature, 'romnr', `shelter-${i}`)
+        const adresse = this.extractXMLProperty(feature, 'adresse', 'Ukjent adresse')
+        const plasser = this.extractXMLProperty(feature, 'plasser', '0')
+        const kategori = this.extractXMLProperty(feature, 't_kategori', 'Ukjent')
 
         // Extract coordinates
         const posElement = feature.getElementsByTagNameNS('http://www.opengis.net/gml', 'pos')[0]

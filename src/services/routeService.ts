@@ -60,7 +60,7 @@ class RouteService {
 
     const newWaypoint: Waypoint = {
       ...waypoint,
-      id: `wp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `wp-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       createdAt: Date.now(),
       updatedAt: Date.now()
     }
@@ -185,7 +185,7 @@ class RouteService {
 
     const newRoute: Route = {
       ...route,
-      id: `route-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `route-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       createdAt: Date.now(),
       updatedAt: Date.now()
     }
@@ -310,7 +310,7 @@ class RouteService {
 
     const newProject: Project = {
       ...project,
-      id: `proj-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `proj-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       createdAt: Date.now(),
       updatedAt: Date.now()
     }

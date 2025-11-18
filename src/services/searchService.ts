@@ -111,49 +111,14 @@ class SearchService {
       : queryLower
 
     const scored = resultsWithRaw.map(({ result, rawAddr }) => {
-      const addrLower = result.displayName.toLowerCase()
-      const streetName = (rawAddr.adressenavn || '').toLowerCase()
-      const houseNum = rawAddr.nummer?.toString() || ''
-      const letter = (rawAddr.bokstav || '').toLowerCase()
-
-      let score = 0
-
-      // Exact match bonus (highest priority)
-      if (addrLower === queryLower) {
-        score += this.SCORE_EXACT_MATCH
-      }
-
-      // Street name matching
-      if (streetName.startsWith(queryStreet)) {
-        score += this.SCORE_STREET_PREFIX
-      } else if (streetName.includes(queryStreet)) {
-        score += this.SCORE_STREET_CONTAINS
-      }
-
-      // House number matching (strict)
-      if (queryHouseNumber) {
-        if (houseNum === queryHouseNumber) {
-          score += this.SCORE_HOUSE_NUMBER_MATCH
-
-          // Letter matching
-          if (queryLetter && letter === queryLetter) {
-            score += this.SCORE_LETTER_MATCH
-          } else if (!queryLetter && !letter) {
-            score += this.SCORE_NO_LETTER_BONUS
-          } else if (queryLetter && letter !== queryLetter) {
-            score += this.SCORE_WRONG_LETTER_PENALTY
-          }
-        } else if (houseNum.startsWith(queryHouseNumber)) {
-          score += this.SCORE_HOUSE_PREFIX_MATCH
-        } else {
-          score += this.SCORE_WRONG_HOUSE_PENALTY
-        }
-      }
-
-      // Levenshtein distance for fuzzy matching (minor factor)
-      const distance = levenshteinDistance(queryLower, addrLower)
-      score -= distance
-
+      const score = this.scoreAddress(
+        result,
+        rawAddr,
+        queryLower,
+        queryStreet,
+        queryHouseNumber,
+        queryLetter
+      )
       return { result, score }
     })
 
@@ -163,6 +128,63 @@ class SearchService {
       .sort((a, b) => b.score - a.score)
       .slice(0, limit)
       .map(item => item.result)
+  }
+
+  /**
+   * Score an address result based on how well it matches the query
+   */
+  private scoreAddress(
+    result: SearchResult,
+    rawAddr: any,
+    queryLower: string,
+    queryStreet: string,
+    queryHouseNumber: string | null,
+    queryLetter: string | null
+  ): number {
+    const addrLower = result.displayName.toLowerCase()
+    const streetName = (rawAddr.adressenavn || '').toLowerCase()
+    const houseNum = rawAddr.nummer?.toString() || ''
+    const letter = (rawAddr.bokstav || '').toLowerCase()
+
+    let score = 0
+
+    // Exact match bonus (highest priority)
+    if (addrLower === queryLower) {
+      score += this.SCORE_EXACT_MATCH
+    }
+
+    // Street name matching
+    if (streetName.startsWith(queryStreet)) {
+      score += this.SCORE_STREET_PREFIX
+    } else if (streetName.includes(queryStreet)) {
+      score += this.SCORE_STREET_CONTAINS
+    }
+
+    // House number matching (strict)
+    if (queryHouseNumber) {
+      if (houseNum === queryHouseNumber) {
+        score += this.SCORE_HOUSE_NUMBER_MATCH
+
+        // Letter matching
+        if (queryLetter && letter === queryLetter) {
+          score += this.SCORE_LETTER_MATCH
+        } else if (!queryLetter && !letter) {
+          score += this.SCORE_NO_LETTER_BONUS
+        } else if (queryLetter && letter !== queryLetter) {
+          score += this.SCORE_WRONG_LETTER_PENALTY
+        }
+      } else if (houseNum.startsWith(queryHouseNumber)) {
+        score += this.SCORE_HOUSE_PREFIX_MATCH
+      } else {
+        score += this.SCORE_WRONG_HOUSE_PENALTY
+      }
+    }
+
+    // Levenshtein distance for fuzzy matching (minor factor)
+    const distance = levenshteinDistance(queryLower, addrLower)
+    score -= distance
+
+    return score
   }
 
   /**

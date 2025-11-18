@@ -2,6 +2,7 @@
 // Supports: Emergency shelters (Tilfluktsrom), Wilderness shelters (Gapahuk/vindskjul), Caves (Huler), Observation Towers, War Memorials (Forts, Bunkers, Battlefields)
 
 import { CACHE_CONFIG } from '../config/timings'
+import { devLog } from '../constants'
 
 export interface ShelterPOI {
   id: string
@@ -285,7 +286,7 @@ class POIService {
       return []
     }
 
-    console.log(`[POIService] Parsing ${data.elements.length} elements for ${category}`)
+    devLog(`[POIService] Parsing ${data.elements.length} elements for ${category}`)
 
     // Build node lookup map once for O(1) coordinate lookups (performance optimization)
     const nodeMap = new Map<number, { lon: number; lat: number }>()
@@ -436,7 +437,7 @@ class POIService {
       }
     }
 
-    console.log(`[POIService] Parsed ${pois.length} unique POIs for ${category}`)
+    devLog(`[POIService] Parsed ${pois.length} unique POIs for ${category}`)
     return pois
   }
 
@@ -456,16 +457,16 @@ class POIService {
     if (this.cache.has(cacheKey)) {
       const cached = this.cache.get(cacheKey)!
       if (!this.isCacheStale(cached.timestamp)) {
-        console.log(`[POIService] Cache hit: ${cacheKey} (${cached.pois.length} POIs)`)
+        devLog(`[POIService] Cache hit: ${cacheKey} (${cached.pois.length} POIs)`)
         return cached.pois
       }
-      console.log(`[POIService] Cache stale: ${cacheKey}`)
+      devLog(`[POIService] Cache stale: ${cacheKey}`)
       this.cache.delete(cacheKey)
     }
 
     // Check if already loading
     if (this.loading.has(cacheKey)) {
-      console.log(`[POIService] Already loading: ${cacheKey}`)
+      devLog(`[POIService] Already loading: ${cacheKey}`)
       return this.loading.get(cacheKey) as Promise<POI[]>
     }
 
@@ -478,8 +479,8 @@ class POIService {
     const bboxString = `${bounds.south},${bounds.west},${bounds.north},${bounds.east}`
     const query = config.overpassQuery.replace(/\{\{bbox\}\}/g, bboxString)
 
-    console.log(`[POIService] Fetching ${category} from Overpass: ${cacheKey}`)
-    console.log(`[POIService] Query:`, query)
+    devLog(`[POIService] Fetching ${category} from Overpass: ${cacheKey}`)
+    devLog(`[POIService] Query:`, query)
 
     const fetchPromise = fetch(this.OVERPASS_URL, {
       method: 'POST',
@@ -493,8 +494,8 @@ class POIService {
       credentials: 'omit'
     })
       .then(async response => {
-        console.log(`[POIService] Overpass response status: ${response.status} ${response.statusText}`)
-        console.log(`[POIService] Response headers:`, {
+        devLog(`[POIService] Overpass response status: ${response.status} ${response.statusText}`)
+        devLog(`[POIService] Response headers:`, {
           contentType: response.headers.get('content-type'),
           cors: response.headers.get('access-control-allow-origin')
         })
@@ -513,7 +514,7 @@ class POIService {
         return response.json()
       })
       .then(data => {
-        console.log(`[POIService] Overpass response data:`, {
+        devLog(`[POIService] Overpass response data:`, {
           hasElements: !!data.elements,
           elementCount: data.elements?.length || 0,
           version: data.version,
@@ -521,7 +522,7 @@ class POIService {
         })
 
         const pois = this.parseOverpassJSON(data, category)
-        console.log(`[POIService] Parsed ${pois.length} POIs for ${cacheKey}`)
+        devLog(`[POIService] Parsed ${pois.length} POIs for ${cacheKey}`)
 
         // Cache results
         this.cache.set(cacheKey, {
@@ -565,17 +566,17 @@ class POIService {
     if (this.cache.has(cacheKey)) {
       const cached = this.cache.get(cacheKey)!
       if (!this.isCacheStale(cached.timestamp)) {
-        console.log(`[POIService] Cache hit: ${cacheKey} (${cached.pois.length} shelters)`)
+        devLog(`[POIService] Cache hit: ${cacheKey} (${cached.pois.length} shelters)`)
         return cached.pois as ShelterPOI[]
       } else {
-        console.log(`[POIService] Cache stale: ${cacheKey}`)
+        devLog(`[POIService] Cache stale: ${cacheKey}`)
         this.cache.delete(cacheKey)
       }
     }
 
     // Check if already loading this viewport
     if (this.loading.has(cacheKey)) {
-      console.log(`[POIService] Already loading: ${cacheKey}`)
+      devLog(`[POIService] Already loading: ${cacheKey}`)
       return this.loading.get(cacheKey) as Promise<ShelterPOI[]>
     }
 
@@ -584,11 +585,11 @@ class POIService {
     const bbox = `${bounds.south},${bounds.west},${bounds.north},${bounds.east},EPSG:4326`
     const url = `${config.wfsUrl}?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TYPENAME=${config.layerName}&SRSNAME=EPSG:4326&BBOX=${bbox}`
 
-    console.log(`[POIService] Fetching shelters for viewport: ${cacheKey}`)
+    devLog(`[POIService] Fetching shelters for viewport: ${cacheKey}`)
 
     const fetchPromise = fetch(url)
       .then(response => {
-        console.log(`[POIService] WFS response status: ${response.status} ${response.statusText}`)
+        devLog(`[POIService] WFS response status: ${response.status} ${response.statusText}`)
         if (!response.ok) {
           throw new Error(`WFS request failed: ${response.status} ${response.statusText}`)
         }
@@ -596,7 +597,7 @@ class POIService {
       })
       .then(gmlText => {
         const shelters = this.parseShelterGML(gmlText)
-        console.log(`[POIService] Fetched ${shelters.length} shelters for ${cacheKey}`)
+        devLog(`[POIService] Fetched ${shelters.length} shelters for ${cacheKey}`)
 
         // Cache the results with viewport bounds and timestamp
         this.cache.set(cacheKey, {
@@ -649,7 +650,7 @@ class POIService {
   clearCache(): void {
     this.cache.clear()
     this.loading.clear()
-    console.log('[POIService] Cache cleared')
+    devLog('[POIService] Cache cleared')
   }
 
   // Clear stale cache entries (cleanup utility)

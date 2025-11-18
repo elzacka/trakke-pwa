@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 📚 Documentation Index - Single Sources of Truth
+## Documentation Index - Single Sources of Truth
 
 Tråkke documentation follows a strict "single source of truth" principle. Each document has a specific purpose:
 
@@ -22,7 +22,7 @@ Tråkke documentation follows a strict "single source of truth" principle. Each 
 - Roadmap/features? → [README.md - Roadmap](README.md#-roadmap)
 - Design tokens? → [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)
 
-## ⚠️ CRITICAL DEPLOYMENT WORKFLOW ⚠️
+## CRITICAL DEPLOYMENT WORKFLOW
 
 **NEVER push to GitHub without user's explicit approval after local testing.**
 

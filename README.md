@@ -1,8 +1,8 @@
-# 🥾 Tråkke - Norwegian Outdoor Mapping PWA
+# Tråkke - Norwegian Outdoor Mapping PWA
 
 A Progressive Web Application for Norwegian outdoor navigation with offline capabilities.
 
-## 🌟 Current Features
+## Current Features
 
 ✅ **Interactive Topographic Map**
 - Kartverket WMTS topographic tiles (Norway)
@@ -76,7 +76,7 @@ A Progressive Web Application for Norwegian outdoor navigation with offline capa
 - **Approved external services**: See [External API Registry](PRIVACY_BY_DESIGN.md#external-api-registry) in PRIVACY_BY_DESIGN.md
 - **Complete privacy documentation**: [PRIVACY_BY_DESIGN.md](PRIVACY_BY_DESIGN.md)
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js 18+
@@ -104,7 +104,7 @@ npm run build
 npm run preview
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 trakke_pwa/
@@ -149,7 +149,7 @@ trakke_pwa/
 └── package.json            # Dependencies and scripts
 ```
 
-## 🎨 Design System
+## Design System
 
 Tråkke uses the **Nordic Silence** design system - a minimalist, nature-inspired visual language with warm, paper-like colors.
 
@@ -161,7 +161,7 @@ Tråkke uses the **Nordic Silence** design system - a minimalist, nature-inspire
 - Spacing scale, shadows, and transitions
 - Component patterns and accessibility guidelines
 
-## 🗺️ Map Integration
+## Map Integration
 
 **Kartverket WMTS Service:**
 - Endpoint: `https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png`
@@ -169,7 +169,7 @@ Tråkke uses the **Nordic Silence** design system - a minimalist, nature-inspire
 - Zoom levels: 3-18
 - Coordinate system: Web Mercator (EPSG:3857)
 
-## 💾 Data Storage
+## Data Storage
 
 ### IndexedDB (v3)
 - Database name: `trakke-db`
@@ -182,7 +182,7 @@ Tråkke uses the **Nordic Silence** design system - a minimalist, nature-inspire
 - **Static assets**: Precached on install (fonts, icons, app shell)
 - **Privacy configuration**: See [PRIVACY_BY_DESIGN.md - Service Worker](PRIVACY_BY_DESIGN.md#3-service-worker-privacy-configuration)
 
-## 📱 PWA Features
+## PWA Features
 
 ### Manifest
 - Name: Tråkke
@@ -200,7 +200,7 @@ Tråkke uses the **Nordic Silence** design system - a minimalist, nature-inspire
 - "Add to Home Screen" on iOS
 - "Install App" on Android/Desktop Chrome
 
-## 🧪 Testing
+## Testing
 
 ### Browser Compatibility
 Tested and supported on modern browsers:
@@ -217,7 +217,7 @@ See [BROWSER_COMPATIBILITY.md](BROWSER_COMPATIBILITY.md) for detailed compatibil
 3. Check "Offline" checkbox
 4. Navigate map (cached tiles will load)
 
-## 🔧 Configuration
+## Configuration
 
 ### Environment Variables
 Create `.env.local` for environment-specific config:
@@ -236,7 +236,7 @@ VITE_BASE_URL=/
 
 Edit `vite.config.ts` to customize manifest and caching.
 
-## 📦 Dependencies
+## Dependencies
 
 ### Core
 - **React 19.2.0**: UI framework
@@ -253,7 +253,7 @@ Edit `vite.config.ts` to customize manifest and caching.
 
 See [DEPENDENCIES.md](DEPENDENCIES.md) for complete dependency list with exact versions.
 
-## 🛣️ Roadmap
+## Roadmap
 
 ### Phase 1 (Complete) ✅
 - ✅ Interactive topographic map with Kartverket tiles
@@ -281,7 +281,7 @@ See [DEPENDENCIES.md](DEPENDENCIES.md) for complete dependency list with exact v
 - [ ] Compass and bearing tools
 - [ ] Push notifications for weather alerts
 
-## 🔒 Privacy & Security
+## Privacy & Security
 
 Tråkke implements Privacy by Design according to GDPR and Norwegian privacy regulations.
 
@@ -300,7 +300,7 @@ Tråkke implements Privacy by Design according to GDPR and Norwegian privacy reg
 
 MIT License - See LICENSE file
 
-## 🙏 Attribution
+## Attribution
 
 All attribution and data source information is available in the app via the "Datakilder" info panel (info button in FAB menu).
 
@@ -319,6 +319,3 @@ All attribution and data source information is available in the app via the "Dat
 - OpenStreetMap data: ODbL - [OpenStreetMap Copyright](https://www.openstreetmap.org/copyright)
 
 ---
-
-**Built with ❤️ for Norwegian outdoor enthusiasts**
-**Privacy-first • No tracking • GDPR compliant**

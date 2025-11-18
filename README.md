@@ -4,34 +4,34 @@ A Progressive Web Application for Norwegian outdoor navigation with offline capa
 
 ## Current Features
 
-✅ **Interactive Topographic Map**
+**Interactive Topographic Map**
 - Kartverket WMTS topographic tiles (Norway)
 - Responsive zoom and pan controls
 - Pitch control (0° default, tiltable for 3D view)
 - Scale indicator and compass
 - MapLibre GL JS rendering engine
 
-✅ **GPS Location Tracking**
+**GPS Location Tracking**
 - Real-time user location with blue marker
 - FAB menu with quick location centering
 - Continuous position tracking
 - Accuracy circle visualization
 
-✅ **Search & Navigation**
+**Search & Navigation**
 - Norwegian place name search (Kartverket SSR API)
 - Address search with smart fuzzy matching (toggleable filter)
 - Outdoor feature prioritization (mountains, lakes, etc.)
 - Search result markers with auto-removal on viewport change
 - Contextual hint text for address filter
 
-✅ **Offline Map Downloads**
+**Offline Map Downloads**
 - Select custom areas for offline use
 - Configurable zoom level range
 - Download progress tracking
 - Manage downloaded areas
 - Navigate to saved areas
 
-✅ **Routes & Waypoints**
+**Routes & Waypoints**
 - Draw routes by clicking on map
 - Calculate distances using Haversine formula
 - Place custom waypoints with names
@@ -39,7 +39,7 @@ A Progressive Web Application for Norwegian outdoor navigation with offline capa
 - Toggle route/waypoint visibility
 - Route management and deletion
 
-✅ **Points of Interest (POI)**
+**Points of Interest (POI)**
 - **Emergency shelters** (Tilfluktsrom) from DSB via WFS - yellow T-marker
 - **Wilderness shelters** (Gapahuk/vindskjul) from OpenStreetMap - cottage icon
 - **Caves** (Huler) from OpenStreetMap - terrain icon (OSM-Carto style)
@@ -50,14 +50,14 @@ A Progressive Web Application for Norwegian outdoor navigation with offline capa
 - Viewport-aware loading (fetches only visible POIs)
 - POI details sheets with comprehensive information
 
-✅ **Progressive Web App**
+**Progressive Web App**
 - Installable on mobile and desktop
 - Works offline with cached map tiles
 - Fast, app-like experience
 - iOS and Android home screen support
 - Service Worker with intelligent caching
 
-✅ **Zen Mode Interface**
+**Zen Mode Interface**
 - Auto-hiding controls for immersive map view
 - Collapsible welcome header with toggle chevron
 - Floating Action Button (FAB) menu
@@ -66,7 +66,7 @@ A Progressive Web Application for Norwegian outdoor navigation with offline capa
 - Gesture-based navigation
 - Keyboard shortcuts for power users
 
-✅ **Privacy by Design (GDPR Compliant)**
+**Privacy by Design (GDPR Compliant)**
 - Zero external tracking or analytics
 - All fonts and assets self-hosted
 - No data transfers outside EU/EØS (only approved Norwegian government services)
@@ -255,31 +255,34 @@ See [DEPENDENCIES.md](DEPENDENCIES.md) for complete dependency list with exact v
 
 ## Roadmap
 
-### Phase 1 (Complete) ✅
-- ✅ Interactive topographic map with Kartverket tiles
-- ✅ GPS location tracking and centering
-- ✅ Progressive Web App with offline capabilities
-- ✅ IndexedDB for local data storage
-- ✅ Privacy-first architecture (no tracking)
+### Phase 1 (Complete)
+- Interactive topographic map with Kartverket tiles
+- GPS location tracking and centering
+- Progressive Web App with offline capabilities
+- IndexedDB for local data storage
+- Privacy-first architecture (no tracking)
 
-### Phase 2 (In Progress) 🚧
-- ✅ **Search functionality** - Place names and addresses (Kartverket APIs)
-- ✅ **Offline map downloads** - Select area and download for offline use
-- ✅ **Routes and waypoints** - Draw routes, place waypoints, calculate distances
-- ✅ **POI categories** - Emergency shelters (DSB WFS), wilderness shelters, caves, towers, war memorials (Overpass API)
-- ✅ **Coordinate formats** - DD, DMS, DDM, UTM, MGRS support
-- ✅ **Settings** - Coordinate format preferences
-- ⏳ Route editing and management UI improvements
-- ⏳ Projects/tracks management
-- ⏳ GPX export functionality
+### Phase 2 (In Progress)
+**Completed:**
+- **Search functionality** - Place names and addresses (Kartverket APIs)
+- **Offline map downloads** - Select area and download for offline use
+- **Routes and waypoints** - Draw routes, place waypoints, calculate distances
+- **POI categories** - Emergency shelters (DSB WFS), wilderness shelters, caves, towers, war memorials (Overpass API)
+- **Coordinate formats** - DD, DMS, DDM, UTM, MGRS support
+- **Settings** - Coordinate format preferences
 
-### Phase 3 (Future) 📅
-- [ ] Additional POI categories (cabins, trails, parking)
-- [ ] Trail overlays from external sources
-- [ ] Elevation profiles using DTM data
-- [ ] GPX import functionality
-- [ ] Compass and bearing tools
-- [ ] Push notifications for weather alerts
+**In Development:**
+- Route editing and management UI improvements
+- Projects/tracks management
+- GPX export functionality
+
+### Phase 3 (Future)
+- Additional POI categories (cabins, trails, parking)
+- Trail overlays from external sources
+- Elevation profiles using DTM data
+- GPX import functionality
+- Compass and bearing tools
+- Push notifications for weather alerts
 
 ## Privacy & Security
 
@@ -296,7 +299,7 @@ Tråkke implements Privacy by Design according to GDPR and Norwegian privacy reg
 - [Developer Guidelines](DEVELOPER_GUIDELINES.md) - Privacy-first development workflow and pre-implementation checklist
 - [Browser Compatibility](BROWSER_COMPATIBILITY.md) - Tested browsers and compatibility notes
 
-## 📄 License
+## License
 
 MIT License - See LICENSE file
 

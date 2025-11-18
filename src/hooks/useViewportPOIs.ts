@@ -45,6 +45,8 @@ export const useViewportPOIs = ({
   const debounceTimeoutRef = useRef<number | undefined>(undefined)
   const previousBoundsRef = useRef<BoundsRect | null>(null)
   const previousZoomRef = useRef<number>(0)
+  const isFetchingRef = useRef<boolean>(false)
+  const latestPOIsRef = useRef<Map<POICategory, POI[]>>(new Map())
 
   useEffect(() => {
     mountedRef.current = true
@@ -112,6 +114,13 @@ export const useViewportPOIs = ({
       return
     }
 
+    // Skip if a fetch is already in progress for similar viewport
+    // This prevents redundant requests during rapid zoom/pan
+    if (isFetchingRef.current) {
+      console.log('[useViewportPOIs] Skipping fetch - request already in progress')
+      return
+    }
+
     previousBoundsRef.current = bounds
     previousZoomRef.current = zoom
 
@@ -124,6 +133,7 @@ export const useViewportPOIs = ({
     console.log(`[useViewportPOIs] Fetching POIs for bounds:`, bounds)
     setIsLoading(true)
     setError(null)
+    isFetchingRef.current = true
 
     try {
       const newVisiblePOIs = new Map<POICategory, POI[]>()
@@ -132,10 +142,12 @@ export const useViewportPOIs = ({
       const fetchPromises = Array.from(activeCategories).map(async (category) => {
         try {
           const pois = await poiService.getPOIs(category, bounds, zoom)
-          return { category, pois }
+          return { category, pois, error: null }
         } catch (err) {
           console.error(`Failed to fetch POIs for category ${category}:`, err)
-          return { category, pois: [] }
+          // Preserve cached POIs on error (e.g., 429 rate limiting) instead of clearing
+          const cachedPOIs = latestPOIsRef.current.get(category) || []
+          return { category, pois: cachedPOIs, error: err }
         }
       })
 
@@ -146,6 +158,7 @@ export const useViewportPOIs = ({
       })
 
       if (mountedRef.current) {
+        latestPOIsRef.current = newVisiblePOIs
         setVisiblePOIs(newVisiblePOIs)
         setIsLoading(false)
         console.log(`[useViewportPOIs] Updated visiblePOIs:`, newVisiblePOIs)
@@ -156,6 +169,8 @@ export const useViewportPOIs = ({
         setError(err instanceof Error ? err.message : 'Failed to load POIs')
         setIsLoading(false)
       }
+    } finally {
+      isFetchingRef.current = false
     }
   }, [map, activeCategories, minZoom, getBoundsWithBuffer, boundsChanged])
 
@@ -221,6 +236,7 @@ export const useViewportPOIs = ({
 
       setIsLoading(true)
       setError(null)
+      isFetchingRef.current = true
 
       try {
         const newVisiblePOIs = new Map<POICategory, POI[]>()
@@ -228,10 +244,12 @@ export const useViewportPOIs = ({
         const fetchPromises = Array.from(activeCategories).map(async (category) => {
           try {
             const pois = await poiService.getPOIs(category, bounds, zoom)
-            return { category, pois }
+            return { category, pois, error: null }
           } catch (err) {
             console.error(`Failed to fetch POIs for category ${category}:`, err)
-            return { category, pois: [] }
+            // Preserve cached POIs on error (e.g., 429 rate limiting) instead of clearing
+            const cachedPOIs = latestPOIsRef.current.get(category) || []
+            return { category, pois: cachedPOIs, error: err }
           }
         })
 
@@ -242,6 +260,7 @@ export const useViewportPOIs = ({
         })
 
         if (mountedRef.current) {
+          latestPOIsRef.current = newVisiblePOIs
           setVisiblePOIs(newVisiblePOIs)
           setIsLoading(false)
         }
@@ -251,6 +270,8 @@ export const useViewportPOIs = ({
           setError(err instanceof Error ? err.message : 'Failed to load POIs')
           setIsLoading(false)
         }
+      } finally {
+        isFetchingRef.current = false
       }
     }
 

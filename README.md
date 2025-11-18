@@ -40,12 +40,15 @@ A Progressive Web Application for Norwegian outdoor navigation with offline capa
 - Route management and deletion
 
 ✅ **Points of Interest (POI)**
-- Public shelters (Tilfluktsrom) from DSB (Norwegian Directorate for Civil Protection)
-- Custom yellow T-marker icons on map (#fbbf24)
-- POI details sheets with shelter capacity and address
+- **Emergency shelters** (Tilfluktsrom) from DSB via WFS - yellow T-marker
+- **Wilderness shelters** (Gapahuk/vindskjul) from OpenStreetMap - cottage icon
+- **Caves** (Huler) from OpenStreetMap - terrain icon (OSM-Carto style)
+- **Observation towers** (Observasjonstårn) from OpenStreetMap - castle icon
+- **War memorials** (Krigsminner: forts, bunkers, battlefields) from OpenStreetMap - monument icon (Osmic fort.svg)
 - Category-based filtering with toggle on/off
 - GPU-accelerated clustering for performance
 - Viewport-aware loading (fetches only visible POIs)
+- POI details sheets with comprehensive information
 
 ✅ **Progressive Web App**
 - Installable on mobile and desktop
@@ -119,7 +122,7 @@ trakke_pwa/
 │   │   ├── routeService.ts # Routes & waypoints CRUD
 │   │   ├── searchService.ts # Kartverket search
 │   │   ├── offlineMapService.ts # Tile downloading
-│   │   ├── poiService.ts   # POI fetching (DSB Tilfluktsrom)
+│   │   ├── poiService.ts   # POI fetching (DSB WFS + Overpass API)
 │   │   ├── coordinateService.ts # Format conversion
 │   │   └── settingsService.ts # User settings
 │   ├── hooks/              # Custom React hooks
@@ -263,7 +266,7 @@ See [DEPENDENCIES.md](DEPENDENCIES.md) for complete dependency list with exact v
 - ✅ **Search functionality** - Place names and addresses (Kartverket APIs)
 - ✅ **Offline map downloads** - Select area and download for offline use
 - ✅ **Routes and waypoints** - Draw routes, place waypoints, calculate distances
-- ✅ **POI categories** - Public shelters (Tilfluktsrom) from DSB with GPU clustering
+- ✅ **POI categories** - Emergency shelters (DSB WFS), wilderness shelters, caves, towers, war memorials (Overpass API)
 - ✅ **Coordinate formats** - DD, DMS, DDM, UTM, MGRS support
 - ✅ **Settings** - Coordinate format preferences
 - ⏳ Route editing and management UI improvements
@@ -304,7 +307,8 @@ All attribution and data source information is available in the app via the "Dat
 - **Maps**: © Kartverket - Topographic tiles (WMTS)
 - **Place Names**: © Kartverket - Sentralt Stedsnavnregister (SSR)
 - **Addresses**: © Kartverket - Adresseregister
-- **Public Shelters**: © DSB (Direktoratet for samfunnssikkerhet og beredskap) - Tilfluktsrom data
+- **Emergency Shelters**: © DSB (Direktoratet for samfunnssikkerhet og beredskap) - Tilfluktsrom data
+- **POI Data**: © OpenStreetMap contributors - Caves, observation towers, war memorials, wilderness shelters
 - **Icons**: Material Symbols Outlined (self-hosted, variable fonts)
 - **Font**: Exo 2 (self-hosted, variable font)
 - **Framework**: React by Meta
@@ -312,6 +316,7 @@ All attribution and data source information is available in the app via the "Dat
 **Data Licenses**:
 - Kartverket data: CC BY 4.0 - [Terms of use](https://www.kartverket.no/api-og-data/vilkar-for-bruk)
 - DSB data: Public data from Norwegian government agency
+- OpenStreetMap data: ODbL - [OpenStreetMap Copyright](https://www.openstreetmap.org/copyright)
 
 ---
 

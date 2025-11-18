@@ -91,7 +91,7 @@ const dbService = {
 | **Map tiles** | Display maps | Service Worker cache | 30 days | ✅ (Kartverket - Norway) |
 | **User location** | Show position on map | Memory only (runtime) | Session only | ✅ (Never leaves device) |
 | **App state** | Persist user preferences | IndexedDB (local) | Until user clears | ✅ (Never leaves device) |
-| **Fonts** | Display text/icons | Service Worker cache | Permanent | ✅ (Served locally) |
+| **Fonts & Icons** | Display text/POI markers | Service Worker cache / Bundled | Permanent | ✅ (Served locally: Material Symbols, Osmic icons) |
 
 ### External API Registry
 
@@ -103,6 +103,7 @@ const dbService = {
 | `ws.geonorge.no` | SSR API | Kartverket | Norway 🇳🇴 | Place name search | ✅ | Sentralt Stedsnavnregister (SSR), Norwegian government |
 | `ws.geonorge.no` | Address API | Kartverket | Norway 🇳🇴 | Address geocoding | ✅ | Norwegian address registry, government data |
 | `ogc.dsb.no` | WFS Service | DSB | Norway 🇳🇴 | Public shelter (Tilfluktsrom) locations | ✅ | Direktoratet for samfunnssikkerhet og beredskap, Norwegian government |
+| `overpass-api.de` | Overpass API | FOSSGIS e.V. | Germany 🇩🇪 | POI data (caves, towers, war memorials, wilderness shelters) from OpenStreetMap | ✅ | German non-profit, EU-based, public OSM data, no tracking |
 
 **Privacy guarantees for all approved services:**
 - No user tracking or analytics
@@ -145,7 +146,7 @@ Implemented via vite.config.ts custom plugin (production builds only):
                style-src 'self' 'unsafe-inline';
                img-src 'self' data: https://cache.kartverket.no;
                font-src 'self';
-               connect-src 'self' https://cache.kartverket.no https://ws.geonorge.no https://ogc.dsb.no;
+               connect-src 'self' https://cache.kartverket.no https://ws.geonorge.no https://ogc.dsb.no https://overpass-api.de;
                worker-src 'self';">
 ```
 
@@ -229,6 +230,17 @@ Implemented via vite.config.ts custom plugin (production builds only):
 | **typescript** | 5.9.3 | Microsoft (USA) | Type safety | ✅ None (dev only) | Safe |
 
 **Risk Assessment**: All dependencies are client-side libraries. No runtime data collection or external API calls.
+
+### Icon Assets (Self-Hosted)
+
+| Asset | Source | License | Purpose | Privacy |
+|-------|--------|---------|---------|---------|
+| **Material Symbols** | Google Fonts (self-hosted) | Apache 2.0 | UI icons and navigation | ✅ Self-hosted font file, no external requests |
+| **Osmic Icons** | github.com/gmgeo/osmic | CC0-1.0 (Public Domain) | POI category markers (fort.svg for war memorials) | ✅ Self-hosted SVGs, no external requests |
+| **OSM-Carto Icons** | github.com/gravitystorm/openstreetmap-carto | CC0-1.0 (Public Domain) | Natural feature POI markers (caves) | ✅ Self-hosted SVGs, no external requests |
+| **Custom SVG** | In-house | N/A | T-marker for Tilfluktsrom | ✅ Inline SVG, no external requests |
+
+**Icon Strategy**: Hybrid approach using Material Symbols for UI controls, Osmic for man-made POI markers, and OSM-Carto for natural features. All assets bundled in build, served from same origin. Zero external CDN dependencies.
 
 ### Future Dependency Guidelines
 

@@ -15,7 +15,7 @@ function injectCSP(): Plugin {
             tag: 'meta',
             attrs: {
               'http-equiv': 'Content-Security-Policy',
-              'content': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://cache.kartverket.no; font-src 'self'; connect-src 'self' https://cache.kartverket.no https://ws.geonorge.no https://ogc.dsb.no; worker-src 'self' blob:; manifest-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self';"
+              'content': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://cache.kartverket.no; font-src 'self'; connect-src 'self' https://cache.kartverket.no https://ws.geonorge.no https://ogc.dsb.no https://overpass-api.de; worker-src 'self' blob:; manifest-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self';"
             },
             injectTo: 'head'
           }

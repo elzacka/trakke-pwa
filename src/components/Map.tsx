@@ -679,7 +679,7 @@ const Map = ({ zenMode }: MapProps) => {
 
     const m = map.current
 
-    const initializePOILayers = () => {
+    const initializePOILayers = async () => {
       if (!map.current || poiLayersInitialized.current) return
 
       console.log('[Map] Initializing POI clustering layers...')
@@ -743,27 +743,78 @@ const Map = ({ zenMode }: MapProps) => {
           }
         })
 
-        // Unclustered points layer (individual shelter markers)
+        // Unclustered points layer (individual POI markers with category-specific icons)
         map.current.addLayer({
           id: 'poi-unclustered',
           type: 'symbol',
           source: 'pois',
           filter: ['!', ['has', 'point_count']],
           layout: {
-            'icon-image': 'shelter-icon', // Will be added as custom image
+            'icon-image': [
+              'match',
+              ['get', 'category'],
+              'shelters', 'tilfluktsrom-icon',
+              'wilderness_shelters', 'wilderness-shelter-icon',
+              'caves', 'cave-icon',
+              'observation_towers', 'tower-icon',
+              'war_memorials', 'memorial-icon',
+              'tilfluktsrom-icon' // fallback
+            ],
             'icon-size': 1,
             'icon-allow-overlap': true
           }
         })
 
-        // Create custom shelter icon (T marker) as image
+        // Helper function to load SVG and convert to Image
+        const loadSVGAsImage = async (path: string, color: string): Promise<HTMLImageElement> => {
+          const response = await fetch(path)
+          const svgText = await response.text()
+
+          // Recolor SVG to match category color
+          const coloredSVG = svgText.replace(/fill="[^"]*"/g, `fill="${color}"`)
+
+          const blob = new Blob([coloredSVG], { type: 'image/svg+xml' })
+          const url = URL.createObjectURL(blob)
+
+          return new Promise((resolve, reject) => {
+            const img = new Image()
+            img.onload = () => {
+              URL.revokeObjectURL(url)
+              resolve(img)
+            }
+            img.onerror = () => {
+              URL.revokeObjectURL(url)
+              reject(new Error(`Failed to load SVG: ${path}`))
+            }
+            img.src = url
+          })
+        }
+
+        // Helper function to convert Image to canvas ImageData
+        const imageToMapIcon = (img: HTMLImageElement, size: number) => {
+          const canvas = document.createElement('canvas')
+          canvas.width = size
+          canvas.height = size
+          const ctx = canvas.getContext('2d')!
+
+          // Draw image centered and scaled
+          ctx.drawImage(img, 0, 0, size, size)
+
+          return {
+            width: size,
+            height: size,
+            data: ctx.getImageData(0, 0, size, size).data
+          }
+        }
+
+        // Create custom shelter icon (T marker) as canvas
         const size = 24
         const canvas = document.createElement('canvas')
         canvas.width = size
         canvas.height = size
         const ctx = canvas.getContext('2d')!
 
-        // Draw yellow square with black border (using fillRect for compatibility)
+        // Draw yellow square with black border
         ctx.fillStyle = '#fbbf24'
         ctx.fillRect(2, 2, size - 4, size - 4)
         ctx.strokeStyle = '#111827'
@@ -777,11 +828,88 @@ const Map = ({ zenMode }: MapProps) => {
         ctx.textBaseline = 'middle'
         ctx.fillText('T', size / 2, size / 2)
 
-        map.current.addImage('shelter-icon', {
+        map.current.addImage('tilfluktsrom-icon', {
           width: size,
           height: size,
           data: ctx.getImageData(0, 0, size, size).data
         })
+
+        // Load SVG icons for all POI categories from OSM-Carto
+        try {
+          const caveImg = await loadSVGAsImage('/trakke-pwa/icons/osm-carto/cave.svg', '#8b4513')
+          map.current.addImage('cave-icon', imageToMapIcon(caveImg, size))
+
+          const towerImg = await loadSVGAsImage('/trakke-pwa/icons/osm-carto/tower_observation.svg', '#4a5568')
+          map.current.addImage('tower-icon', imageToMapIcon(towerImg, size))
+
+          const memorialImg = await loadSVGAsImage('/trakke-pwa/icons/osm-carto/fort.svg', '#6b7280')
+          map.current.addImage('memorial-icon', imageToMapIcon(memorialImg, size))
+
+          const wildernessShelterImg = await loadSVGAsImage('/trakke-pwa/icons/osm-carto/shelter.svg', '#b45309')
+          map.current.addImage('wilderness-shelter-icon', imageToMapIcon(wildernessShelterImg, size))
+        } catch (error) {
+          console.error('[Map] Failed to load SVG icons, using fallback circles:', error)
+
+          // Fallback: cave icon (brown circle)
+          const caveCanvas = document.createElement('canvas')
+          caveCanvas.width = size
+          caveCanvas.height = size
+          const caveCtx = caveCanvas.getContext('2d')!
+          caveCtx.fillStyle = '#8b4513' // Saddle brown
+          caveCtx.beginPath()
+          caveCtx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2)
+          caveCtx.fill()
+          map.current.addImage('cave-icon', {
+            width: size,
+            height: size,
+            data: caveCtx.getImageData(0, 0, size, size).data
+          })
+
+          // Fallback: observation tower icon (gray circle)
+          const towerCanvas = document.createElement('canvas')
+          towerCanvas.width = size
+          towerCanvas.height = size
+          const towerCtx = towerCanvas.getContext('2d')!
+          towerCtx.fillStyle = '#4a5568'
+          towerCtx.beginPath()
+          towerCtx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2)
+          towerCtx.fill()
+          map.current.addImage('tower-icon', {
+            width: size,
+            height: size,
+            data: towerCtx.getImageData(0, 0, size, size).data
+          })
+
+          // Fallback: war memorial icon (dark gray circle)
+          const memorialCanvas = document.createElement('canvas')
+          memorialCanvas.width = size
+          memorialCanvas.height = size
+          const memorialCtx = memorialCanvas.getContext('2d')!
+          memorialCtx.fillStyle = '#6b7280'
+          memorialCtx.beginPath()
+          memorialCtx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2)
+          memorialCtx.fill()
+          map.current.addImage('memorial-icon', {
+            width: size,
+            height: size,
+            data: memorialCtx.getImageData(0, 0, size, size).data
+          })
+
+          // Fallback: wilderness shelter icon (brown/orange circle)
+          const wildernessShelterCanvas = document.createElement('canvas')
+          wildernessShelterCanvas.width = size
+          wildernessShelterCanvas.height = size
+          const wildernessShelterCtx = wildernessShelterCanvas.getContext('2d')!
+          wildernessShelterCtx.fillStyle = '#b45309'
+          wildernessShelterCtx.beginPath()
+          wildernessShelterCtx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2)
+          wildernessShelterCtx.fill()
+          map.current.addImage('wilderness-shelter-icon', {
+            width: size,
+            height: size,
+            data: wildernessShelterCtx.getImageData(0, 0, size, size).data
+          })
+        }
 
         poiLayersInitialized.current = true
         console.log('[Map] POI clustering layers initialized successfully')
@@ -808,10 +936,16 @@ const Map = ({ zenMode }: MapProps) => {
 
     // Convert visible POIs to GeoJSON features
     const features: any[] = []
+    const idCounts: Record<string, number> = {}
 
     visiblePOIs.forEach((pois, category) => {
       if (activeCategories.has(category)) {
+        console.log(`[Map] Processing ${pois.length} POIs for category ${category}`)
         pois.forEach(poi => {
+          // Track duplicate IDs
+          const count = idCounts[poi.id] || 0
+          idCounts[poi.id] = count + 1
+
           features.push({
             type: 'Feature',
             geometry: {
@@ -829,6 +963,12 @@ const Map = ({ zenMode }: MapProps) => {
         })
       }
     })
+
+    // Log any duplicate POI IDs
+    const duplicates = Object.entries(idCounts).filter(([id, count]) => count > 1)
+    if (duplicates.length > 0) {
+      console.warn(`[Map] Found ${duplicates.length} duplicate POI IDs:`, duplicates)
+    }
 
     const source = map.current.getSource('pois') as maplibregl.GeoJSONSource
     if (source) {
@@ -1031,6 +1171,90 @@ const Map = ({ zenMode }: MapProps) => {
       canvas.removeEventListener('touchmove', handleTouchMove)
     }
   }, []) // Empty deps - register once
+
+  // Register direct DOM mousedown handler for Ctrl+click (bypasses MapLibre event handling)
+  useEffect(() => {
+    if (!map.current) return
+
+    const canvas = map.current.getCanvas()
+    let mouseDownPos: { x: number; y: number } | null = null
+    let hadCtrlKey = false
+
+    const handleMouseDown = (e: MouseEvent) => {
+      mouseDownPos = { x: e.clientX, y: e.clientY }
+      hadCtrlKey = e.ctrlKey
+
+      console.log('[Map] Direct DOM mousedown event - modifiers:', {
+        ctrlKey: e.ctrlKey,
+        shiftKey: e.shiftKey,
+        altKey: e.altKey,
+        metaKey: e.metaKey,
+        button: e.button
+      })
+    }
+
+    const handleMouseUp = async (e: MouseEvent) => {
+      console.log('[Map] Direct DOM mouseup event - modifiers:', {
+        ctrlKey: e.ctrlKey,
+        hadCtrlKeyOnDown: hadCtrlKey,
+        button: e.button
+      })
+
+      // Check if mouse hasn't moved much (click, not drag)
+      if (mouseDownPos) {
+        const dx = Math.abs(e.clientX - mouseDownPos.x)
+        const dy = Math.abs(e.clientY - mouseDownPos.y)
+
+        // Only handle Ctrl+click (left button) without dragging
+        if (hadCtrlKey && e.button === 0 && dx < 5 && dy < 5 && map.current) {
+          e.preventDefault()
+          e.stopPropagation()
+
+          // Get coordinates from map
+          const point = map.current.unproject([e.clientX, e.clientY])
+          const coords = `${point.lat.toFixed(6)}, ${point.lng.toFixed(6)}`
+          console.log('[Map] ✅ Direct Ctrl+Click detected! Copying coordinates:', coords)
+
+          try {
+            await navigator.clipboard.writeText(coords)
+            console.log('[Map] ✅ Coordinates copied successfully')
+
+            // Haptic feedback
+            if ('vibrate' in navigator) {
+              navigator.vibrate(10)
+            }
+
+            // Visual feedback
+            const notification = document.createElement('div')
+            notification.className = 'coordinate-copy-notification'
+            notification.textContent = `Koordinater kopiert: ${coords}`
+            document.body.appendChild(notification)
+
+            setTimeout(() => {
+              if (notification.parentNode) {
+                document.body.removeChild(notification)
+              }
+            }, UI_DELAYS.NOTIFICATION_DISPLAY)
+          } catch (error) {
+            console.error('Failed to copy coordinates:', error)
+            alert(`Koordinater: ${coords}`)
+          }
+        }
+      }
+
+      mouseDownPos = null
+      hadCtrlKey = false
+    }
+
+    // Capture phase to intercept before MapLibre
+    canvas.addEventListener('mousedown', handleMouseDown, { capture: true })
+    canvas.addEventListener('mouseup', handleMouseUp, { capture: true })
+
+    return () => {
+      canvas.removeEventListener('mousedown', handleMouseDown, { capture: true })
+      canvas.removeEventListener('mouseup', handleMouseUp, { capture: true })
+    }
+  }, [])
 
   // Helper function to update route drawing layers (prevents stale closure issues)
   const updateRouteDrawingLayers = (points: Array<[number, number]>) => {
@@ -1282,17 +1506,29 @@ const Map = ({ zenMode }: MapProps) => {
     // Use ref values to avoid stale closures
     const { isPlacingWaypoint, isDrawingRoute, isSelectingArea, measurementActive, measurementMode, isMobile } = clickStateRef.current
 
-    console.log('[Map] Click detected. isPlacingWaypoint:', isPlacingWaypoint, 'isDrawingRoute:', isDrawingRoute)
-
-    // Ctrl+Click (or Cmd+Click on Mac): Copy coordinates to clipboard (desktop only)
     const mouseEvent = e.originalEvent as MouseEvent
-    if (!isMobile && mouseEvent && (mouseEvent.ctrlKey || mouseEvent.metaKey)) {
+
+    // Debug: Log all modifier keys on every click
+    if (mouseEvent) {
+      console.log('[Map] MapLibre click event - modifiers:', {
+        ctrlKey: mouseEvent.ctrlKey,
+        shiftKey: mouseEvent.shiftKey,
+        altKey: mouseEvent.altKey,
+        metaKey: mouseEvent.metaKey,
+        isMobile
+      })
+    }
+
+    // Ctrl+Click: Copy coordinates to clipboard (desktop only)
+    // Note: This might not fire if MapLibre intercepts Ctrl+click
+    if (!isMobile && mouseEvent && mouseEvent.ctrlKey) {
+      e.preventDefault()
       const coords = `${e.lngLat.lat.toFixed(6)}, ${e.lngLat.lng.toFixed(6)}`
-      console.log('[Map] Ctrl/Cmd+Click detected, copying coordinates:', coords)
+      console.log('[Map] ✅ Ctrl+Click detected! Copying coordinates:', coords)
 
       try {
         await navigator.clipboard.writeText(coords)
-        console.log('[Map] Coordinates copied successfully')
+        console.log('[Map] ✅ Coordinates copied successfully to clipboard')
 
         // Visual feedback using CSS class (safer than inline styles)
         const notification = document.createElement('div')

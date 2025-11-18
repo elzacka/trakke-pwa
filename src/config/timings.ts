@@ -11,8 +11,8 @@ export const UI_DELAYS = {
   /** Search debounce delay (300ms) */
   SEARCH_DEBOUNCE: 300,
 
-  /** POI viewport loading debounce (300ms) */
-  POI_DEBOUNCE: 300,
+  /** POI viewport loading debounce (1000ms) - increased to reduce Overpass API rate limiting */
+  POI_DEBOUNCE: 1000,
 
   /** Long-press duration for waypoint details (500ms) */
   LONG_PRESS: 500,
@@ -25,8 +25,8 @@ export const UI_DELAYS = {
  * Cache and TTL settings
  */
 export const CACHE_CONFIG = {
-  /** POI cache time-to-live (5 minutes) */
-  POI_TTL: 300000, // 5 minutes
+  /** POI cache time-to-live (30 minutes) - increased to reduce Overpass API calls */
+  POI_TTL: 1800000, // 30 minutes
 
   /** Map tile cache max entries (Workbox) */
   TILE_MAX_ENTRIES: 25000,

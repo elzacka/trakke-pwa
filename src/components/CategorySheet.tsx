@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import BottomSheet from './BottomSheet'
 import { poiService, type POICategory } from '../services/poiService'
+import { getIconConfig } from '../services/iconService'
 import '../styles/CategorySheet.css'
 
 interface CategorySheetProps {
@@ -21,9 +22,18 @@ const CATEGORY_GROUPS: CategoryGroup[] = [
     id: 'emergency',
     name: 'Service',
     categories: ['shelters']
+  },
+  {
+    id: 'outdoor',
+    name: 'Friluftsliv',
+    categories: ['wilderness_shelters', 'caves', 'observation_towers']
+  },
+  {
+    id: 'culture',
+    name: 'Kultur',
+    categories: ['war_memorials']
   }
-  // Future groups:
-  // { id: 'outdoor', name: 'Friluftsliv', categories: ['cabins', 'camping', 'trails'] }
+  // Future categories:
   // { id: 'infrastructure', name: 'Infrastruktur', categories: ['parking', 'facilities'] }
 ]
 
@@ -108,6 +118,8 @@ const CategorySheet = ({ isOpen, onClose, onCategorySelect }: CategorySheetProps
                       const isSelected = selectedCategories.has(categoryId)
                       const cachedCount = poiService.getCachedCount(categoryId)
 
+                      const iconConfig = getIconConfig(categoryId)
+
                       return (
                         <button
                           key={categoryId}
@@ -115,12 +127,21 @@ const CategorySheet = ({ isOpen, onClose, onCategorySelect }: CategorySheetProps
                           onClick={() => handleCategoryToggle(categoryId)}
                         >
                           <div className="category-option-icon">
-                            {category.icon === 'custom-t-marker' ? (
+                            {iconConfig.type === 'custom' && categoryId === 'shelters' ? (
+                              // Custom T-marker for Tilfluktsrom
                               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <rect x="0.5" y="0.5" width="19" height="19" rx="2.5" fill="#fbbf24" stroke="#111827" strokeWidth="1"/>
                                 <text x="10" y="10" fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" fontSize="12" fontWeight="400" fill="#111827" textAnchor="middle" dominantBaseline="central">T</text>
                               </svg>
+                            ) : (iconConfig.type === 'osmic' || iconConfig.type === 'osm-carto') && iconConfig.path ? (
+                              // Osmic or OSM-Carto SVG icon
+                              <img
+                                src={iconConfig.path}
+                                alt={category.name}
+                                style={{ width: '20px', height: '20px', filter: `brightness(0) saturate(100%)`, opacity: 0.8 }}
+                              />
                             ) : (
+                              // Material Symbol fallback
                               <span className="material-symbols-outlined" style={{ color: category.color }}>{category.icon}</span>
                             )}
                           </div>

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import BottomSheet from './BottomSheet'
-import { poiService, type POI, type ShelterPOI } from '../services/poiService'
+import { poiService, type POI, type ShelterPOI, type CavePOI, type ObservationTowerPOI, type WarMemorialPOI, type WildernessShelterPOI } from '../services/poiService'
 import '../styles/POIDetailsSheet.css'
 
 interface POIDetailsSheetProps {
@@ -14,9 +14,13 @@ const POIDetailsSheet = ({ isOpen, onClose, poi }: POIDetailsSheetProps) => {
 
   if (!poi) return null
 
-  // Map POI type to category (shelter -> shelters)
-  const categoryMap: Record<string, 'shelters'> = {
-    'shelter': 'shelters'
+  // Map POI type to category
+  const categoryMap: Record<string, 'shelters' | 'caves' | 'observation_towers' | 'war_memorials' | 'wilderness_shelters'> = {
+    'shelter': 'shelters',
+    'cave': 'caves',
+    'observation_tower': 'observation_towers',
+    'war_memorial': 'war_memorials',
+    'wilderness_shelter': 'wilderness_shelters'
   }
   const category = categoryMap[poi.type] || 'shelters'
   const categoryConfig = poiService.getCategoryConfig(category)
@@ -27,6 +31,19 @@ const POIDetailsSheet = ({ isOpen, onClose, poi }: POIDetailsSheetProps) => {
     return match ? match[0] : ''
   }
 
+  /**
+   * Render POI details for all categories
+   *
+   * DESIGN DECISION (2025-11-17):
+   * - NO Material Symbol icons in POI detail items
+   * - Clean, text-only information display
+   * - Copy button icon is the ONLY exception (functional purpose)
+   *
+   * IMPORTANT: When adding new POI categories in the future:
+   * - DO NOT add icons to info items (no <span className="material-symbols-outlined">)
+   * - Only show: label + value in a two-column grid layout
+   * - Keep the copy button on coordinates row (it's functional, not decorative)
+   */
   const renderShelterDetails = (shelter: ShelterPOI) => {
     const handleCopyCoordinates = () => {
       const [lon, lat] = shelter.coordinates
@@ -45,24 +62,228 @@ const POIDetailsSheet = ({ isOpen, onClose, poi }: POIDetailsSheetProps) => {
       <>
         <div className="poi-details-info">
           <div className="poi-details-info-item">
-            <span className="material-symbols-outlined">group</span>
             <div className="poi-details-info-label">Kapasitet</div>
             <div className="poi-details-info-value">
               {shelter.capacity} {shelter.capacity === 1 ? 'plass' : 'plasser'}
             </div>
           </div>
           <div className="poi-details-info-item">
-            <span className="material-symbols-outlined">category</span>
             <div className="poi-details-info-label">Kategori</div>
             <div className="poi-details-info-value">{shelter.category}</div>
           </div>
           <div className="poi-details-info-item">
-            <span className="material-symbols-outlined">location_on</span>
             <div className="poi-details-info-label">Adresse</div>
             <div className="poi-details-info-value">{shelter.address}</div>
           </div>
           <div className="poi-details-info-item poi-details-info-item-with-button">
-            <span className="material-symbols-outlined">pin_drop</span>
+            <div className="poi-details-info-label">Koordinater</div>
+            <div className="poi-details-info-value">
+              {shelter.coordinates[1].toFixed(5)}°N, {shelter.coordinates[0].toFixed(5)}°E
+            </div>
+            <button
+              className={`poi-details-copy-button ${copied ? 'copied' : ''}`}
+              onClick={handleCopyCoordinates}
+              aria-label="Kopier koordinater"
+            >
+              <span className="material-symbols-outlined">
+                {copied ? 'check' : 'content_copy'}
+              </span>
+            </button>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  const renderCaveDetails = (cave: CavePOI) => {
+    const handleCopyCoordinates = () => {
+      const [lon, lat] = cave.coordinates
+      const coords = `${lat.toFixed(6)}, ${lon.toFixed(6)}`
+      navigator.clipboard.writeText(coords)
+      if ('vibrate' in navigator) {
+        navigator.vibrate(10)
+      }
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+
+    return (
+      <>
+        <div className="poi-details-info">
+          <div className="poi-details-info-item">
+            <div className="poi-details-info-label">Navn</div>
+            <div className="poi-details-info-value">{cave.name}</div>
+          </div>
+          {cave.description && (
+            <div className="poi-details-info-item">
+              <div className="poi-details-info-label">Beskrivelse</div>
+              <div className="poi-details-info-value">{cave.description}</div>
+            </div>
+          )}
+          <div className="poi-details-info-item poi-details-info-item-with-button">
+            <div className="poi-details-info-label">Koordinater</div>
+            <div className="poi-details-info-value">
+              {cave.coordinates[1].toFixed(5)}°N, {cave.coordinates[0].toFixed(5)}°E
+            </div>
+            <button
+              className={`poi-details-copy-button ${copied ? 'copied' : ''}`}
+              onClick={handleCopyCoordinates}
+              aria-label="Kopier koordinater"
+            >
+              <span className="material-symbols-outlined">
+                {copied ? 'check' : 'content_copy'}
+              </span>
+            </button>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  const renderObservationTowerDetails = (tower: ObservationTowerPOI) => {
+    const handleCopyCoordinates = () => {
+      const [lon, lat] = tower.coordinates
+      const coords = `${lat.toFixed(6)}, ${lon.toFixed(6)}`
+      navigator.clipboard.writeText(coords)
+      if ('vibrate' in navigator) {
+        navigator.vibrate(10)
+      }
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+
+    return (
+      <>
+        <div className="poi-details-info">
+          <div className="poi-details-info-item">
+            <div className="poi-details-info-label">Navn</div>
+            <div className="poi-details-info-value">{tower.name}</div>
+          </div>
+          {tower.height && (
+            <div className="poi-details-info-item">
+              <div className="poi-details-info-label">Høyde</div>
+              <div className="poi-details-info-value">{tower.height} m</div>
+            </div>
+          )}
+          {tower.operator && (
+            <div className="poi-details-info-item">
+              <div className="poi-details-info-label">Operatør</div>
+              <div className="poi-details-info-value">{tower.operator}</div>
+            </div>
+          )}
+          <div className="poi-details-info-item poi-details-info-item-with-button">
+            <div className="poi-details-info-label">Koordinater</div>
+            <div className="poi-details-info-value">
+              {tower.coordinates[1].toFixed(5)}°N, {tower.coordinates[0].toFixed(5)}°E
+            </div>
+            <button
+              className={`poi-details-copy-button ${copied ? 'copied' : ''}`}
+              onClick={handleCopyCoordinates}
+              aria-label="Kopier koordinater"
+            >
+              <span className="material-symbols-outlined">
+                {copied ? 'check' : 'content_copy'}
+              </span>
+            </button>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  const renderWarMemorialDetails = (memorial: WarMemorialPOI) => {
+    const handleCopyCoordinates = () => {
+      const [lon, lat] = memorial.coordinates
+      const coords = `${lat.toFixed(6)}, ${lon.toFixed(6)}`
+      navigator.clipboard.writeText(coords)
+      if ('vibrate' in navigator) {
+        navigator.vibrate(10)
+      }
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+
+    return (
+      <>
+        <div className="poi-details-info">
+          <div className="poi-details-info-item">
+            <div className="poi-details-info-label">Navn</div>
+            <div className="poi-details-info-value">{memorial.name}</div>
+          </div>
+          {memorial.period && (
+            <div className="poi-details-info-item">
+              <div className="poi-details-info-label">Periode</div>
+              <div className="poi-details-info-value">{memorial.period}</div>
+            </div>
+          )}
+          {memorial.inscription && (
+            <div className="poi-details-info-item">
+              <div className="poi-details-info-label">Inskript</div>
+              <div className="poi-details-info-value">{memorial.inscription}</div>
+            </div>
+          )}
+          <div className="poi-details-info-item poi-details-info-item-with-button">
+            <div className="poi-details-info-label">Koordinater</div>
+            <div className="poi-details-info-value">
+              {memorial.coordinates[1].toFixed(5)}°N, {memorial.coordinates[0].toFixed(5)}°E
+            </div>
+            <button
+              className={`poi-details-copy-button ${copied ? 'copied' : ''}`}
+              onClick={handleCopyCoordinates}
+              aria-label="Kopier koordinater"
+            >
+              <span className="material-symbols-outlined">
+                {copied ? 'check' : 'content_copy'}
+              </span>
+            </button>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  const renderWildernessShelterDetails = (shelter: WildernessShelterPOI) => {
+    const handleCopyCoordinates = () => {
+      const [lon, lat] = shelter.coordinates
+      const coords = `${lat.toFixed(6)}, ${lon.toFixed(6)}`
+      navigator.clipboard.writeText(coords)
+      if ('vibrate' in navigator) {
+        navigator.vibrate(10)
+      }
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+
+    // Norwegian shelter type labels
+    const shelterTypeLabels: Record<string, string> = {
+      'basic_hut': 'Gapahuk',
+      'weather_shelter': 'Vindskjul',
+      'rock_shelter': 'Helleskjul',
+      'lavvu': 'Lavvo'
+    }
+
+    return (
+      <>
+        <div className="poi-details-info">
+          <div className="poi-details-info-item">
+            <div className="poi-details-info-label">Navn</div>
+            <div className="poi-details-info-value">{shelter.name}</div>
+          </div>
+          {shelter.shelter_type && (
+            <div className="poi-details-info-item">
+              <div className="poi-details-info-label">Type</div>
+              <div className="poi-details-info-value">
+                {shelterTypeLabels[shelter.shelter_type] || shelter.shelter_type}
+              </div>
+            </div>
+          )}
+          {shelter.description && (
+            <div className="poi-details-info-item">
+              <div className="poi-details-info-label">Beskrivelse</div>
+              <div className="poi-details-info-value">{shelter.description}</div>
+            </div>
+          )}
+          <div className="poi-details-info-item poi-details-info-item-with-button">
             <div className="poi-details-info-label">Koordinater</div>
             <div className="poi-details-info-value">
               {shelter.coordinates[1].toFixed(5)}°N, {shelter.coordinates[0].toFixed(5)}°E
@@ -93,7 +314,10 @@ const POIDetailsSheet = ({ isOpen, onClose, poi }: POIDetailsSheetProps) => {
       <div className="poi-details-sheet">
         <div className="poi-details-header">
           <h2 className="poi-details-title">
-            {categoryConfig.name} nr. {getRoomNumber(poi.name)}
+            {poi.type === 'shelter'
+              ? `${categoryConfig.name} nr. ${getRoomNumber(poi.name)}`
+              : poi.name
+            }
           </h2>
           <button
             className="poi-details-close"
@@ -106,6 +330,10 @@ const POIDetailsSheet = ({ isOpen, onClose, poi }: POIDetailsSheetProps) => {
 
         <div className="poi-details-content">
           {poi.type === 'shelter' && renderShelterDetails(poi as ShelterPOI)}
+          {poi.type === 'cave' && renderCaveDetails(poi as CavePOI)}
+          {poi.type === 'observation_tower' && renderObservationTowerDetails(poi as ObservationTowerPOI)}
+          {poi.type === 'war_memorial' && renderWarMemorialDetails(poi as WarMemorialPOI)}
+          {poi.type === 'wilderness_shelter' && renderWildernessShelterDetails(poi as WildernessShelterPOI)}
         </div>
       </div>
     </BottomSheet>

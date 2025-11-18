@@ -100,9 +100,13 @@ BottomSheet (reusable container)
 ├── DownloadSheet (offline area download)
 ├── RouteSheet (routes & waypoints management)
 ├── CategorySheet (POI categories)
-│   ├── Category groups (Service, future: Friluftsliv, Infrastruktur)
+│   ├── Category groups (Service, Natur, Infrastruktur, Historie)
 │   ├── Toggle categories on/off
-│   └── Shelters (Tilfluktsrom from DSB)
+│   ├── Emergency shelters (Tilfluktsrom from DSB WFS)
+│   ├── Wilderness shelters (Gapahuk/vindskjul from Overpass API)
+│   ├── Caves (Huler from Overpass API)
+│   ├── Observation towers (Observasjonstårn from Overpass API)
+│   └── War memorials (Krigsminner: forts, bunkers, battlefields from Overpass API)
 ├── POIDetailsSheet (POI information)
 │   ├── Shelter details (capacity, address)
 │   └── Coordinate display in multiple formats
@@ -148,11 +152,12 @@ All services are singletons exported as instances:
 - Respects Norwegian bounds
 
 **poiService.ts** - Points of Interest (POI) management
-- Fetches POI data from external WFS services (DSB Tilfluktsrom)
+- Fetches POI data from external services (WFS and Overpass API)
 - Viewport-aware caching (5-minute TTL)
-- Currently supports: Public shelters (Tilfluktsrom from DSB)
+- **WFS data sources**: Emergency shelters (DSB Tilfluktsrom)
+- **Overpass API sources**: Wilderness shelters, caves, observation towers, war memorials
 - Returns GeoJSON-compatible POI objects
-- Category system for future expansion (cabins, trails, parking)
+- **Critical bug fix**: Processes both OSM nodes and ways (polygons), calculates centroids for way geometries, filters out bare geometry nodes
 
 **coordinateService.ts** - Coordinate format conversion
 - Supports 5 formats: DD, DMS, DDM, UTM, MGRS
@@ -245,7 +250,11 @@ isSelectingArea: boolean     // Two clicks to select download area
 - Search result: Green location pin (maplibregl.Marker, auto-removes when panned out of viewport)
 - Waypoint: Red pulsing location pin (maplibregl.Marker, CSS animation)
 - POI markers: Rendered as GeoJSON layer with GPU clustering
-  - Shelters (Tilfluktsrom): Custom yellow T-marker (#fbbf24)
+  - Emergency shelters (Tilfluktsrom): Custom yellow T-marker (#fbbf24)
+  - Wilderness shelters (Gapahuk/vindskjul): cottage icon (brown/orange #b45309)
+  - Caves: terrain icon (saddle brown #8b4513) - OSM-Carto style
+  - Observation towers: castle icon (gray #4a5568) - Osmic style
+  - War memorials: monument icon (dark gray #6b7280) - Osmic fort.svg
   - Cluster circles: Show count of POIs in viewport
   - Click to view POI details in POIDetailsSheet
 
@@ -326,7 +335,49 @@ if (oldVersion < 4 && !db.objectStoreNames.contains('myStore')) {
 5. Update CSP in vite.config.ts to match
 6. Test in production build
 
-**Approved example**: DSB Tilfluktsrom WFS (`ogc.dsb.no`) - Norwegian government agency, no tracking, public data, no API keys
+**Approved examples**:
+- DSB Tilfluktsrom WFS (`ogc.dsb.no`) - Norwegian government agency, no tracking, public data, no API keys
+- Overpass API (`overpass-api.de`) - German non-profit (FOSSGIS e.V.), EU-based, public OSM data, no tracking
+
+### Processing OSM Way Geometries (Polygons)
+
+When fetching POI data from Overpass API, many features (forts, bunkers, buildings) are represented as **ways** (polygons) rather than nodes. To display them as point markers, calculate the centroid:
+
+```typescript
+// poiService.ts - parseOverpassJSON() pattern
+for (const element of data.elements) {
+  // Skip bare geometry nodes (nodes without tags)
+  const tags = element.tags || {}
+  if (Object.keys(tags).length === 0) continue
+
+  let coordinates: [number, number]
+
+  if (element.type === 'node') {
+    // Use lat/lon directly for nodes
+    coordinates = [element.lon, element.lat]
+  } else if (element.type === 'way') {
+    // Calculate centroid for ways (polygons)
+    if (!element.nodes || element.nodes.length === 0) continue
+
+    // Find node coordinates from elements array
+    const wayNodes = data.elements.filter((e: any) =>
+      element.nodes.includes(e.id) && e.type === 'node'
+    )
+
+    if (wayNodes.length === 0) continue
+
+    // Calculate centroid
+    const sumLon = wayNodes.reduce((sum: number, n: any) => sum + n.lon, 0)
+    const sumLat = wayNodes.reduce((sum: number, n: any) => sum + n.lat, 0)
+    coordinates = [sumLon / wayNodes.length, sumLat / wayNodes.length]
+  }
+
+  // Create POI with calculated coordinates
+  pois.push({ id, type, name, coordinates })
+}
+```
+
+**Critical**: Always filter out bare geometry nodes (nodes without tags) to prevent duplicate markers. Only process elements with tags (features).
 
 ## Code Quality & Best Practices
 
@@ -527,7 +578,7 @@ Key files to understand the architecture:
 - `src/services/routeService.ts` - Routes/waypoints CRUD
 - `src/services/searchService.ts` - Kartverket search APIs
 - `src/services/offlineMapService.ts` - Tile downloading
-- `src/services/poiService.ts` - POI fetching and caching (DSB Tilfluktsrom)
+- `src/services/poiService.ts` - POI fetching and caching (DSB WFS + Overpass API for OSM data)
 - `src/services/coordinateService.ts` - Coordinate format conversion
 - `src/services/settingsService.ts` - User settings (localStorage)
 
@@ -581,7 +632,8 @@ When reviewing or modifying code:
   - localhost (or your domain)
   - cache.kartverket.no (map tiles)
   - ws.geonorge.no (search APIs)
-  - ogc.dsb.no (shelter POI data)
+  - ogc.dsb.no (emergency shelter POI data)
+  - overpass-api.de (OSM POI data: caves, towers, war memorials, wilderness shelters)
 
 **Documentation reference**:
 - Privacy checklist: [DEVELOPER_GUIDELINES.md](DEVELOPER_GUIDELINES.md#pre-implementation-checklist)

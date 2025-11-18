@@ -1,32 +1,32 @@
-# Tråkke designsystem
+# Tråkke Design System
 
-**Nordisk ro** – Et dempet design som fremhever kartet og lar brukeren utforske i fred.
+**Nordisk ro** – A muted design that highlights the map and lets the user explore in peace.
 
-## Filosofi
+## Philosophy
 
-Tråkkes designsystem bygger på prinsippet **"Nordisk ro"**. Designet er inspirert av stillheten i norsk natur og bygger på et bevisst fravær av støy. Kartet får være sentrum, mens grensesnittet holder seg diskret i bakgrunnen. Fargepaletten er dempet og naturlig, slik at brukerens oppmerksomhet forblir der den skal: ute i terrenget, ikke på skjermen.
+Tråkke's design system is built on the principle of **"Nordisk ro"** (Nordic tranquility). The design is inspired by the stillness of Norwegian nature and is based on a deliberate absence of noise. The map takes center stage, while the interface remains discreetly in the background. The color palette is muted and natural, so that the user's attention remains where it should be: out in the terrain, not on the screen.
 
-### Designprinsipper
+### Design Principles
 
-1. **Minimalistisk** – Brukeren ser bare det som faktisk trengs.
-2. **Kartet i sentrum** – Kartet er hovedinnholdet uten konkurranse fra andre elementer.
-3. **Naturinspirert** – Farger og former hentet fra norsk natur.
-4. **Personvern som standard** – Ingen støy. Ingen sporing.
-5. **Tilgjengelighet som praksis** – Kontraster, typografi og struktur følger WCAG for lesbarhet og brukervennlighet.
+1. **Minimalist** – The user only sees what is actually needed.
+2. **Map-centric** – The map is the main content without competition from other elements.
+3. **Nature-inspired** – Colors and shapes drawn from Norwegian nature.
+4. **Privacy by default** – No noise. No tracking.
+5. **Accessibility as practice** – Contrasts, typography, and structure follow WCAG for readability and usability.
 
 ---
 
-## Logo & Identitet
+## Logo & Identity
 
-### Tråkke-logoen
+### The Tråkke Logo
 
-Tråkke-logoen består av to elementer: **symbolet** og **navnet**. Sammen skaper de et uttrykk som er lett å kjenne igjen og enkelt å bruke i alle flater.
+The Tråkke logo consists of two elements: the **symbol** and the **name**. Together they create an expression that is easy to recognize and simple to use across all surfaces.
 
 #### Symbol (Brand Mark)
 
 **Material Symbol:** `forest` (Outlined variant)
 
-I header-implementasjonen (App.tsx):
+In the header implementation (App.tsx):
 
 ```tsx
 <span className="material-symbols-outlined logo-icon">
@@ -44,7 +44,7 @@ I header-implementasjonen (App.tsx):
 }
 ```
 
-I fargepaletten (color_palette.html) brukes en boksramme:
+In the color palette (color_palette.html), a box frame is used:
 
 ```css
 .brand-mark {
@@ -68,23 +68,23 @@ I fargepaletten (color_palette.html) brukes en boksramme:
 }
 ```
 
-**Spesifikasjoner:**
-- **Ikon:** `forest` fra Material Symbols Outlined
-- **Størrelse i app:** 28px (direkte på header)
-- **Størrelse i fargepalett:** 30px (i 44×44px container)
-- **Farge:** Alltid Tråkke-grønn (#3e4533)
-- **Font-familie:** 'Material Symbols Outlined' (self-hosted)
-- **Line-height:** 1 (for presis sentrering)
+**Specifications:**
+- **Icon:** `forest` from Material Symbols Outlined
+- **Size in app:** 28px (directly on header)
+- **Size in color palette:** 30px (in 44×44px container)
+- **Color:** Always Tråkke green (#3e4533)
+- **Font family:** 'Material Symbols Outlined' (self-hosted)
+- **Line-height:** 1 (for precise centering)
 
-**Alternativer:**
-- **SVG-fallback:** Hvis Material Symbols ikke er tilgjengelig, bruk en custom SVG-versjon av tree/forest-ikonet (se `/public/trakke-icon.svg`)
-- **Monokrom:** På mørk bakgrunn, bruk hvit (#ffffff) ikonfarge
+**Alternatives:**
+- **SVG fallback:** If Material Symbols is not available, use a custom SVG version of the tree/forest icon (see `/public/trakke-icon.svg`)
+- **Monochrome:** On dark backgrounds, use white (#ffffff) icon color
 
-#### Navn (Logotype)
+#### Name (Logotype)
 
-**Typografi:** Exo 2 (self-hosted variable font)
+**Typography:** Exo 2 (self-hosted variable font)
 
-I header-implementasjonen (App.tsx):
+In the header implementation (App.tsx):
 
 ```tsx
 <h1 className="app-title">Tråkke</h1>
@@ -101,7 +101,7 @@ I header-implementasjonen (App.tsx):
   line-height: 1;
 }
 
-/* Mobil (max-width: 768px) */
+/* Mobile (max-width: 768px) */
 @media (max-width: 768px) {
   .app-title {
     font-size: 24px;
@@ -109,7 +109,7 @@ I header-implementasjonen (App.tsx):
 }
 ```
 
-I fargepaletten brukes system fonts:
+In the color palette, system fonts are used:
 
 ```css
 .brand-name {
@@ -121,31 +121,31 @@ I fargepaletten brukes system fonts:
 }
 ```
 
-**Spesifikasjoner:**
-- **Skrivemåte:** `Tråkke` (stor T, små bokstaver, med norsk å)
-- **Font i app:** Exo 2 (self-hosted)
-- **Font i dokumentasjon:** System fonts (privacy-compliant)
-- **Vekt i app:** 300 (light, for elegant uttrykk)
-- **Vekt i dokumentasjon:** 600 (semibold, for bedre lesbarhet)
-- **Størrelse:** 28px (desktop), 24px (mobil)
-- **Farge:** Alltid Tråkke-grønn (#3e4533)
-- **Letter-spacing:** 0.02em (app), 0.04em (dokumentasjon)
+**Specifications:**
+- **Spelling:** `Tråkke` (capital T, lowercase letters, with Norwegian å)
+- **Font in app:** Exo 2 (self-hosted)
+- **Font in documentation:** System fonts (privacy-compliant)
+- **Weight in app:** 300 (light, for elegant expression)
+- **Weight in documentation:** 600 (semibold, for better readability)
+- **Size:** 28px (desktop), 24px (mobile)
+- **Color:** Always Tråkke green (#3e4533)
+- **Letter-spacing:** 0.02em (app), 0.04em (documentation)
 
 #### Logo Lockup
 
-Standard plassering er horisontal med symbol til venstre.
+Standard placement is horizontal with symbol on the left.
 
-I app-headeren:
+In the app header:
 
 ```css
 .header-branding {
   display: flex;
   align-items: center;
-  gap: 8px;  /* Avstand mellom symbol og navn */
+  gap: 8px;  /* Distance between symbol and name */
 }
 ```
 
-I fargepaletten:
+In the color palette:
 
 ```css
 .brand-lockup {
@@ -155,52 +155,52 @@ I fargepaletten:
 }
 ```
 
-**Varianter:**
+**Variants:**
 
-1. **Primær (horisontal):**
+1. **Primary (horizontal):**
    ```
    [Symbol] Tråkke
    ```
-   - Symbol 28px, navn 28px (desktop app)
-   - Symbol 28px, navn 24px (mobil app)
-   - Gap: 8px (app), 14px (dokumentasjon)
-   - Bruk: Header, velkomstskjerm, about-side
+   - Symbol 28px, name 28px (desktop app)
+   - Symbol 28px, name 24px (mobile app)
+   - Gap: 8px (app), 14px (documentation)
+   - Use: Header, welcome screen, about page
 
-2. **Kompakt (kun symbol):**
+2. **Compact (symbol only):**
    ```
    [Symbol]
    ```
-   - Kun symbol 44×44px
-   - Bruk: PWA-ikon, favicon, tight spaces
+   - Symbol only 44×44px
+   - Use: PWA icon, favicon, tight spaces
 
-3. **Vertikal (sentert):**
+3. **Vertical (centered):**
    ```
       [Symbol]
       Tråkke
    ```
-   - Symbol over navn
+   - Symbol above name
    - Gap: 8px
-   - Bruk: Splash screens, onboarding
+   - Use: Splash screens, onboarding
 
-#### Clearspace & Plassering
+#### Clearspace & Placement
 
-**Minimum clearspace:** 12px rundt hele logo-lockupen (0.5× symbol-høyde)
+**Minimum clearspace:** 12px around the entire logo lockup (0.5× symbol height)
 
-**Ikke:**
-- ❌ Strekk eller skjev logoen
-- ❌ Endre farger (kun #3e4533 eller #ffffff)
-- ❌ Legg til effekter (skygger, gradients på tekst)
-- ❌ Plasser på komplekse bakgrunner uten overlay
-- ❌ Bruk andre ikoner enn `forest`
+**Don't:**
+- Stretch or skew the logo
+- Change colors (only #3e4533 or #ffffff)
+- Add effects (shadows, gradients on text)
+- Place on complex backgrounds without overlay
+- Use icons other than `forest`
 
-**Tillatt:**
-- ✅ Monokrom hvit på mørke bakgrunner
-- ✅ SVG-fallback hvis Material Symbols ikke tilgjengelig
-- ✅ Skalere proporsjonsbestemt (behold aspect ratio)
+**Allowed:**
+- Monochrome white on dark backgrounds
+- SVG fallback if Material Symbols not available
+- Scale proportionally (maintain aspect ratio)
 
-#### PWA-ikon (App Icon)
+#### PWA Icon (App Icon)
 
-Basert på symbolet, optimalisert for maskering.
+Based on the symbol, optimized for masking.
 
 ```json
 {
@@ -210,11 +210,11 @@ Basert på symbolet, optimalisert for maskering.
 }
 ```
 
-**Safe zone:** 20% padding fra kanten (maskable spec)
-- Icon size: 192×192px eller 512×512px
-- Symbol plassert sentrisk med 38px safe zone
-- Bakgrunn: Tråkke-grønn (#3e4533)
-- Ikon: Hvit (#ffffff) `forest`-symbol
+**Safe zone:** 20% padding from edge (maskable spec)
+- Icon size: 192×192px or 512×512px
+- Symbol placed centrally with 38px safe zone
+- Background: Tråkke green (#3e4533)
+- Icon: White (#ffffff) `forest` symbol
 
 #### Favicon
 
@@ -222,162 +222,162 @@ Basert på symbolet, optimalisert for maskering.
 <link rel="icon" type="image/svg+xml" href="/trakke-icon.svg">
 ```
 
-Forenklet versjon:
-- 32×32px eller 48×48px
-- Tråkke-grønn bakgrunn
-- Hvit eller transparent `forest`-ikon
+Simplified version:
+- 32×32px or 48×48px
+- Tråkke green background
+- White or transparent `forest` icon
 
 ---
 
-## Fargepalett
+## Color Palette
 
-### Brand-kjerne
+### Brand Core
 
-Tråkke-grønn er hentet fra norske skoger – en mørk, dyp grønnfarge som brukes sparsomt for identitet og primærhandlinger.
+Tråkke green is drawn from Norwegian forests – a dark, deep green color used sparingly for identity and primary actions.
 
 ```css
---trk-brand: #3e4533;        /* Primær brand-farge */
---trk-brand-soft: #606756;   /* Mykere variant for UI-elementer */
---trk-brand-tint: #e9ece6;   /* Lys tint for bakgrunner og flater */
+--trk-brand: #3e4533;        /* Primary brand color */
+--trk-brand-soft: #606756;   /* Softer variant for UI elements */
+--trk-brand-tint: #e9ece6;   /* Light tint for backgrounds and surfaces */
 ```
 
-**Bruksområder:**
-- `--trk-brand`: Primærknapper, aktive tilstander, logo, rutelinjer
-- `--trk-brand-soft`: Sekundære knapper, inaktive ikoner
-- `--trk-brand-tint`: Hover-states, subtile bakgrunner
+**Use cases:**
+- `--trk-brand`: Primary buttons, active states, logo, route lines
+- `--trk-brand-soft`: Secondary buttons, inactive icons
+- `--trk-brand-tint`: Hover states, subtle backgrounds
 
-### Nøytraler
+### Neutrals
 
-Varme, papiraktige nøytraler uten blåskjær. Gir en naturlig, rolig følelse.
+Warm, paper-like neutrals without blue cast. Provides a natural, calm feeling.
 
 ```css
---trk-bg: #fafaf7;              /* Hovedbakgrunn */
---trk-surface: #ffffff;         /* Kort, paneler, overlays */
---trk-surface-subtle: #f2f3f0;  /* Subtil bakgrunn for elementer */
+--trk-bg: #fafaf7;              /* Main background */
+--trk-surface: #ffffff;         /* Cards, panels, overlays */
+--trk-surface-subtle: #f2f3f0;  /* Subtle background for elements */
 --trk-border: #e4e5e1;          /* Standard border */
---trk-border-strong: #c9ccc5;   /* Sterkere border for separering */
+--trk-border-strong: #c9ccc5;   /* Stronger border for separation */
 ```
 
-**Bruksområder:**
+**Use cases:**
 - `--trk-bg`: Body background
-- `--trk-surface`: Bottom sheets, kort, modaler
-- `--trk-surface-subtle`: Input-bakgrunner, disabled states
-- `--trk-border`: Skillelinjer, kortborders
-- `--trk-border-strong`: Fremhevede borders, separatorer
+- `--trk-surface`: Bottom sheets, cards, modals
+- `--trk-surface-subtle`: Input backgrounds, disabled states
+- `--trk-border`: Divider lines, card borders
+- `--trk-border-strong`: Emphasized borders, separators
 
-### Tekstfarger
+### Text Colors
 
-Tre nivåer av tekstkontrast for hierarki.
-
-```css
---trk-text: #1a1d1b;          /* Primær tekst (body, overskrifter) */
---trk-text-muted: #4a4f47;    /* Sekundær tekst (beskrivelser) */
---trk-text-soft: #7c8278;     /* Tertiær tekst (hjelpetekst, labels) */
-```
-
-**Kontraster:**
-- `--trk-text` på `--trk-surface`: **15.8:1** (AAA)
-- `--trk-text-muted` på `--trk-surface`: **8.9:1** (AAA)
-- `--trk-text-soft` på `--trk-surface`: **4.8:1** (AA)
-
-### Funksjonelle farger
-
-Semantiske farger for GPS-posisjon, varsler og suksess. Brukes sparsomt og konsekvent.
+Three levels of text contrast for hierarchy.
 
 ```css
---trk-blue: #1e6ce0;    /* GPS-posisjon, info, fokus */
---trk-red: #d0443e;     /* Waypoints, varsler, destruktive handlinger */
---trk-green: #2e9e5b;   /* Suksess, bekreftelser */
+--trk-text: #1a1d1b;          /* Primary text (body, headings) */
+--trk-text-muted: #4a4f47;    /* Secondary text (descriptions) */
+--trk-text-soft: #7c8278;     /* Tertiary text (help text, labels) */
 ```
 
-**Bruksområder:**
-- `--trk-blue`: Brukerposisjon-markør, "følg meg"-knapp, fokuserte elementer
-- `--trk-red`: Waypoint-pins, slette-knapper, feilmeldinger
-- `--trk-green`: Lagret-bekreftelser, nedlasting fullført, suksessmeldinger
+**Contrasts:**
+- `--trk-text` on `--trk-surface`: **15.8:1** (AAA)
+- `--trk-text-muted` on `--trk-surface`: **8.9:1** (AAA)
+- `--trk-text-soft` on `--trk-surface`: **4.8:1** (AA)
 
-### Overlays & dybde
+### Functional Colors
 
-Transparente lag for paneler som svever over kartet.
+Semantic colors for GPS position, alerts, and success. Used sparingly and consistently.
 
 ```css
---trk-overlay-strong: rgba(255, 255, 255, 0.85);  /* Sterkt overlay */
---trk-overlay-soft: rgba(250, 250, 246, 0.6);     /* Mykt overlay */
---trk-selection: rgba(62, 69, 51, 0.18);          /* Markerte ruter/områder */
---trk-shadow-soft: 0 12px 40px rgba(0, 0, 0, 0.06); /* Subtil skygge */
+--trk-blue: #1e6ce0;    /* GPS position, info, focus */
+--trk-red: #d0443e;     /* Waypoints, alerts, destructive actions */
+--trk-green: #2e9e5b;   /* Success, confirmations */
 ```
 
-**Bruksområder:**
-- `--trk-overlay-strong`: Bottom sheets, søkepanel
-- `--trk-overlay-soft`: Velkomst-header, info-kort
-- `--trk-selection`: Valgt rute på kart, nedlastingsområde
-- `--trk-shadow-soft`: FAB-meny, kort, modaler
+**Use cases:**
+- `--trk-blue`: User position marker, "follow me" button, focused elements
+- `--trk-red`: Waypoint pins, delete buttons, error messages
+- `--trk-green`: Saved confirmations, download complete, success messages
+
+### Overlays & Depth
+
+Transparent layers for panels that float above the map.
+
+```css
+--trk-overlay-strong: rgba(255, 255, 255, 0.85);  /* Strong overlay */
+--trk-overlay-soft: rgba(250, 250, 246, 0.6);     /* Soft overlay */
+--trk-selection: rgba(62, 69, 51, 0.18);          /* Selected routes/areas */
+--trk-shadow-soft: 0 12px 40px rgba(0, 0, 0, 0.06); /* Subtle shadow */
+```
+
+**Use cases:**
+- `--trk-overlay-strong`: Bottom sheets, search panel
+- `--trk-overlay-soft`: Welcome header, info cards
+- `--trk-selection`: Selected route on map, download area
+- `--trk-shadow-soft`: FAB menu, cards, modals
 
 ---
 
 ## Spacing & Layout
 
-### Gap-tokens
+### Gap Tokens
 
-Konsistent spacing for margins og gaps.
+Consistent spacing for margins and gaps.
 
 ```css
---gap-xl: 32px;   /* Stor seksjonsspacing */
---gap-lg: 24px;   /* Mellom seksjoner */
---gap-md: 16px;   /* Mellom elementer */
---gap-sm: 10px;   /* Kompakte lister */
+--gap-xl: 32px;   /* Large section spacing */
+--gap-lg: 24px;   /* Between sections */
+--gap-md: 16px;   /* Between elements */
+--gap-sm: 10px;   /* Compact lists */
 ```
 
 ### Border Radius
 
 ```css
---radius-lg: 20px;   /* Bottom sheets, store paneler */
---radius-md: 14px;   /* Knapper, kort */
---radius-sm: 999px;  /* Pills, tags, ikoner */
+--radius-lg: 20px;   /* Bottom sheets, large panels */
+--radius-md: 14px;   /* Buttons, cards */
+--radius-sm: 999px;  /* Pills, tags, icons */
 ```
 
 ---
 
-## Typografi
+## Typography
 
 ### Font Stack
 
-System-fonter for beste ytelse og privacy (ingen eksterne fonts).
+System fonts for best performance and privacy (no external fonts).
 
 ```css
 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
              Oxygen, Ubuntu, Cantarell, sans-serif;
 ```
 
-### Størrelser
+### Sizes
 
 ```css
-/* Overskrifter */
-font-size: clamp(32px, 4vw, 40px);  /* H1 - responsiv */
+/* Headings */
+font-size: clamp(32px, 4vw, 40px);  /* H1 - responsive */
 font-size: 26px;                     /* Brand name */
 font-size: 14px;                     /* Section titles (uppercase) */
 
-/* Body tekst */
+/* Body text */
 font-size: 15px;  /* Standard body */
-font-size: 13px;  /* Beskrivelser, hjelpetekst */
-font-size: 12px;  /* Små labels */
+font-size: 13px;  /* Descriptions, help text */
+font-size: 12px;  /* Small labels */
 font-size: 11px;  /* Pills, tags */
 
-/* Monospace (hex-koder, koordinater) */
+/* Monospace (hex codes, coordinates) */
 font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 ```
 
-### Vekter
+### Weights
 
 ```css
 font-weight: 400;  /* Normal */
-font-weight: 500;  /* Medium (knapper, labels) */
-font-weight: 600;  /* Semibold (overskrifter) */
-font-weight: 700;  /* Bold (store overskrifter) */
+font-weight: 500;  /* Medium (buttons, labels) */
+font-weight: 600;  /* Semibold (headings) */
+font-weight: 700;  /* Bold (large headings) */
 ```
 
 ---
 
-## Komponenter
+## Components
 
 ### Bottom Sheets
 
@@ -389,14 +389,14 @@ padding: 18px;
 backdrop-filter: blur(10px);
 ```
 
-**Høyder:**
+**Heights:**
 - Peek: 40vh (collapsed)
 - Half: 70vh (medium)
 - Full: 95vh (expanded)
 
-### Knapper
+### Buttons
 
-**Primær:**
+**Primary:**
 ```css
 background: var(--trk-brand);
 color: #ffffff;
@@ -406,14 +406,14 @@ font-size: 15px;
 font-weight: 500;
 ```
 
-**Sekundær:**
+**Secondary:**
 ```css
 background: transparent;
 color: var(--trk-text);
 border: 1px solid var(--trk-border);
 ```
 
-**Destruktiv:**
+**Destructive:**
 ```css
 background: var(--trk-red);
 color: #ffffff;
@@ -429,9 +429,9 @@ background: var(--trk-brand);
 box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 ```
 
-**Interaksjon:**
-- Tap: Sentrer på brukerposisjon
-- Langt trykk (500ms): Åpne radialmeny
+**Interaction:**
+- Tap: Center on user position
+- Long press (500ms): Open radial menu
 
 ### Pills & Tags
 
@@ -445,7 +445,7 @@ text-transform: uppercase;
 letter-spacing: 0.12em;
 ```
 
-### Input-felter
+### Input Fields
 
 ```css
 background: var(--trk-surface-subtle);
@@ -463,16 +463,16 @@ outline-offset: 2px;
 
 ---
 
-## Animasjoner & Transitions
+## Animations & Transitions
 
 ### Timing
 
 ```css
---transition-fast: 140ms ease-out;   /* Hover, små bevegelser */
---transition-med: 200ms ease-out;    /* Sheets, modaler */
+--transition-fast: 140ms ease-out;   /* Hover, small movements */
+--transition-med: 200ms ease-out;    /* Sheets, modals */
 ```
 
-### Hover-states
+### Hover States
 
 ```css
 .button:hover {
@@ -484,17 +484,17 @@ outline-offset: 2px;
 
 ### Auto-hide UI
 
-Kontroller skjules etter 5 sekunder inaktivitet (se `useAutoHide.ts`).
+Controls hide after 5 seconds of inactivity (see `useAutoHide.ts`).
 
 ---
 
-## Ikoner
+## Icons
 
 ### Material Symbols Outlined
 
-Tråkke bruker **Material Symbols Outlined** som ikonbibliotek. Fonten er selvhostet (ingen eksterne CDN) for å opprettholde privacy-first prinsippet.
+Tråkke uses **Material Symbols Outlined** as its icon library. The font is self-hosted (no external CDN) to maintain the privacy-first principle.
 
-**Font-definisjon** (index.css):
+**Font definition** (index.css):
 
 ```css
 @font-face {
@@ -509,7 +509,7 @@ Tråkke bruker **Material Symbols Outlined** som ikonbibliotek. Fonten er selvho
   font-family: 'Material Symbols Outlined';
   font-weight: normal;
   font-style: normal;
-  font-size: 24px;          /* Standard størrelse */
+  font-size: 24px;          /* Standard size */
   line-height: 1;
   letter-spacing: normal;
   text-transform: none;
@@ -522,7 +522,7 @@ Tråkke bruker **Material Symbols Outlined** som ikonbibliotek. Fonten er selvho
 }
 ```
 
-**Bruk i kode:**
+**Use in code:**
 
 ```tsx
 <span className="material-symbols-outlined">search</span>
@@ -530,50 +530,50 @@ Tråkke bruker **Material Symbols Outlined** som ikonbibliotek. Fonten er selvho
 <span className="material-symbols-outlined">forest</span>
 ```
 
-**Størrelser:**
-- **20px**: Små ikoner i trange knapper
-- **24px**: Standard UI-ikoner (default)
-- **28px**: Logo-ikon i header
-- **30px**: FAB-meny hovedikon
+**Sizes:**
+- **20px**: Small icons in tight buttons
+- **24px**: Standard UI icons (default)
+- **28px**: Logo icon in header
+- **30px**: FAB menu main icon
 
-**Farger:**
-- **Standard**: `var(--trk-text-soft)` (#7c8278) - inaktive ikoner
-- **Aktiv**: `var(--trk-brand)` (#3e4533) - valgte tilstander
-- **Interaktiv**: `var(--trk-text)` (#1a1d1b) - hoverable ikoner
-- **Funksjonell**:
+**Colors:**
+- **Standard**: `var(--trk-text-soft)` (#7c8278) - inactive icons
+- **Active**: `var(--trk-brand)` (#3e4533) - selected states
+- **Interactive**: `var(--trk-text)` (#1a1d1b) - hoverable icons
+- **Functional**:
   - GPS: `var(--trk-blue)` (#1e6ce0)
-  - Slett: `var(--trk-red)` (#d0443e)
-  - Suksess: `var(--trk-green)` (#2e9e5b)
+  - Delete: `var(--trk-red)` (#d0443e)
+  - Success: `var(--trk-green)` (#2e9e5b)
 
-**Ofte brukte ikoner:**
-- `search` - Søk
-- `close` - Lukk sheets/modaler
-- `my_location` - GPS/brukerposisjon
-- `location_on` - Waypoints, POI-markører
-- `route` - Ruter
-- `download` - Last ned offline kart
-- `forest` - Logo/brand-symbol
+**Commonly used icons:**
+- `search` - Search
+- `close` - Close sheets/modals
+- `my_location` - GPS/user position
+- `location_on` - Waypoints, POI markers
+- `route` - Routes
+- `download` - Download offline maps
+- `forest` - Logo/brand symbol
 - `expand_more` / `expand_less` - Collapse/expand
-- `check` - Bekreftelser, valgte items
-- `info` - Informasjon
-- `settings` - Innstillinger
-- `layers` - Kategorier/POI-lag
+- `check` - Confirmations, selected items
+- `info` - Information
+- `settings` - Settings
+- `layers` - Categories/POI layers
 
-**Kilde:** https://fonts.google.com/icons (self-hosted i `/public/fonts/`)
+**Source:** https://fonts.google.com/icons (self-hosted in `/public/fonts/`)
 
 ### Custom Symbol: Tilfluktsrom (T-marker)
 
-For POI-kategorien **Tilfluktsrom** (offentlige tilfluktsrom fra DSB) brukes et **custom SVG-symbol** i stedet for Material Symbols. Dette er det eneste unntaket fra regelen om å kun bruke Material Symbols.
+For the POI category **Tilfluktsrom** (public shelters from DSB), a **custom SVG symbol** is used instead of Material Symbols. This is the only exception from the rule of only using Material Symbols.
 
-**Hvorfor custom symbol:**
-- Material Symbols har ikke et passende ikon for tilfluktsrom
-- DSB (Direktoratet for samfunnssikkerhet og beredskap) bruker "T" som standard merking
-- Tydelig visuell identitet som brukere kjenner igjen fra fysiske skilt
+**Why custom symbol:**
+- Material Symbols doesn't have a suitable icon for shelters
+- DSB (Directorate for Civil Protection) uses "T" as standard marking
+- Clear visual identity that users recognize from physical signs
 
-**SVG-definisjon** (CategorySheet.tsx og POI-markører):
+**SVG definition** (CategorySheet.tsx and POI markers):
 
 ```tsx
-// I kategori-menyen (20×20px)
+// In category menu (20×20px)
 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect
     x="0.5"
@@ -597,7 +597,7 @@ For POI-kategorien **Tilfluktsrom** (offentlige tilfluktsrom fra DSB) brukes et 
   >T</text>
 </svg>
 
-// På kartet (32×32px POI-markør)
+// On map (32×32px POI marker)
 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect
     x="1"
@@ -622,20 +622,20 @@ For POI-kategorien **Tilfluktsrom** (offentlige tilfluktsrom fra DSB) brukes et 
 </svg>
 ```
 
-**Spesifikasjoner:**
+**Specifications:**
 
-- **Form:** Avrundet firkant (rounded rectangle)
-- **Border-radius:** 2.5px (20px størrelse), 4px (32px størrelse)
-- **Bakgrunnsfarge:** `#fbbf24` (gul - matcher DSBs oransje/gule merkesystem)
-- **Border:** 1px (meny), 2px (kart) - `#111827` (mørk)
-- **Tekst:** "T" - system font, 400 weight
-- **Tekststørrelse:** 12px (meny), 18px (kart)
-- **Tekstfarge:** `#111827` (mørk, høy kontrast mot gul bakgrunn)
+- **Shape:** Rounded rectangle
+- **Border-radius:** 2.5px (20px size), 4px (32px size)
+- **Background color:** `#fbbf24` (yellow - matches DSB's orange/yellow marking system)
+- **Border:** 1px (menu), 2px (map) - `#111827` (dark)
+- **Text:** "T" - system font, 400 weight
+- **Text size:** 12px (menu), 18px (map)
+- **Text color:** `#111827` (dark, high contrast against yellow background)
 
-**Bruk i kode:**
+**Use in code:**
 
 ```tsx
-// Sjekk om custom symbol skal brukes
+// Check if custom symbol should be used
 {category.icon === 'custom-t-marker' ? (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
     {/* SVG markup */}
@@ -647,7 +647,7 @@ For POI-kategorien **Tilfluktsrom** (offentlige tilfluktsrom fra DSB) brukes et 
 )}
 ```
 
-**CSS for POI-markører** (Map.css):
+**CSS for POI markers** (Map.css):
 
 ```css
 .poi-marker {
@@ -679,9 +679,9 @@ For POI-kategorien **Tilfluktsrom** (offentlige tilfluktsrom fra DSB) brukes et 
 }
 ```
 
-**Viktighet:** Dette er det **eneste godkjente unntaket** fra Material Symbols. Alle andre POI-kategorier og UI-elementer skal bruke Material Symbols Outlined.
+**Importance:** This is the **only approved exception** from Material Symbols. All other POI categories and UI elements should use Material Symbols Outlined.
 
-**Kategori-konfigurasjon** (poiService.ts):
+**Category configuration** (poiService.ts):
 
 ```typescript
 const CATEGORIES: Record<POICategory, CategoryConfig> = {
@@ -698,16 +698,16 @@ const CATEGORIES: Record<POICategory, CategoryConfig> = {
 
 ---
 
-## Kartlag & Markører
+## Map Layers & Markers
 
-### Kartbase
+### Map Base
 
 **Kartverket WMTS** (cache.kartverket.no)
-- Stil: Standard topografisk
-- Min zoom: 5 (Norge-oversikt)
-- Max zoom: 18 (detaljert)
+- Style: Standard topographic
+- Min zoom: 5 (Norway overview)
+- Max zoom: 18 (detailed)
 
-### Rute-styling
+### Route Styling
 
 ```javascript
 {
@@ -720,18 +720,18 @@ const CATEGORIES: Record<POICategory, CategoryConfig> = {
 }
 ```
 
-### Waypoint-markører
+### Waypoint Markers
 
 ```javascript
-// Pulserende rød pin
+// Pulsing red pin
 background: #d0443e;  // var(--trk-red)
 animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 ```
 
-### Brukerposisjon
+### User Position
 
 ```javascript
-// Blå sirkel med hvit border
+// Blue circle with white border
 background: #1e6ce0;  // var(--trk-blue)
 border: 3px solid #ffffff;
 border-radius: 50%;
@@ -743,7 +743,7 @@ border-radius: 50%;
 
 ### Focus Indicators
 
-Alle interaktive elementer har synlig fokusindikator:
+All interactive elements have visible focus indicator:
 
 ```css
 :focus-visible {
@@ -752,20 +752,20 @@ Alle interaktive elementer har synlig fokusindikator:
 }
 ```
 
-### Tastaturnavigasjon
+### Keyboard Navigation
 
-- Tab: Navigere mellom elementer
-- Enter/Space: Aktivere knapper
-- Escape: Lukke sheets/modaler
-- Arrow keys: Navigere i lister
+- Tab: Navigate between elements
+- Enter/Space: Activate buttons
+- Escape: Close sheets/modals
+- Arrow keys: Navigate in lists
 
-### Skjermlesere
+### Screen Readers
 
-Alle ikoner har `aria-label`, dekorative elementer har `aria-hidden="true"`.
+All icons have `aria-label`, decorative elements have `aria-hidden="true"`.
 
-### Kontraster
+### Contrasts
 
-Minimum kontrast 4.5:1 (AA) for all tekst, 3:1 for store elementer.
+Minimum contrast 4.5:1 (AA) for all text, 3:1 for large elements.
 
 ---
 
@@ -784,24 +784,24 @@ Minimum kontrast 4.5:1 (AA) for all tekst, 3:1 for store elementer.
 @media (min-width: 1200px) { }
 ```
 
-**Bottom sheets:** Alltid fullbredde på mobil, maksbredde 600px på desktop.
+**Bottom sheets:** Always full-width on mobile, max-width 600px on desktop.
 
 ---
 
 ## Zen Mode vs Classic Mode
 
-### Zen Mode (Standard)
+### Zen Mode (Default)
 
-- Auto-hiding kontroller (5s timeout)
-- Kollapsbar velkomst-header
-- FAB-meny som primærnavigasjon
+- Auto-hiding controls (5s timeout)
+- Collapsible welcome header
+- FAB menu as primary navigation
 - Bottom sheets for features
 
 ### Classic Mode
 
-- Always-visible kontroller
-- Paneler i stedet for sheets
-- Tradisjonell navigasjon
+- Always-visible controls
+- Panels instead of sheets
+- Traditional navigation
 
 ---
 
@@ -809,37 +809,37 @@ Minimum kontrast 4.5:1 (AA) for all tekst, 3:1 for store elementer.
 
 ### CSS
 
-1. **Bruk alltid CSS custom properties** for farger og spacing
-2. **Mobile-first** – skriv base styles for mobil, override for desktop
-3. **Unngå hardkodede farger** – bruk `var(--trk-*)`
-4. **Transitions** kun på transform og opacity for beste ytelse
+1. **Always use CSS custom properties** for colors and spacing
+2. **Mobile-first** – write base styles for mobile, override for desktop
+3. **Avoid hardcoded colors** – use `var(--trk-*)`
+4. **Transitions** only on transform and opacity for best performance
 
 ### JavaScript
 
-1. **Mounted refs** for async operasjoner som oppdaterer state
-2. **Cleanup functions** for event listeners og timers
-3. **Debounce** søk og scroll events
-4. **Functional updates** når ny state avhenger av gammel state
+1. **Mounted refs** for async operations that update state
+2. **Cleanup functions** for event listeners and timers
+3. **Debounce** search and scroll events
+4. **Functional updates** when new state depends on old state
 
 ### Performance
 
 1. **CSS containment** for bottom sheets
-2. **will-change** kun under animasjoner
+2. **will-change** only during animations
 3. **Lazy load** heavy components (RouteSheet, DownloadSheet)
-4. **IndexedDB** for all persistence, aldri localStorage
+4. **IndexedDB** for all persistence, never localStorage
 
 ### Privacy
 
-1. **Ingen eksterne fonts** – system font stack
-2. **Selv-hostet ikoner** – Material Symbols embedded
-3. **Ingen CDNs** for libraries eller assets
-4. **CSP** enforce i production builds
+1. **No external fonts** – system font stack
+2. **Self-hosted icons** – Material Symbols embedded
+3. **No CDNs** for libraries or assets
+4. **CSP** enforce in production builds
 
 ---
 
-## Eksempler
+## Examples
 
-### Primærknapp med ikon
+### Primary Button with Icon
 
 ```tsx
 <button className="primary-button">
@@ -871,7 +871,7 @@ Minimum kontrast 4.5:1 (AA) for all tekst, 3:1 for store elementer.
 }
 ```
 
-### Info-kort over kart
+### Info Card Over Map
 
 ```tsx
 <div className="map-overlay-card">
@@ -893,23 +893,23 @@ Minimum kontrast 4.5:1 (AA) for all tekst, 3:1 for store elementer.
 
 ---
 
-## Verktøy & Ressurser
+## Tools & Resources
 
-### Fargepalett preview
+### Color Palette Preview
 
-Se `/Users/lene/dev/trakke_pwa_related/color_palette.html` for interaktiv oversikt over alle farger med kopiering til clipboard.
+See `/Users/lene/dev/trakke_pwa_related/color_palette.html` for an interactive overview of all colors with clipboard copying.
 
-### Design tokens i kode
+### Design Tokens in Code
 
-Alle tokens er definert i `:root` i `index.css`:
+All tokens are defined in `:root` in `index.css`:
 
 ```css
-/* Se src/index.css for komplett liste */
+/* See src/index.css for complete list */
 ```
 
-### Figma (fremtidig)
+### Figma (future)
 
-Design-filer vil bli tilgjengelig når Phase 2 er komplett.
+Design files will be available when Phase 2 is complete.
 
 ---
 
@@ -917,11 +917,11 @@ Design-filer vil bli tilgjengelig når Phase 2 er komplett.
 
 ### v1.0 (2025-01-15)
 
-- Initial design system dokumentasjon
-- Nordic Silence fargepalett etablert
-- CSS custom properties for alle tokens
-- Accessibility guidelines dokumentert
+- Initial design system documentation
+- Nordisk ro color palette established
+- CSS custom properties for all tokens
+- Accessibility guidelines documented
 
 ---
 
-**Laget for Tråkke** – Privacy-first friluftsnavigasjon
+**Made for Tråkke** – Privacy-first outdoor navigation

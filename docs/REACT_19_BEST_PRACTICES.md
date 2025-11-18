@@ -19,7 +19,7 @@ Tråkke uses React 19.2 with TypeScript 5.9.3. The following patterns ensure opt
 - User-friendly Norwegian error messages
 - Technical error details (collapsible)
 - Recovery options: "Last siden på nytt" (reload) and "Prøv igjen" (reset)
-- Nordic Silence design system styling
+- Nordisk ro design system styling
 
 ### Usage Example
 ```tsx

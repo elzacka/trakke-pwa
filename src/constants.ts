@@ -47,7 +47,7 @@ export const OFFLINE_CONFIG = {
   MAX_CACHED_TILES: 500,
 } as const
 
-// Theme Colors - Nordic Silence Design System
+// Theme Colors - Nordisk ro Design System
 export const COLORS = {
   // Brand
   BRAND: '#3e4533',           // Primary brand green

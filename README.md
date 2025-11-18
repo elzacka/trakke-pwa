@@ -130,7 +130,7 @@ trakke_pwa/
 │   │   ├── useViewportPOIs.ts # POI viewport loading
 │   │   └── (and more...)
 │   ├── styles/             # CSS files (one per component)
-│   │   ├── design-tokens.css # Nordic Silence design system
+│   │   ├── design-tokens.css # Nordisk ro design system
 │   │   ├── index.css       # Global styles
 │   │   └── (component CSS files)
 │   ├── types/              # TypeScript type definitions
@@ -151,10 +151,10 @@ trakke_pwa/
 
 ## Design System
 
-Tråkke uses the **Nordic Silence** design system - a minimalist, nature-inspired visual language with warm, paper-like colors.
+Tråkke uses the **Nordisk ro** design system - a minimalist, nature-inspired visual language with warm, paper-like colors.
 
 **Complete design documentation**: See [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) for:
-- Nordic Silence color palette (brand, neutrals, text hierarchy, functional colors)
+- Nordisk ro color palette (brand, neutrals, text hierarchy, functional colors)
 - Logo specifications and usage guidelines
 - Typography (Exo 2 variable font)
 - Icon system (Material Symbols Outlined, self-hosted)

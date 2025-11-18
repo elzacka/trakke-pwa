@@ -277,6 +277,129 @@ class POIService {
   }
 
   /**
+   * Calculate coordinates for OSM element (node or way centroid)
+   */
+  private calculateElementCoordinates(
+    element: OverpassElement,
+    nodeMap: Map<number, { lon: number; lat: number }>
+  ): [number, number] | null {
+    if (element.type === 'node') {
+      if (element.lon === undefined || element.lat === undefined) return null
+      return [element.lon, element.lat]
+    }
+
+    if (element.type === 'way') {
+      if (!element.nodes || element.nodes.length === 0) return null
+
+      // Look up node coordinates from pre-built map
+      const wayNodes = element.nodes
+        .map((nodeId: number) => nodeMap.get(nodeId))
+        .filter((node): node is { lon: number; lat: number } => node !== undefined)
+
+      if (wayNodes.length === 0) return null
+
+      // Calculate centroid
+      const sumLon = wayNodes.reduce((sum, n) => sum + n.lon, 0)
+      const sumLat = wayNodes.reduce((sum, n) => sum + n.lat, 0)
+      return [sumLon / wayNodes.length, sumLat / wayNodes.length]
+    }
+
+    return null
+  }
+
+  /**
+   * Create cave POI from OSM element
+   */
+  private createCavePOI(element: OverpassElement, coordinates: [number, number]): CavePOI {
+    const tags = element.tags || {}
+    return {
+      id: `cave-${element.id}`,
+      type: 'cave',
+      name: tags.name || `Hule #${element.id}`,
+      description: tags.description,
+      coordinates
+    }
+  }
+
+  /**
+   * Create observation tower POI from OSM element
+   */
+  private createObservationTowerPOI(element: OverpassElement, coordinates: [number, number]): ObservationTowerPOI {
+    const tags = element.tags || {}
+    return {
+      id: `tower-${element.id}`,
+      type: 'observation_tower',
+      name: tags.name || `Observasjonstårn #${element.id}`,
+      height: tags.height ? parseFloat(tags.height) : undefined,
+      operator: tags.operator,
+      coordinates
+    }
+  }
+
+  /**
+   * Create war memorial POI from OSM element
+   */
+  private createWarMemorialPOI(element: OverpassElement, coordinates: [number, number]): WarMemorialPOI {
+    const tags = element.tags || {}
+
+    // Generate Norwegian name based on type
+    let memorialName = tags.name || tags['name:no'] || tags['name:nb']
+    if (!memorialName) {
+      if (tags.historic === 'fort') {
+        memorialName = 'Fort'
+      } else if (tags.historic === 'battlefield') {
+        memorialName = 'Slagmark'
+      } else if (tags.military === 'bunker' || tags.historic === 'bunker') {
+        const bunkerType = tags.bunker_type
+        if (bunkerType === 'gun_emplacement') memorialName = 'Kanoninnretning'
+        else if (bunkerType === 'shelter') memorialName = 'Skjulsrom'
+        else if (bunkerType === 'ammunition') memorialName = 'Ammunisjonsbunker'
+        else if (bunkerType === 'technical') memorialName = 'Teknisk bunker'
+        else memorialName = 'Bunker'
+      } else {
+        memorialName = `Krigsminne #${element.id}`
+      }
+    }
+
+    return {
+      id: `memorial-${element.id}`,
+      type: 'war_memorial',
+      name: memorialName,
+      inscription: tags.inscription,
+      period: tags['memorial:period'] || tags.start_date || tags.historic,
+      coordinates
+    }
+  }
+
+  /**
+   * Create wilderness shelter POI from OSM element
+   */
+  private createWildernessShelterPOI(element: OverpassElement, coordinates: [number, number]): WildernessShelterPOI {
+    const tags = element.tags || {}
+
+    // Generate Norwegian name based on shelter type
+    let shelterName = tags.name || tags['name:no'] || tags['name:nb']
+    const shelterType = tags.shelter_type
+
+    if (!shelterName) {
+      if (shelterType === 'basic_hut') shelterName = 'Gapahuk'
+      else if (shelterType === 'weather_shelter') shelterName = 'Vindskjul'
+      else if (shelterType === 'rock_shelter') shelterName = 'Helleskjul'
+      else if (shelterType === 'lavvu') shelterName = 'Lavvo'
+      else shelterName = 'Gapahuk/vindskjul'
+    }
+
+    return {
+      id: `wilderness-shelter-${element.id}`,
+      type: 'wilderness_shelter',
+      name: shelterName,
+      shelter_type: shelterType,
+      description: tags.description,
+      coordinates
+    }
+  }
+
+  /**
    * Parse Overpass API JSON response to POI objects
    * Privacy: Overpass API is EU-based (Germany), no tracking, public OSM data only
    */
@@ -288,7 +411,7 @@ class POIService {
 
     devLog(`[POIService] Parsing ${data.elements.length} elements for ${category}`)
 
-    // Build node lookup map once for O(1) coordinate lookups (performance optimization)
+    // Build node lookup map once for O(1) coordinate lookups
     const nodeMap = new Map<number, { lon: number; lat: number }>()
     for (const element of data.elements) {
       if (element.type === 'node' && element.lon !== undefined && element.lat !== undefined) {
@@ -300,140 +423,41 @@ class POIService {
     const seenIds = new Set<string>()
 
     for (const element of data.elements) {
-      // Only process nodes and ways with tags (skip bare coordinate nodes from way geometries)
+      // Only process nodes and ways with tags
       if (element.type !== 'node' && element.type !== 'way') continue
 
-      // Skip elements without tags (these are just geometry vertices from ways)
       const tags = element.tags
       if (!tags || typeof tags !== 'object' || Object.keys(tags).length === 0) continue
 
-      let coordinates: [number, number]
+      // Calculate coordinates
+      const coordinates = this.calculateElementCoordinates(element, nodeMap)
+      if (!coordinates) continue
 
-      // For nodes, use lat/lon directly
-      if (element.type === 'node') {
-        // Skip nodes without coordinates
-        if (element.lon === undefined || element.lat === undefined) continue
-        coordinates = [element.lon, element.lat]
-      } else {
-        // For ways, calculate centroid from nodes
-        if (!element.nodes || element.nodes.length === 0) continue
-
-        // Look up node coordinates from pre-built map (O(M) instead of O(N×M))
-        const wayNodes = element.nodes
-          .map((nodeId: number) => nodeMap.get(nodeId))
-          .filter((node): node is { lon: number; lat: number } => node !== undefined)
-
-        if (wayNodes.length === 0) continue
-
-        // Calculate centroid (arithmetic mean)
-        const sumLon = wayNodes.reduce((sum, n) => sum + n.lon, 0)
-        const sumLat = wayNodes.reduce((sum, n) => sum + n.lat, 0)
-        coordinates = [sumLon / wayNodes.length, sumLat / wayNodes.length]
-      }
-
-      let poiId: string
+      let poi: POI | null = null
 
       switch (category) {
         case 'caves':
-          poiId = `cave-${element.id}`
-          if (seenIds.has(poiId)) {
-            console.warn(`[POIService] Duplicate cave ID: ${poiId}`)
-            continue
-          }
-          seenIds.add(poiId)
-          pois.push({
-            id: poiId,
-            type: 'cave',
-            name: tags.name || `Hule #${element.id}`,
-            description: tags.description,
-            coordinates
-          })
+          poi = this.createCavePOI(element, coordinates)
           break
-
         case 'observation_towers':
-          poiId = `tower-${element.id}`
-          if (seenIds.has(poiId)) {
-            console.warn(`[POIService] Duplicate tower ID: ${poiId}`)
-            continue
-          }
-          seenIds.add(poiId)
-          pois.push({
-            id: poiId,
-            type: 'observation_tower',
-            name: tags.name || `Observasjonstårn #${element.id}`,
-            height: tags.height ? parseFloat(tags.height) : undefined,
-            operator: tags.operator,
-            coordinates
-          })
+          poi = this.createObservationTowerPOI(element, coordinates)
           break
-
         case 'war_memorials':
-          poiId = `memorial-${element.id}`
-          if (seenIds.has(poiId)) {
-            console.warn(`[POIService] Duplicate memorial ID: ${poiId}`)
-            continue
-          }
-          seenIds.add(poiId)
-
-          // Generate Norwegian name based on type (from T1 logic)
-          let memorialName = tags.name || tags['name:no'] || tags['name:nb']
-          if (!memorialName) {
-            if (tags.historic === 'fort') {
-              memorialName = 'Fort'
-            } else if (tags.historic === 'battlefield') {
-              memorialName = 'Slagmark'
-            } else if (tags.military === 'bunker' || tags.historic === 'bunker') {
-              // Norwegian bunker type names (from T1)
-              const bunkerType = tags.bunker_type
-              if (bunkerType === 'gun_emplacement') memorialName = 'Kanoninnretning'
-              else if (bunkerType === 'shelter') memorialName = 'Skjulsrom'
-              else if (bunkerType === 'ammunition') memorialName = 'Ammunisjonsbunker'
-              else if (bunkerType === 'technical') memorialName = 'Teknisk bunker'
-              else memorialName = 'Bunker'
-            } else {
-              memorialName = `Krigsminne #${element.id}`
-            }
-          }
-
-          pois.push({
-            id: poiId,
-            type: 'war_memorial',
-            name: memorialName,
-            inscription: tags.inscription,
-            period: tags['memorial:period'] || tags.start_date || tags.historic,
-            coordinates
-          })
+          poi = this.createWarMemorialPOI(element, coordinates)
           break
-
         case 'wilderness_shelters':
-          poiId = `wilderness-shelter-${element.id}`
-          if (seenIds.has(poiId)) {
-            console.warn(`[POIService] Duplicate wilderness shelter ID: ${poiId}`)
-            continue
-          }
-          seenIds.add(poiId)
-
-          // Generate Norwegian name based on shelter type
-          let shelterName = tags.name || tags['name:no'] || tags['name:nb']
-          const shelterType = tags.shelter_type
-
-          if (!shelterName) {
-            if (shelterType === 'basic_hut') shelterName = 'Gapahuk'
-            else if (shelterType === 'weather_shelter') shelterName = 'Vindskjul'
-            else if (shelterType === 'rock_shelter') shelterName = 'Helleskjul'
-            else if (shelterType === 'lavvu') shelterName = 'Lavvo'
-            else shelterName = 'Gapahuk/vindskjul'
-          }
-
-          pois.push({
-            id: poiId,
-            type: 'wilderness_shelter',
-            name: shelterName,
-            shelter_type: shelterType,
-            description: tags.description,
-            coordinates
-          })
+          poi = this.createWildernessShelterPOI(element, coordinates)
           break
+      }
+
+      if (poi) {
+        // Check for duplicates
+        if (seenIds.has(poi.id)) {
+          console.warn(`[POIService] Duplicate POI ID: ${poi.id}`)
+          continue
+        }
+        seenIds.add(poi.id)
+        pois.push(poi)
       }
     }
 

@@ -51,6 +51,11 @@ const WAYPOINTS_STORE = 'waypoints'
 const PROJECTS_STORE = 'projects'
 
 class RouteService {
+  // ID generation constants
+  private readonly ID_RANDOM_STRING_START = 2
+  private readonly ID_RANDOM_STRING_END = 11  // substring end index (exclusive)
+  private readonly ID_RADIX = 36  // Base-36 for random string generation
+
   // Use dbService instead of maintaining separate database connection
   private async getDB(): Promise<IDBDatabase> {
     return await dbService.init()
@@ -62,7 +67,7 @@ class RouteService {
 
     const newWaypoint: Waypoint = {
       ...waypoint,
-      id: `wp-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+      id: `wp-${Date.now()}-${Math.random().toString(this.ID_RADIX).substring(this.ID_RANDOM_STRING_START, this.ID_RANDOM_STRING_END)}`,
       createdAt: Date.now(),
       updatedAt: Date.now()
     }
@@ -187,7 +192,7 @@ class RouteService {
 
     const newRoute: Route = {
       ...route,
-      id: `route-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+      id: `route-${Date.now()}-${Math.random().toString(this.ID_RADIX).substring(this.ID_RANDOM_STRING_START, this.ID_RANDOM_STRING_END)}`,
       createdAt: Date.now(),
       updatedAt: Date.now()
     }
@@ -312,7 +317,7 @@ class RouteService {
 
     const newProject: Project = {
       ...project,
-      id: `proj-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+      id: `proj-${Date.now()}-${Math.random().toString(this.ID_RADIX).substring(this.ID_RANDOM_STRING_START, this.ID_RANDOM_STRING_END)}`,
       createdAt: Date.now(),
       updatedAt: Date.now()
     }

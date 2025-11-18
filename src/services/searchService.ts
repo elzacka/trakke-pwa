@@ -18,6 +18,38 @@ class SearchService {
   private readonly KARTVERKET_API = 'https://ws.geonorge.no/stedsnavn/v1/navn'
   private readonly KARTVERKET_ADDRESS_API = 'https://ws.geonorge.no/adresser/v1/sok'
 
+  // Address scoring weights
+  private readonly SCORE_EXACT_MATCH = 1000
+  private readonly SCORE_STREET_PREFIX = 100
+  private readonly SCORE_STREET_CONTAINS = 50
+  private readonly SCORE_HOUSE_NUMBER_MATCH = 200
+  private readonly SCORE_LETTER_MATCH = 100
+  private readonly SCORE_NO_LETTER_BONUS = 50
+  private readonly SCORE_WRONG_LETTER_PENALTY = -150
+  private readonly SCORE_POOR_MATCH_THRESHOLD = -400
+  private readonly SCORE_HOUSE_PREFIX_MATCH = 10
+  private readonly SCORE_WRONG_HOUSE_PENALTY = -500
+
+  // Place scoring weights
+  private readonly SCORE_PLACE_EXACT = 1000
+  private readonly SCORE_PLACE_PREFIX = 800
+  private readonly SCORE_PLACE_PREFIX_LENGTH_BONUS_MAX = 100
+  private readonly SCORE_PLACE_WORD_MATCH = 600
+  private readonly SCORE_PLACE_SUBSTRING = 300
+  private readonly SCORE_PLACE_FUZZY_BASE = 400
+  private readonly SCORE_PLACE_FUZZY_PENALTY_PER_CHAR = 100
+  private readonly SCORE_PLACE_FUZZY_MAX_DISTANCE = 3
+  private readonly SCORE_PLACE_OUTDOOR_TYPE_BONUS = 50
+  private readonly SCORE_PLACE_SHORT_NAME_BONUS = 30
+  private readonly SCORE_PLACE_LONG_NAME_PENALTY = -20
+  private readonly SCORE_PLACE_THRESHOLD = 100
+
+  // Search configuration
+  private readonly ADDRESS_SEARCH_MULTIPLIER = 3  // Fetch 3x results for filtering
+  private readonly PLACE_SEARCH_LIMIT = 30
+  private readonly SHORT_NAME_THRESHOLD = 15
+  private readonly LONG_NAME_THRESHOLD = 30
+
   /**
    * Search for addresses using Kartverket's address API with smart filtering
    */
@@ -28,7 +60,7 @@ class SearchService {
       // Fetch more results to allow for smart filtering
       const url = new URL(this.KARTVERKET_ADDRESS_API)
       url.searchParams.set('sok', query)
-      url.searchParams.set('treffPerSide', (limit * 3).toString()) // Fetch 3x to filter
+      url.searchParams.set('treffPerSide', (limit * this.ADDRESS_SEARCH_MULTIPLIER).toString())
       url.searchParams.set('side', '0')
       url.searchParams.set('asciiKompatibel', 'true')
 
@@ -88,36 +120,33 @@ class SearchService {
 
       // Exact match bonus (highest priority)
       if (addrLower === queryLower) {
-        score += 1000
+        score += this.SCORE_EXACT_MATCH
       }
 
       // Street name matching
       if (streetName.startsWith(queryStreet)) {
-        score += 100 // Prefix match
+        score += this.SCORE_STREET_PREFIX
       } else if (streetName.includes(queryStreet)) {
-        score += 50 // Contains match
+        score += this.SCORE_STREET_CONTAINS
       }
 
       // House number matching (strict)
       if (queryHouseNumber) {
         if (houseNum === queryHouseNumber) {
-          score += 200 // Exact house number match
+          score += this.SCORE_HOUSE_NUMBER_MATCH
 
           // Letter matching
           if (queryLetter && letter === queryLetter) {
-            score += 100 // Exact letter match
+            score += this.SCORE_LETTER_MATCH
           } else if (!queryLetter && !letter) {
-            score += 50 // Both have no letter
+            score += this.SCORE_NO_LETTER_BONUS
           } else if (queryLetter && letter !== queryLetter) {
-            score -= 150 // Wrong letter penalty
+            score += this.SCORE_WRONG_LETTER_PENALTY
           }
         } else if (houseNum.startsWith(queryHouseNumber)) {
-          // Only match if house number is a prefix (e.g., "2" matches "25" only if ambiguous)
-          // But penalize heavily to prefer exact matches
-          score += 10
+          score += this.SCORE_HOUSE_PREFIX_MATCH
         } else {
-          // Completely different house number - heavily penalize
-          score -= 500
+          score += this.SCORE_WRONG_HOUSE_PENALTY
         }
       }
 
@@ -130,7 +159,7 @@ class SearchService {
 
     // Sort by score and return top results (raw data automatically dropped)
     return scored
-      .filter(item => item.score > -400) // Filter out poor matches
+      .filter(item => item.score > this.SCORE_POOR_MATCH_THRESHOLD)
       .sort((a, b) => b.score - a.score)
       .slice(0, limit)
       .map(item => item.result)
@@ -146,7 +175,7 @@ class SearchService {
       // Fetch many more results for better autocomplete/fuzzy matching
       const url = new URL(this.KARTVERKET_API)
       url.searchParams.set('sok', query)
-      url.searchParams.set('treffPerSide', '30') // Fetch more results for better matching
+      url.searchParams.set('treffPerSide', this.PLACE_SEARCH_LIMIT.toString())
       url.searchParams.set('side', '1') // API uses 1-indexed pages
       url.searchParams.set('utkoordsys', '4326') // WGS84 (standard lon/lat)
       url.searchParams.set('fuzzy', 'true') // Enable fuzzy matching in API
@@ -194,16 +223,16 @@ class SearchService {
 
       // Exact match (highest priority)
       if (nameLower === queryLower) {
-        score += 1000
+        score += this.SCORE_PLACE_EXACT
       }
 
       // Direct prefix match (very high priority for autocomplete)
       // Example: "ulsrud" matches "ulsrudvannet"
       if (nameLower.startsWith(queryLower)) {
-        score += 800
+        score += this.SCORE_PLACE_PREFIX
         // Stronger bonus for closer length match
         const lengthDiff = nameLower.length - queryLower.length
-        score += Math.max(0, 100 - lengthDiff * 2)
+        score += Math.max(0, this.SCORE_PLACE_PREFIX_LENGTH_BONUS_MAX - lengthDiff * 2)
       }
 
       // Word boundary prefix match (also high priority)
@@ -212,7 +241,7 @@ class SearchService {
       let hasWordMatch = false
       for (const word of words) {
         if (word.startsWith(queryLower)) {
-          score += 600 // Any word starts with query
+          score += this.SCORE_PLACE_WORD_MATCH
           hasWordMatch = true
           break
         }
@@ -220,32 +249,31 @@ class SearchService {
 
       // Substring match within name (medium priority)
       if (!hasWordMatch && nameLower.includes(queryLower)) {
-        score += 300
+        score += this.SCORE_PLACE_SUBSTRING
       }
 
       // Character-by-character prefix fuzzy match
       // Example: "ulsru" very close to "ulsrud" in "ulsrudvannet"
       const namePrefix = nameLower.substring(0, Math.min(queryLower.length + 5, nameLower.length))
       const distance = levenshteinDistance(queryLower, namePrefix)
-      if (distance <= 3) {
-        // Allow typos and partial matches
-        score += Math.max(0, 400 - (distance * 100))
+      if (distance <= this.SCORE_PLACE_FUZZY_MAX_DISTANCE) {
+        score += Math.max(0, this.SCORE_PLACE_FUZZY_BASE - (distance * this.SCORE_PLACE_FUZZY_PENALTY_PER_CHAR))
       }
 
       // Bonus for popular outdoor place types
       const placeType = (rawPlace.navneobjekttype || '').toLowerCase()
       if (['fjell', 'vann', 'dal', 'bre', 'fjord', 'øy'].includes(placeType)) {
-        score += 50 // Higher bonus for outdoor/nature features
+        score += this.SCORE_PLACE_OUTDOOR_TYPE_BONUS
       }
 
       // Bonus for shorter names (more specific/likely what user wants)
-      if (nameLower.length <= 15) {
-        score += 30
+      if (nameLower.length <= this.SHORT_NAME_THRESHOLD) {
+        score += this.SCORE_PLACE_SHORT_NAME_BONUS
       }
 
       // Penalty for very long names (less specific)
-      if (nameLower.length > 30) {
-        score -= 20
+      if (nameLower.length > this.LONG_NAME_THRESHOLD) {
+        score += this.SCORE_PLACE_LONG_NAME_PENALTY
       }
 
       return { result, score }
@@ -253,7 +281,7 @@ class SearchService {
 
     // Sort by score and return top results (raw data automatically dropped)
     return scored
-      .filter(item => item.score > 100) // Higher threshold to filter noise
+      .filter(item => item.score > this.SCORE_PLACE_THRESHOLD)
       .sort((a, b) => b.score - a.score)
       .slice(0, limit)
       .map(item => item.result)

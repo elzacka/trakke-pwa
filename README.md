@@ -53,12 +53,12 @@ A Progressive Web Application for Norwegian outdoor navigation with offline capa
 **Progressive Web App**
 - Installable on mobile and desktop
 - Works offline with cached map tiles
-- Fast, app-like experience
+- App-like experience
 - iOS and Android home screen support
 - Service Worker with intelligent caching
 
 **Zen Mode Interface**
-- Auto-hiding controls for immersive map view
+- Auto-hiding controls
 - Collapsible welcome header with toggle chevron
 - Floating Action Button (FAB) menu
 - Bottom sheets for feature access (Search, Download, Routes, Categories, Settings, Info)
@@ -141,7 +141,7 @@ trakke_pwa/
 │   ├── apple-icon-180.png  # iOS app icon
 │   ├── fonts/              # Self-hosted Exo 2 variable font
 │   └── material-symbols/   # Self-hosted Material Symbols icons
-├── DESIGN_SYSTEM.md        # Complete design documentation
+├── DESIGN_SYSTEM.md        # Design documentation
 ├── DEVELOPER_GUIDELINES.md # Privacy & development guidelines
 ├── CLAUDE.md               # Developer context for AI assistance
 ├── vite.config.ts          # Vite + PWA + CSP config
@@ -151,9 +151,9 @@ trakke_pwa/
 
 ## Design System
 
-Tråkke uses the **Nordisk ro** design system - a minimalist, nature-inspired visual language with warm, paper-like colors.
+Tråkke uses the **Nordisk ro** design system.
 
-**Complete design documentation**: See [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) for:
+See [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) for:
 - Nordisk ro color palette (brand, neutrals, text hierarchy, functional colors)
 - Logo specifications and usage guidelines
 - Typography (Exo 2 variable font)
@@ -209,7 +209,7 @@ Tested and supported on modern browsers:
 - Firefox 100+
 - Safari 15+ / iOS 15+
 
-See [BROWSER_COMPATIBILITY.md](BROWSER_COMPATIBILITY.md) for detailed compatibility information, testing requirements, and browser-specific notes.
+See [BROWSER_COMPATIBILITY.md](BROWSER_COMPATIBILITY.md) for compatibility information, testing requirements, and browser-specific notes.
 
 ### Testing Offline Mode
 1. Open app in browser

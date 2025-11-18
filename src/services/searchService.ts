@@ -3,6 +3,8 @@
 // - Place names: Sentralt Stedsnavnregister (SSR) © Kartverket
 // - Addresses: Adresseregister © Kartverket
 
+import { levenshteinDistance } from '../utils/levenshtein'
+
 export interface SearchResult {
   id: string
   name: string
@@ -120,7 +122,7 @@ class SearchService {
       }
 
       // Levenshtein distance for fuzzy matching (minor factor)
-      const distance = this.levenshteinDistance(queryLower, addrLower)
+      const distance = levenshteinDistance(queryLower, addrLower)
       score -= distance
 
       return { result, score }
@@ -224,7 +226,7 @@ class SearchService {
       // Character-by-character prefix fuzzy match
       // Example: "ulsru" very close to "ulsrud" in "ulsrudvannet"
       const namePrefix = nameLower.substring(0, Math.min(queryLower.length + 5, nameLower.length))
-      const distance = this.levenshteinDistance(queryLower, namePrefix)
+      const distance = levenshteinDistance(queryLower, namePrefix)
       if (distance <= 3) {
         // Allow typos and partial matches
         score += Math.max(0, 400 - (distance * 100))
@@ -255,38 +257,6 @@ class SearchService {
       .sort((a, b) => b.score - a.score)
       .slice(0, limit)
       .map(item => item.result)
-  }
-
-  /**
-   * Calculate Levenshtein distance between two strings (edit distance)
-   * Used for fuzzy matching to handle typos
-   */
-  private levenshteinDistance(str1: string, str2: string): number {
-    const len1 = str1.length
-    const len2 = str2.length
-    const matrix: number[][] = []
-
-    // Initialize matrix
-    for (let i = 0; i <= len1; i++) {
-      matrix[i] = [i]
-    }
-    for (let j = 0; j <= len2; j++) {
-      matrix[0][j] = j
-    }
-
-    // Calculate distances
-    for (let i = 1; i <= len1; i++) {
-      for (let j = 1; j <= len2; j++) {
-        const cost = str1[i - 1] === str2[j - 1] ? 0 : 1
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j] + 1,      // deletion
-          matrix[i][j - 1] + 1,      // insertion
-          matrix[i - 1][j - 1] + cost // substitution
-        )
-      }
-    }
-
-    return matrix[len1][len2]
   }
 
   /**

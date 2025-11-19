@@ -620,6 +620,10 @@ Key files to understand the architecture:
 
 **Quick status**: Phase 2 in progress (POI categories, coordinate formats implemented; projects/GPX export pending)
 
+**Upcoming phases**:
+- Phase 3: Elevation profiles, weather, route planning, photo geotagging
+- Phase 4: GPS navigation, turn-by-turn guidance, track recording
+
 ## Privacy Compliance Reminders
 
 When reviewing or modifying code:

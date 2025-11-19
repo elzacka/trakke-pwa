@@ -4,7 +4,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import NavigationLocationControl from './NavigationLocationControl'
 import SearchControl from './SearchControl'
 import DownloadControl from './DownloadControl'
-import InfoPanel from './InfoPanel'
+// InfoPanel removed - using InfoSheet instead
 import FABMenu from './FABMenu'
 import SearchSheet from './SearchSheet'
 import InfoSheet from './InfoSheet'
@@ -797,16 +797,17 @@ const Map = ({ zenMode }: MapProps) => {
 
         // Load SVG icons for all POI categories from OSM-Carto
         try {
-          const caveImg = await loadSVGAsImage('/trakke-pwa/icons/osm-carto/cave.svg', '#8b4513')
+          const baseUrl = import.meta.env.BASE_URL
+          const caveImg = await loadSVGAsImage(`${baseUrl}icons/osm-carto/cave.svg`, '#8b4513')
           map.current.addImage('cave-icon', imageToMapIcon(caveImg, size))
 
-          const towerImg = await loadSVGAsImage('/trakke-pwa/icons/osm-carto/tower_observation.svg', '#4a5568')
+          const towerImg = await loadSVGAsImage(`${baseUrl}icons/osm-carto/tower_observation.svg`, '#4a5568')
           map.current.addImage('tower-icon', imageToMapIcon(towerImg, size))
 
-          const memorialImg = await loadSVGAsImage('/trakke-pwa/icons/osm-carto/fort.svg', '#6b7280')
+          const memorialImg = await loadSVGAsImage(`${baseUrl}icons/osm-carto/fort.svg`, '#6b7280')
           map.current.addImage('memorial-icon', imageToMapIcon(memorialImg, size))
 
-          const wildernessShelterImg = await loadSVGAsImage('/trakke-pwa/icons/osm-carto/shelter.svg', '#b45309')
+          const wildernessShelterImg = await loadSVGAsImage(`${baseUrl}icons/osm-carto/shelter.svg`, '#b45309')
           map.current.addImage('wilderness-shelter-icon', imageToMapIcon(wildernessShelterImg, size))
         } catch (error) {
           console.error('[Map] Failed to load SVG icons, using fallback circles:', error)
@@ -2624,7 +2625,7 @@ const Map = ({ zenMode }: MapProps) => {
               onCancelSelection={handleCancelSelection}
             />
           </div>
-          <InfoPanel />
+          {/* InfoPanel removed - using InfoSheet via FABMenu instead */}
         </>
       )}
       <div ref={mapContainer} className="map" />

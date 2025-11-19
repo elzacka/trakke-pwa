@@ -76,7 +76,7 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
                       <li>
                         Stedsnavn for søkefunksjon. {' '}
                         <a
-                          href="https://kartkatalog.geonorge.no/metadata/stedsnavn-komplett-ssr/e1c50348-962d-4047-8325-bdc265c853ed?search=Sentralt%20Stedsnavnregister%20(SSR)"
+                          href="https://kartkatalog.geonorge.no/metadata/soeketjeneste-for-stedsnavn/d12de000-1a23-46b3-9192-3a1a98b2c994"
                           target="_blank"
                           rel="noopener noreferrer"
                         >
@@ -86,7 +86,7 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
                       <li>
                         Adresser for søkefunksjon. {' '}
                         <a
-                          href="https://kartkatalog.geonorge.no/metadata/adresser/ea192681-d039-42ec-b1bc-f3ce04c189ac"
+                          href="https://kartkatalog.geonorge.no/metadata/44eeffdc-6069-4000-a49b-2d6bfc59ac61"
                           target="_blank"
                           rel="noopener noreferrer"
                         >

@@ -276,12 +276,21 @@ See [DEPENDENCIES.md](DEPENDENCIES.md) for complete dependency list with exact v
 - Projects/tracks management
 - GPX export functionality
 
-### Phase 3 (Future)
+### Phase 3 (Planned)
+- Elevation profiles using DTM data
+- Weather integration (Yr.no/MET Norway - requires privacy review)
+- Route planning with trail snapping
+- Photo geotagging for waypoints
+
+### Phase 4 (GPS Navigation & Advanced Features)
+- Turn-by-turn navigation
+- Live GPS tracking and route following
+- Compass and bearing tools
+- Off-route alerts and recalculation
+- Track recording (breadcrumb trails)
+- Battery-efficient tracking modes
 - Additional POI categories (cabins, trails, parking)
 - Trail overlays from external sources
-- Elevation profiles using DTM data
-- GPX import functionality
-- Compass and bearing tools
 - Push notifications for weather alerts
 
 ## Privacy & Security

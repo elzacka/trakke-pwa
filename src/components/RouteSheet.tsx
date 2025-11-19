@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import BottomSheet from './BottomSheet'
-import { routeService, type Route, type Waypoint } from '../services/routeService'
+import { routeService, type Route, type Waypoint, type Project } from '../services/routeService'
+import { exportRouteToGpx, exportMultipleRoutesToGpx, downloadGpx, canExportRoute } from '../utils/gpxExport'
 import '../styles/RouteSheet.css'
 
 interface RouteSheetProps {
@@ -22,6 +23,7 @@ interface RouteSheetProps {
 }
 
 type ViewMode = 'list' | 'detail' | 'create'
+type TabMode = 'routes' | 'projects'
 
 const RouteSheet = ({
   isOpen,
@@ -41,9 +43,12 @@ const RouteSheet = ({
   onToggleVisibility
 }: RouteSheetProps) => {
   const [viewMode, setViewMode] = useState<ViewMode>('list')
+  const [tabMode, setTabMode] = useState<TabMode>('routes')
   const [routes, setRoutes] = useState<Route[]>([])
   const [waypoints, setWaypoints] = useState<Waypoint[]>([])
+  const [projects, setProjects] = useState<Project[]>([])
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null)
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set())
 
@@ -57,14 +62,16 @@ const RouteSheet = ({
   const loadData = async () => {
     setIsLoading(true)
     try {
-      const [loadedRoutes, loadedWaypoints] = await Promise.all([
+      const [loadedRoutes, loadedWaypoints, loadedProjects] = await Promise.all([
         routeService.getAllRoutes(),
-        routeService.getAllWaypoints()
+        routeService.getAllWaypoints(),
+        routeService.getAllProjects()
       ])
       setRoutes(loadedRoutes)
       setWaypoints(loadedWaypoints)
+      setProjects(loadedProjects)
     } catch (error) {
-      console.error('Failed to load routes:', error)
+      console.error('Failed to load data:', error)
     } finally {
       setIsLoading(false)
     }
@@ -94,8 +101,129 @@ const RouteSheet = ({
     if (viewMode === 'detail' || viewMode === 'create') {
       setViewMode('list')
       setSelectedRoute(null)
+      setSelectedProject(null)
     } else {
       onClose()
+    }
+  }
+
+  const handleProjectClick = (project: Project) => {
+    setSelectedProject(project)
+    setViewMode('detail')
+  }
+
+  const handleCreateProject = async () => {
+    const name = window.prompt('Navn på prosjekt:')
+    if (!name || name.trim() === '') return
+
+    try {
+      await routeService.createProject({
+        name: name.trim(),
+        routes: [],
+        waypoints: []
+      })
+      await loadData()
+    } catch (error) {
+      console.error('Failed to create project:', error)
+      alert('Kunne ikke opprette prosjekt')
+    }
+  }
+
+  const handleDeleteProject = async (projectId: string) => {
+    const confirmed = window.confirm('Er du sikker på at du vil slette dette prosjektet?')
+    if (!confirmed) return
+
+    try {
+      await routeService.deleteProject(projectId)
+      await loadData()
+      if (selectedProject?.id === projectId) {
+        setViewMode('list')
+        setSelectedProject(null)
+      }
+    } catch (error) {
+      console.error('Failed to delete project:', error)
+      alert('Kunne ikke slette prosjektet')
+    }
+  }
+
+  const handleAddRouteToProject = async (projectId: string, routeId: string) => {
+    try {
+      const project = await routeService.getProject(projectId)
+      if (!project) throw new Error('Project not found')
+
+      if (project.routes.includes(routeId)) {
+        alert('Ruten er allerede i dette prosjektet')
+        return
+      }
+
+      await routeService.updateProject(projectId, {
+        routes: [...project.routes, routeId]
+      })
+      await loadData()
+    } catch (error) {
+      console.error('Failed to add route to project:', error)
+      alert('Kunne ikke legge til rute i prosjekt')
+    }
+  }
+
+  const handleRemoveRouteFromProject = async (projectId: string, routeId: string) => {
+    try {
+      const project = await routeService.getProject(projectId)
+      if (!project) throw new Error('Project not found')
+
+      await routeService.updateProject(projectId, {
+        routes: project.routes.filter(id => id !== routeId)
+      })
+      await loadData()
+    } catch (error) {
+      console.error('Failed to remove route from project:', error)
+      alert('Kunne ikke fjerne rute fra prosjekt')
+    }
+  }
+
+  const handleExportRouteGpx = async (routeId: string) => {
+    try {
+      const route = routes.find(r => r.id === routeId)
+      if (!route) throw new Error('Route not found')
+
+      if (!canExportRoute(route)) {
+        alert('Ruten må ha minst 2 punkter for å eksporteres')
+        return
+      }
+
+      // Get waypoints for this route
+      const routeWaypoints = waypoints.filter(wp =>
+        route.waypoints && route.waypoints.includes(wp.id)
+      )
+
+      const gpxContent = exportRouteToGpx(route, routeWaypoints)
+      downloadGpx(gpxContent, route.name)
+    } catch (error) {
+      console.error('Failed to export GPX:', error)
+      alert('Kunne ikke eksportere GPX')
+    }
+  }
+
+  const handleExportProjectGpx = async (projectId: string) => {
+    try {
+      const project = projects.find(p => p.id === projectId)
+      if (!project) throw new Error('Project not found')
+
+      const projectRoutes = routes.filter(r => project.routes.includes(r.id))
+      if (projectRoutes.length === 0) {
+        alert('Prosjektet har ingen ruter å eksportere')
+        return
+      }
+
+      const projectWaypoints = waypoints.filter(wp =>
+        project.waypoints.includes(wp.id)
+      )
+
+      const gpxContent = exportMultipleRoutesToGpx(projectRoutes, projectWaypoints, project.name)
+      downloadGpx(gpxContent, project.name)
+    } catch (error) {
+      console.error('Failed to export project GPX:', error)
+      alert('Kunne ikke eksportere prosjekt som GPX')
     }
   }
 
@@ -213,13 +341,30 @@ const RouteSheet = ({
         </button>
       </div>
 
+      {/* Tab switcher */}
+      <div className="route-tabs">
+        <button
+          className={`route-tab ${tabMode === 'routes' ? 'active' : ''}`}
+          onClick={() => setTabMode('routes')}
+        >
+          Ruter
+        </button>
+        <button
+          className={`route-tab ${tabMode === 'projects' ? 'active' : ''}`}
+          onClick={() => setTabMode('projects')}
+        >
+          Prosjekter
+        </button>
+      </div>
+
       <div className="route-sheet-content">
         {isLoading ? (
           <div className="route-loading">
             <p>Laster...</p>
           </div>
-        ) : (
+        ) : tabMode === 'routes' ? (
           <>
+            {/* Routes Tab Content */}
             {/* Create buttons */}
             <section className="route-actions">
               <button
@@ -386,14 +531,74 @@ const RouteSheet = ({
               )}
             </section>
           </>
+        ) : (
+          <>
+            {/* Projects Tab Content */}
+            <section className="route-actions">
+              <button
+                type="button"
+                className="route-action-button primary"
+                onClick={handleCreateProject}
+              >
+                <span className="material-symbols-outlined">create_new_folder</span>
+                <span>Nytt prosjekt</span>
+              </button>
+            </section>
+
+            {/* Projects list */}
+            <section className="route-section">
+              <h3>Mine prosjekter ({projects.length})</h3>
+              {projects.length > 0 ? (
+                <div className="route-list">
+                  {projects.map((project) => {
+                    const projectRoutes = routes.filter(r => project.routes.includes(r.id))
+                    const projectWaypoints = waypoints.filter(w => project.waypoints.includes(w.id))
+
+                    return (
+                      <div
+                        key={project.id}
+                        className="route-item"
+                        onClick={() => handleProjectClick(project)}
+                      >
+                        <div className="route-item-icon">
+                          <span className="material-symbols-outlined">folder</span>
+                        </div>
+                        <div className="route-item-content">
+                          <div className="route-item-name">{project.name}</div>
+                          <div className="route-item-meta">
+                            {projectRoutes.length} {projectRoutes.length === 1 ? 'rute' : 'ruter'} • {projectWaypoints.length} {projectWaypoints.length === 1 ? 'punkt' : 'punkter'}
+                          </div>
+                        </div>
+                        <div className="route-item-actions">
+                          <button
+                            className="route-item-delete"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDeleteProject(project.id)
+                            }}
+                            aria-label="Slett prosjekt"
+                          >
+                            <span className="material-symbols-outlined">delete</span>
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <p className="route-empty-state">Ingen prosjekter ennå. Opprett et prosjekt for å organisere ruter og punkter.</p>
+              )}
+            </section>
+          </>
         )}
       </div>
     </div>
   )
 
-  // Detail view
-  const renderDetailView = () => {
-    if (!selectedRoute) return null
+  // Project Detail View
+  const renderProjectDetail = (project: Project) => {
+    const projectRoutes = routes.filter(r => project.routes.includes(r.id))
+    const projectWaypoints = waypoints.filter(w => project.waypoints.includes(w.id))
 
     return (
       <div className="route-sheet">
@@ -405,7 +610,7 @@ const RouteSheet = ({
           >
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
-          <h2>{selectedRoute.name}</h2>
+          <h2>{project.name}</h2>
           <button
             className="route-sheet-close"
             onClick={onClose}
@@ -417,48 +622,154 @@ const RouteSheet = ({
 
         <div className="route-sheet-content">
           <div className="route-detail">
-            {selectedRoute.description && (
-              <p className="route-detail-description">{selectedRoute.description}</p>
+            {project.description && (
+              <p className="route-detail-description">{project.description}</p>
+            )}
+
+            <div className="route-detail-stats">
+              <div className="route-stat">
+                <span className="route-stat-label">Ruter</span>
+                <span className="route-stat-value">{projectRoutes.length}</span>
+              </div>
+              <div className="route-stat">
+                <span className="route-stat-label">Punkter</span>
+                <span className="route-stat-value">{projectWaypoints.length}</span>
+              </div>
+            </div>
+
+            <div className="route-detail-meta">
+              <p>Opprettet: {formatDate(project.createdAt)}</p>
+            </div>
+
+            {/* Routes in project */}
+            {projectRoutes.length > 0 && (
+              <section className="route-section">
+                <h3>Ruter i prosjekt</h3>
+                <div className="route-list">
+                  {projectRoutes.map((route) => (
+                    <div key={route.id} className="route-item">
+                      <div className="route-item-icon">
+                        <span className="material-symbols-outlined">route</span>
+                      </div>
+                      <div className="route-item-content">
+                        <div className="route-item-name">{route.name}</div>
+                        <div className="route-item-meta">
+                          {formatDistance(route.distance)}
+                        </div>
+                      </div>
+                      <div className="route-item-actions">
+                        <button
+                          className="route-item-delete"
+                          onClick={() => handleRemoveRouteFromProject(project.id, route.id)}
+                          aria-label="Fjern fra prosjekt"
+                        >
+                          <span className="material-symbols-outlined">remove</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <div className="route-detail-actions">
+              {projectRoutes.length > 0 && (
+                <button
+                  className="route-detail-button primary"
+                  onClick={() => handleExportProjectGpx(project.id)}
+                >
+                  <span className="material-symbols-outlined">download</span>
+                  <span>Eksporter GPX</span>
+                </button>
+              )}
+              <button
+                className="route-detail-button"
+                onClick={() => handleDeleteProject(project.id)}
+              >
+                <span className="material-symbols-outlined">delete</span>
+                <span>Slett prosjekt</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Route Detail View
+  const renderRouteDetail = (route: Route) => {
+    return (
+      <div className="route-sheet">
+        <div className="route-sheet-header">
+          <button
+            className="route-sheet-back"
+            onClick={handleBack}
+            aria-label="Tilbake"
+          >
+            <span className="material-symbols-outlined">arrow_back</span>
+          </button>
+          <h2>{route.name}</h2>
+          <button
+            className="route-sheet-close"
+            onClick={onClose}
+            aria-label="Lukk"
+          >
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <div className="route-sheet-content">
+          <div className="route-detail">
+            {route.description && (
+              <p className="route-detail-description">{route.description}</p>
             )}
 
             <div className="route-detail-stats">
               <div className="route-stat">
                 <span className="route-stat-label">Distanse</span>
-                <span className="route-stat-value">{formatDistance(selectedRoute.distance)}</span>
+                <span className="route-stat-value">{formatDistance(route.distance)}</span>
               </div>
               <div className="route-stat">
                 <span className="route-stat-label">Varighet</span>
-                <span className="route-stat-value">{formatDuration(selectedRoute.duration)}</span>
+                <span className="route-stat-value">{formatDuration(route.duration)}</span>
               </div>
-              {selectedRoute.elevationGain && (
+              {route.elevationGain && (
                 <div className="route-stat">
                   <span className="route-stat-label">Stigning</span>
-                  <span className="route-stat-value">{selectedRoute.elevationGain} m</span>
+                  <span className="route-stat-value">{route.elevationGain} m</span>
                 </div>
               )}
-              {selectedRoute.difficulty && (
+              {route.difficulty && (
                 <div className="route-stat">
                   <span className="route-stat-label">Vanskelighet</span>
                   <span className="route-stat-value">
-                    {selectedRoute.difficulty === 'easy' && 'Lett'}
-                    {selectedRoute.difficulty === 'moderate' && 'Middels'}
-                    {selectedRoute.difficulty === 'hard' && 'Krevende'}
+                    {route.difficulty === 'easy' && 'Lett'}
+                    {route.difficulty === 'moderate' && 'Middels'}
+                    {route.difficulty === 'hard' && 'Krevende'}
                   </span>
                 </div>
               )}
             </div>
 
             <div className="route-detail-meta">
-              <p>Opprettet: {formatDate(selectedRoute.createdAt)}</p>
-              {selectedRoute.completedAt && (
-                <p>Fullført: {formatDate(selectedRoute.completedAt)}</p>
+              <p>Opprettet: {formatDate(route.createdAt)}</p>
+              {route.completedAt && (
+                <p>Fullført: {formatDate(route.completedAt)}</p>
               )}
             </div>
 
             <div className="route-detail-actions">
               <button
+                className="route-detail-button primary"
+                onClick={() => handleExportRouteGpx(route.id)}
+                disabled={!canExportRoute(route)}
+              >
+                <span className="material-symbols-outlined">download</span>
+                <span>Eksporter GPX</span>
+              </button>
+              <button
                 className="route-detail-button"
-                onClick={() => handleDeleteRoute(selectedRoute.id)}
+                onClick={() => handleDeleteRoute(route.id)}
               >
                 <span className="material-symbols-outlined">delete</span>
                 <span>Slett rute</span>
@@ -479,7 +790,8 @@ const RouteSheet = ({
       initialHeight="half"
     >
       {viewMode === 'list' && renderListView()}
-      {viewMode === 'detail' && renderDetailView()}
+      {viewMode === 'detail' && selectedRoute && renderRouteDetail(selectedRoute)}
+      {viewMode === 'detail' && selectedProject && renderProjectDetail(selectedProject)}
     </BottomSheet>
   )
 }

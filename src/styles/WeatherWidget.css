@@ -45,11 +45,19 @@
   border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
-/* Weather icon (emoji) */
+/* Weather icon (SVG) */
 .weather-icon {
-  font-size: 20px;
   line-height: 1;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.weather-icon-img {
+  width: 24px;
+  height: 24px;
+  display: block;
 }
 
 /* Temperature display */

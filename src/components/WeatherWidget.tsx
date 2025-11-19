@@ -53,7 +53,7 @@ const WeatherWidget = ({ lat, lon, onExpand }: WeatherWidgetProps) => {
   if (!forecast) return null
 
   const { current } = forecast
-  const emoji = weatherService.getWeatherEmoji(current.symbol)
+  const iconPath = weatherService.getWeatherIcon(current.symbol)
   const temp = Math.round(current.temperature)
 
   return (
@@ -62,10 +62,16 @@ const WeatherWidget = ({ lat, lon, onExpand }: WeatherWidgetProps) => {
       onClick={onExpand}
       role="button"
       tabIndex={0}
-      aria-label={`Vær: ${temp} grader, ${emoji}. Klikk for detaljer`}
+      aria-label={`Vær: ${temp} grader. Klikk for detaljer`}
       title="Klikk for værdetaljer"
     >
-      <div className="weather-icon">{emoji}</div>
+      <div className="weather-icon">
+        <img
+          src={iconPath}
+          alt={current.symbol}
+          className="weather-icon-img"
+        />
+      </div>
       <div className="weather-temp">{temp}°</div>
     </div>
   )

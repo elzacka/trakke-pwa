@@ -238,44 +238,18 @@ class WeatherService {
   }
 
   /**
-   * Get weather symbol emoji for display
-   * Maps MET symbol codes to appropriate emoji
+   * Get weather symbol icon path for display
+   * Returns path to MET Norway official SVG weather icon
+   * Symbol codes from API directly match icon filenames
+   *
+   * Icons: © 2015-2017 Yr, MIT License
+   * Source: https://github.com/metno/weathericons
    */
-  getWeatherEmoji(symbol: string): string {
-    // Remove time suffix (_day, _night, _polartwilight)
-    const baseSymbol = symbol.replace(/_(day|night|polartwilight)$/, '')
-
-    const emojiMap: Record<string, string> = {
-      clearsky: '☀️',
-      fair: '🌤️',
-      partlycloudy: '⛅',
-      cloudy: '☁️',
-      rainshowers: '🌦️',
-      rain: '🌧️',
-      heavyrain: '🌧️',
-      lightrain: '🌦️',
-      sleet: '🌨️',
-      snow: '❄️',
-      snowshowers: '🌨️',
-      fog: '🌫️',
-      thunder: '⛈️',
-      thundershowers: '⛈️'
-    }
-
-    // Check for specific matches
-    for (const [key, emoji] of Object.entries(emojiMap)) {
-      if (baseSymbol.includes(key)) {
-        return emoji
-      }
-    }
-
-    // Default fallback
-    if (baseSymbol.includes('rain')) return '🌧️'
-    if (baseSymbol.includes('snow')) return '❄️'
-    if (baseSymbol.includes('cloud')) return '☁️'
-    if (baseSymbol.includes('clear')) return '☀️'
-
-    return '🌤️'
+  getWeatherIcon(symbol: string): string {
+    // Symbol code from API directly maps to SVG filename
+    // Use BASE_URL to handle /trakke-pwa/ subdirectory in production
+    const baseUrl = import.meta.env.BASE_URL
+    return `${baseUrl}icons/weather/${symbol}.svg`
   }
 
   /**

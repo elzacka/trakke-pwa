@@ -85,7 +85,11 @@ const WeatherSheet = ({ isOpen, onClose, lat, lon }: WeatherSheetProps) => {
                 <div className="weather-current">
                   <div className="weather-current-main">
                     <div className="weather-current-icon">
-                      {weatherService.getWeatherEmoji(forecast.current.symbol)}
+                      <img
+                        src={weatherService.getWeatherIcon(forecast.current.symbol)}
+                        alt={forecast.current.symbol}
+                        className="weather-icon weather-icon-large"
+                      />
                     </div>
                     <div className="weather-current-temp">
                       {Math.round(forecast.current.temperature)}°
@@ -123,7 +127,11 @@ const WeatherSheet = ({ isOpen, onClose, lat, lon }: WeatherSheetProps) => {
                     <div key={index} className="weather-hour">
                       <div className="weather-hour-time">{formatTime(hour.time)}</div>
                       <div className="weather-hour-icon">
-                        {weatherService.getWeatherEmoji(hour.symbol)}
+                        <img
+                          src={weatherService.getWeatherIcon(hour.symbol)}
+                          alt={hour.symbol}
+                          className="weather-icon weather-icon-small"
+                        />
                       </div>
                       <div className="weather-hour-temp">
                         {Math.round(hour.temperature)}°
@@ -146,7 +154,11 @@ const WeatherSheet = ({ isOpen, onClose, lat, lon }: WeatherSheetProps) => {
                     <div key={index} className="weather-day">
                       <div className="weather-day-date">{formatDate(day.time)}</div>
                       <div className="weather-day-icon">
-                        {weatherService.getWeatherEmoji(day.symbol)}
+                        <img
+                          src={weatherService.getWeatherIcon(day.symbol)}
+                          alt={day.symbol}
+                          className="weather-icon weather-icon-medium"
+                        />
                       </div>
                       <div className="weather-day-temp">
                         {Math.round(day.temperature)}°
@@ -177,11 +189,8 @@ const WeatherSheet = ({ isOpen, onClose, lat, lon }: WeatherSheetProps) => {
                     rel="noopener noreferrer"
                   >
                     MET Norway
-                  </a>{' '}
-                  (CC BY 4.0)
-                </p>
-                <p className="weather-updated">
-                  Oppdatert:{' '}
+                  </a>
+                  . Oppdatert:{' '}
                   {new Date(forecast.fetchedAt).toLocaleString('no-NO', {
                     hour: '2-digit',
                     minute: '2-digit'

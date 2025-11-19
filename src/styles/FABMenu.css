@@ -74,7 +74,7 @@
   right: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
   /* Calculate max-height to prevent overlap with top controls */
   /* Weather widget is at: safe-area-top + 10px + 10px + 44px + 4px = safe-area + 68px */
   /* Menu should not extend beyond: viewport - (safe-area + 68px + 44px widget + 8px gap) */

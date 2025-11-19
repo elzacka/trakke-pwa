@@ -80,3 +80,4 @@ PRIVACY_COMPLIANCE.md
 # PWA service worker cache (runtime generated)
 sw.js.map
 workbox-*.js.map
+devdocs/

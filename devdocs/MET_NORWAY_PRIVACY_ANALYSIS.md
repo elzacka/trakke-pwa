@@ -111,7 +111,7 @@
 
 **Format:**
 ```
-User-Agent: Trakke-PWA/1.0 (https://github.com/elzacka/trakke-pwa) contact@example.com
+User-Agent: Trakke-PWA/1.0 (https://github.com/elzacka/trakke-pwa) hei@tazk.no
 ```
 
 **Fallback Options:**
@@ -188,7 +188,7 @@ const lon = Math.round(longitude * 10000) / 10000
 
 ```http
 GET https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=60.10&lon=9.58&altitude=500
-User-Agent: Trakke-PWA/1.0 (https://github.com/elzacka/trakke-pwa) your-email@example.com
+User-Agent: Trakke-PWA/1.0 (https://github.com/elzacka/trakke-pwa) hei@tazk.no
 ```
 
 **Response Sample:**
@@ -261,7 +261,7 @@ export default {
 
     const response = await fetch(metUrl, {
       headers: {
-        'User-Agent': 'Trakke-PWA/1.0 (https://github.com/elzacka/trakke-pwa) your-email@example.com'
+        'User-Agent': 'Trakke-PWA/1.0 (https://github.com/elzacka/trakke-pwa) hei@tazk.no'
       }
     })
 

@@ -12,7 +12,7 @@ Tråkke documentation follows a strict "single source of truth" principle. Each 
 | **[CLAUDE.md](CLAUDE.md)** (this file) | AI assistant context | Architecture patterns, IndexedDB schema, code examples, component structure |
 | **[PRIVACY_BY_DESIGN.md](PRIVACY_BY_DESIGN.md)** | Privacy/GDPR compliance | [External API Registry](PRIVACY_BY_DESIGN.md#external-api-registry), [CSP configuration](PRIVACY_BY_DESIGN.md#2-content-security-policy-csp), [Service Worker privacy](PRIVACY_BY_DESIGN.md#3-service-worker-privacy-configuration) |
 | **[DEVELOPER_GUIDELINES.md](DEVELOPER_GUIDELINES.md)** | Developer workflow | [Pre-implementation checklist](DEVELOPER_GUIDELINES.md#pre-implementation-checklist), privacy-first development patterns |
-| **[DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)** | Visual design | Nordisk ro colors, typography, icons, spacing, logo specifications |
+| **[DESIGN_SYSTEM.md](devdocs/DESIGN_SYSTEM.md)** | Visual design | Nordisk ro colors, typography, icons, spacing, logo specifications |
 
 **When you need information:**
 - External APIs? → [PRIVACY_BY_DESIGN.md - External API Registry](PRIVACY_BY_DESIGN.md#external-api-registry)
@@ -20,7 +20,7 @@ Tråkke documentation follows a strict "single source of truth" principle. Each 
 - Privacy checklist? → [DEVELOPER_GUIDELINES.md](DEVELOPER_GUIDELINES.md#pre-implementation-checklist)
 - Database schema? → [CLAUDE.md - IndexedDB Schema](#indexeddb-schema-v3)
 - Roadmap/features? → [README.md - Roadmap](README.md#-roadmap)
-- Design tokens? → [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)
+- Design tokens? → [DESIGN_SYSTEM.md](devdocs/DESIGN_SYSTEM.md)
 
 ## CRITICAL DEPLOYMENT WORKFLOW
 
@@ -274,7 +274,7 @@ isSelectingArea: boolean     // Two clicks to select download area
 - Uses CSS Grid and Flexbox
 - Material Symbols icons (self-hosted, variable fonts)
 
-**Design System**: All colors, typography, spacing, and visual design tokens are documented in [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md). The app uses the **Nordisk ro** color palette with CSS custom properties (`--trk-*` prefix).
+**Design System**: All colors, typography, spacing, and visual design tokens are documented in [DESIGN_SYSTEM.md](devdocs/DESIGN_SYSTEM.md). The app uses the **Nordisk ro** color palette with CSS custom properties (`--trk-*` prefix).
 
 ## Common Development Patterns
 

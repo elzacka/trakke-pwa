@@ -10,6 +10,7 @@ export interface MapPreferences {
   enlargePointer: boolean
   offlineOnly: boolean
   coordinateFormat: CoordinateFormat
+  showWeatherWidget: boolean
 }
 
 const DEFAULT_PREFERENCES: MapPreferences = {
@@ -18,7 +19,8 @@ const DEFAULT_PREFERENCES: MapPreferences = {
   showCompass: false,
   enlargePointer: false,
   offlineOnly: false,
-  coordinateFormat: 'DD'
+  coordinateFormat: 'DD',
+  showWeatherWidget: false
 }
 
 const STORAGE_KEY = 'trakke_map_preferences'

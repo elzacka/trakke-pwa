@@ -2637,8 +2637,8 @@ const Map = ({ zenMode }: MapProps) => {
             lon={userLocation?.coords.longitude || MAP_CONFIG.DEFAULT_CENTER[0]}
           />
 
-          {/* Weather widget - show when user has location */}
-          {userLocation && (
+          {/* Weather widget - show when user has location and preference enabled */}
+          {userLocation && mapPreferences.showWeatherWidget && (
             <WeatherWidget
               lat={userLocation.coords.latitude}
               lon={userLocation.coords.longitude}

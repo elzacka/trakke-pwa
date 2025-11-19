@@ -141,6 +141,22 @@ const MapPreferencesSheet = ({ isOpen, onClose, onPreferencesChange }: MapPrefer
               </button>
             </div>
 
+            <div className="preference-item">
+              <div className="preference-info">
+                <span className="preference-label">Vis vær</span>
+                <span className="preference-description">
+                  Viser værwidget på kartet når posisjon er tilgjengelig
+                </span>
+              </div>
+              <button
+                className={`toggle-switch ${preferences.showWeatherWidget ? 'active' : ''}`}
+                onClick={() => handleToggle('showWeatherWidget')}
+                aria-label="Toggle værwidget"
+              >
+                <span className="toggle-slider"></span>
+              </button>
+            </div>
+
             {/* Coordinate Format Section */}
             <div className="preference-section">
               <h3 className="preference-section-title">Koordinatformat</h3>

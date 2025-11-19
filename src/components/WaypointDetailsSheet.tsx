@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import BottomSheet from './BottomSheet'
+import Sheet from './Sheet'
 import { coordinateService, type CoordinateFormat } from '../services/coordinateService'
 import { mapPreferencesService } from '../services/mapPreferencesService'
 import '../styles/WaypointDetailsSheet.css'
@@ -71,7 +71,7 @@ const WaypointDetailsSheet = ({
   const formattedCoord = coordinateService.format(lon, lat, coordinateFormat)
 
   return (
-    <BottomSheet
+    <Sheet
       isOpen={isOpen}
       onClose={handleCancel}
       peekHeight={40}
@@ -163,7 +163,7 @@ const WaypointDetailsSheet = ({
           </div>
         </div>
       </div>
-    </BottomSheet>
+    </Sheet>
   )
 }
 

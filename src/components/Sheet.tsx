@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import '../styles/BottomSheet.css'
+import '../styles/Sheet.css'
 
 export type SheetHeight = 'peek' | 'half' | 'full' | 'closed'
 
-interface BottomSheetProps {
+interface SheetProps {
   isOpen: boolean
   onClose: () => void
   children: React.ReactNode
@@ -14,7 +14,7 @@ interface BottomSheetProps {
   onHeightChange?: (height: SheetHeight) => void
 }
 
-const BottomSheet = ({
+const Sheet = ({
   isOpen,
   onClose,
   children,
@@ -23,7 +23,7 @@ const BottomSheet = ({
   initialHeight = 'peek',
   height: externalHeight,
   onHeightChange
-}: BottomSheetProps) => {
+}: SheetProps) => {
   const [internalHeight, setInternalHeight] = useState<SheetHeight>(initialHeight)
 
   // Use external height if provided, otherwise use internal state
@@ -110,7 +110,7 @@ const BottomSheet = ({
     if (Math.abs(diff) < threshold) return
 
     if (isMobile) {
-      // Mobile: sheets at top, swipe down to expand, up to close
+      // Mobile: top-positioned sheets, swipe down to expand, up to close
       if (diff < 0) {
         // Swipe down (expand)
         if (height === 'peek') updateHeight('half')
@@ -122,7 +122,7 @@ const BottomSheet = ({
         else if (height === 'peek') onClose()
       }
     } else {
-      // Desktop: sheets at bottom, swipe up to expand, down to close
+      // Desktop: centered modal, swipe up to expand, down to close
       if (diff > 0) {
         // Swipe up
         if (height === 'peek') updateHeight('half')
@@ -164,14 +164,14 @@ const BottomSheet = ({
     <>
       {isOpen && height !== 'closed' && (
         <div
-          className="bottom-sheet-backdrop"
+          className="sheet-backdrop"
           onClick={onClose}
           aria-hidden="true"
         />
       )}
       <div
         ref={sheetRef}
-        className={`bottom-sheet bottom-sheet-${height} ${isMobile ? 'bottom-sheet-mobile' : ''} ${keyboardVisible ? 'keyboard-visible' : ''}`}
+        className={`sheet sheet-${height} ${isMobile ? 'sheet-mobile' : ''} ${keyboardVisible ? 'keyboard-visible' : ''}`}
         style={{
           ['--peek-height' as string]: `${peekHeight}vh`,
           ['--half-height' as string]: `${halfHeight}vh`,
@@ -181,13 +181,13 @@ const BottomSheet = ({
         aria-modal="true"
       >
         <div
-          className="bottom-sheet-handle"
+          className="sheet-handle"
           aria-label="Dra for å justere størrelse"
           onTouchStart={handleHandleTouchStart}
           onTouchMove={handleHandleTouchMove}
           onTouchEnd={handleHandleTouchEnd}
         />
-        <div className="bottom-sheet-content">
+        <div className="sheet-content">
           {children}
         </div>
       </div>
@@ -195,4 +195,4 @@ const BottomSheet = ({
   )
 }
 
-export default BottomSheet
+export default Sheet

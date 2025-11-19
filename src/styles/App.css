@@ -1,3 +1,4 @@
+@import './design-tokens.css';
 /* Main app container */
 .app {
   width: 100%;

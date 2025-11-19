@@ -1,3 +1,4 @@
+@import './design-tokens.css';
 /* Map Preferences Sheet Styles - Nordisk ro Design System */
 
 .map-preferences-sheet {
@@ -5,49 +6,6 @@
   flex-direction: column;
   height: 100%;
   padding: 0;
-}
-
-.map-preferences-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 24px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  background: var(--trk-surface);
-  flex-shrink: 0;
-}
-
-.map-preferences-header h2 {
-  margin: 0;
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--trk-text);
-}
-
-.map-preferences-close {
-  background: none;
-  border: none;
-  padding: var(--space-sm);
-  cursor: pointer;
-  color: var(--trk-text-soft);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-sm);
-  transition: var(--transition-base);
-}
-
-.map-preferences-close:hover {
-  background: var(--trk-bg);
-  color: var(--trk-text);
-}
-
-.map-preferences-close:active {
-  background: var(--trk-surface-subtle);
-}
-
-.map-preferences-close .material-symbols-outlined {
-  font-size: 24px;
 }
 
 .map-preferences-content {

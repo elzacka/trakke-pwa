@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import BottomSheet from './BottomSheet'
+import Sheet from './Sheet'
 import { mapPreferencesService, type MapPreferences } from '../services/mapPreferencesService'
 import { coordinateService, type CoordinateFormat } from '../services/coordinateService'
 import '../styles/MapPreferencesSheet.css'
@@ -40,7 +40,7 @@ const MapPreferencesSheet = ({ isOpen, onClose, onPreferencesChange }: MapPrefer
   }
 
   return (
-    <BottomSheet
+    <Sheet
       isOpen={isOpen}
       onClose={onClose}
       peekHeight={30}
@@ -48,17 +48,6 @@ const MapPreferencesSheet = ({ isOpen, onClose, onPreferencesChange }: MapPrefer
       initialHeight="half"
     >
       <div className="map-preferences-sheet">
-        <div className="map-preferences-header">
-          <h2>Kartpreferanser</h2>
-          <button
-            className="map-preferences-close"
-            onClick={onClose}
-            aria-label="Lukk"
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
-
         <div className="map-preferences-content">
           <div className="preferences-list">
             {/* Map Controls Section */}
@@ -209,7 +198,7 @@ const MapPreferencesSheet = ({ isOpen, onClose, onPreferencesChange }: MapPrefer
           </div>
         </div>
       </div>
-    </BottomSheet>
+    </Sheet>
   )
 }
 

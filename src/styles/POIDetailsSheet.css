@@ -1,52 +1,8 @@
+@import './design-tokens.css';
 .poi-details-sheet {
   display: flex;
   flex-direction: column;
   height: 100%;
-}
-
-/* Header - matches CategorySheet/SettingsSheet pattern */
-.poi-details-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 20px 16px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  position: sticky;
-  top: 0;
-  background: var(--trk-surface);
-  z-index: 10;
-  flex-shrink: 0;
-}
-
-.poi-details-title {
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--trk-text);
-  margin: 0;
-}
-
-.poi-details-close {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: background-color var(--transition-base);
-  flex-shrink: 0;
-}
-
-.poi-details-close:hover {
-  background-color: var(--trk-bg);
-}
-
-.poi-details-close .material-symbols-outlined {
-  font-size: 20px;
-  color: var(--trk-text-soft);
-  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
 }
 
 /* Content */
@@ -142,14 +98,6 @@
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
-  .poi-details-header {
-    padding: 16px 16px 12px;
-  }
-
-  .poi-details-title {
-    font-size: 16px;
-  }
-
   .poi-details-content {
     padding: 6px;
   }

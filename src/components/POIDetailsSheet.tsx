@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import BottomSheet from './BottomSheet'
+import Sheet from './Sheet'
 import { poiService, type POI, type ShelterPOI, type CavePOI, type ObservationTowerPOI, type WarMemorialPOI, type WildernessShelterPOI } from '../services/poiService'
 import '../styles/POIDetailsSheet.css'
 
@@ -304,7 +304,7 @@ const POIDetailsSheet = ({ isOpen, onClose, poi }: POIDetailsSheetProps) => {
   }
 
   return (
-    <BottomSheet
+    <Sheet
       isOpen={isOpen}
       onClose={onClose}
       peekHeight={40}
@@ -312,22 +312,6 @@ const POIDetailsSheet = ({ isOpen, onClose, poi }: POIDetailsSheetProps) => {
       initialHeight="half"
     >
       <div className="poi-details-sheet">
-        <div className="poi-details-header">
-          <h2 className="poi-details-title">
-            {poi.type === 'shelter'
-              ? `${categoryConfig.name} nr. ${getRoomNumber(poi.name)}`
-              : poi.name
-            }
-          </h2>
-          <button
-            className="poi-details-close"
-            onClick={onClose}
-            aria-label="Lukk"
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
-
         <div className="poi-details-content">
           {poi.type === 'shelter' && renderShelterDetails(poi as ShelterPOI)}
           {poi.type === 'cave' && renderCaveDetails(poi as CavePOI)}
@@ -336,7 +320,7 @@ const POIDetailsSheet = ({ isOpen, onClose, poi }: POIDetailsSheetProps) => {
           {poi.type === 'wilderness_shelter' && renderWildernessShelterDetails(poi as WildernessShelterPOI)}
         </div>
       </div>
-    </BottomSheet>
+    </Sheet>
   )
 }
 

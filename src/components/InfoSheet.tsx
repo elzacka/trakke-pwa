@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import BottomSheet from './BottomSheet'
+import Sheet from './Sheet'
 import '../styles/InfoSheet.css'
 
 interface InfoSheetProps {
@@ -27,7 +27,7 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
   }
 
   return (
-    <BottomSheet
+    <Sheet
       isOpen={isOpen}
       onClose={onClose}
       peekHeight={40}
@@ -35,17 +35,6 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
       initialHeight="half"
     >
       <div className="info-sheet">
-        <div className="info-sheet-header">
-          <h2>Info</h2>
-          <button
-            className="info-sheet-close"
-            onClick={onClose}
-            aria-label="Lukk"
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
-
         <div className="info-sheet-content">
           <div className="info-menu">
             {/* Datakilder Section */}
@@ -359,7 +348,7 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
           </div>
         </div>
       </div>
-    </BottomSheet>
+    </Sheet>
   )
 }
 

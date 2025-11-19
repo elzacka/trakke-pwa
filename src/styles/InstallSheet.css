@@ -1,44 +1,5 @@
+@import './design-tokens.css';
 /* InstallSheet Component - Clean & Minimal Design */
-
-.install-sheet {
-  padding: 0;
-}
-
-.install-sheet-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.install-sheet-header h2 {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--trk-text);
-  margin: 0;
-}
-
-.install-sheet-close {
-  background: none;
-  border: none;
-  padding: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: background-color 0.2s;
-}
-
-.install-sheet-close:hover {
-  background-color: rgba(0, 0, 0, 0.04);
-}
-
-.install-sheet-close .material-symbols-outlined {
-  font-size: 24px;
-  color: var(--trk-text-soft);
-}
 
 .install-sheet-content {
   padding: 20px;

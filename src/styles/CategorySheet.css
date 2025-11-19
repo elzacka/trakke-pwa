@@ -1,64 +1,21 @@
+@import './design-tokens.css';
 .category-sheet {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
 
-.category-sheet-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 20px 16px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  position: sticky;
-  top: 0;
-  background: var(--trk-surface);
-  z-index: 10;
-  flex-shrink: 0;
-}
-
-.category-sheet-header h2 {
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--trk-text);
-  margin: 0;
-}
-
-.category-sheet-close {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: background-color var(--transition-base);
-  flex-shrink: 0;
-}
-
-.category-sheet-close:hover {
-  background-color: var(--trk-bg);
-}
-
-.category-sheet-close .material-symbols-outlined {
-  font-size: 20px;
-  color: var(--trk-text-soft);
-  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
-}
-
 .category-sheet-content {
   flex: 1;
   overflow-y: auto;
-  padding: 8px;
+  padding: var(--sheet-inner-padding);
 }
 
 /* Category Menu Container */
 .category-menu {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--sheet-section-gap);
 }
 
 /* Section (Main Menu Item) */
@@ -74,7 +31,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: var(--section-header-padding-desktop);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -107,16 +64,16 @@
 .category-section-content {
   display: flex;
   flex-direction: column;
-  padding: 0 8px 8px 8px;
-  gap: 4px;
+  padding: var(--nested-content-padding);
+  gap: var(--sheet-item-gap);
 }
 
 /* Category Option (Sub-menu Item) */
 .category-option {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
+  gap: var(--list-item-gap);
+  padding: var(--list-item-padding-desktop);
   background: var(--trk-surface);
   border: none;
   border-radius: 10px;
@@ -176,16 +133,8 @@
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
-  .category-sheet-header {
-    padding: 16px 16px 12px;
-  }
-
-  .category-sheet-header h2 {
-    font-size: 16px;
-  }
-
   .category-section-header {
-    padding: 12px 14px;
+    padding: var(--section-header-padding-mobile);
   }
 
   .category-section-title {
@@ -193,7 +142,7 @@
   }
 
   .category-option {
-    padding: 10px 12px;
+    padding: var(--list-item-padding-mobile);
   }
 
   .category-option-icon .material-symbols-outlined {

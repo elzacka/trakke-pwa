@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import BottomSheet from './BottomSheet'
+import Sheet from './Sheet'
 import '../styles/WaypointDetailsSheet.css'
 
 interface RouteDetailsSheetProps {
@@ -67,7 +67,7 @@ const RouteDetailsSheet = ({
   }
 
   return (
-    <BottomSheet
+    <Sheet
       isOpen={isOpen}
       onClose={handleCancel}
       peekHeight={40}
@@ -144,7 +144,7 @@ const RouteDetailsSheet = ({
           </div>
         </div>
       </div>
-    </BottomSheet>
+    </Sheet>
   )
 }
 

@@ -1,83 +1,18 @@
+@import './design-tokens.css';
 /* Route Sheet - Routes and waypoints management */
 
 .route-sheet {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-md);
   flex-shrink: 0;
-}
-
-/* Header */
-.route-sheet-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 20px 16px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  position: sticky;
-  top: 0;
-  background: var(--trk-surface);
-  z-index: 10;
-  flex-shrink: 0;
-  gap: 12px;
-}
-
-.route-sheet-header h2 {
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--trk-text);
-  margin: 0;
-  flex: 1;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-.route-sheet-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.route-sheet-back,
-.route-sheet-close,
-.route-visibility-button {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: background-color var(--transition-base);
-  flex-shrink: 0;
-}
-
-.route-visibility-button {
-  color: var(--trk-brand);
-}
-
-.route-visibility-button:hover {
-  background-color: rgba(62, 69, 51, 0.08);
-}
-
-.route-sheet-back:hover,
-.route-sheet-close:hover {
-  background-color: var(--trk-bg);
-}
-
-.route-sheet-back .material-symbols-outlined,
-.route-sheet-close .material-symbols-outlined {
-  font-size: 20px;
-  color: var(--trk-text-soft);
-  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
 }
 
 /* Tabs */
 .route-tabs {
   display: flex;
   gap: 8px;
-  padding: 0 20px;
+  padding: 0 16px;
   border-bottom: 1px solid var(--trk-border);
   flex-shrink: 0;
 }
@@ -111,7 +46,7 @@
 .route-sheet-content {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--space-lg);
   flex-shrink: 0;
 }
 
@@ -139,7 +74,7 @@
 /* Action buttons */
 .route-actions {
   display: flex;
-  gap: 12px;
+  gap: var(--space-md);
   flex-shrink: 0;
 }
 
@@ -148,11 +83,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 14px 16px;
+  gap: var(--button-gap);
+  padding: var(--button-padding-md);
   border: 1px solid var(--trk-border);
   background: var(--trk-surface);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-base);
   font-size: 14px;
@@ -202,7 +137,7 @@
 .route-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--sheet-section-gap);
   flex-shrink: 0;
 }
 
@@ -218,25 +153,25 @@
 .waypoint-categories {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-md);
   flex-shrink: 0;
 }
 
 .waypoint-category {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--sheet-section-gap);
   flex-shrink: 0;
 }
 
 .category-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
+  gap: var(--sheet-section-gap);
+  padding: var(--list-item-padding-desktop);
   background: var(--trk-surface-subtle);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all var(--transition-base);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -271,17 +206,17 @@
 .route-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--sheet-section-gap);
   flex-shrink: 0;
 }
 
 .route-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
+  gap: var(--list-item-gap);
+  padding: var(--list-item-padding-desktop);
   background: var(--trk-surface);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: background-color var(--transition-base);
   flex-shrink: 0;
@@ -380,7 +315,7 @@
 .route-detail {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-lg);
   flex-shrink: 0;
 }
 
@@ -395,17 +330,17 @@
 .route-detail-stats {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  gap: var(--space-md);
   flex-shrink: 0;
 }
 
 .route-stat {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 16px;
+  gap: var(--sheet-item-gap);
+  padding: var(--space-lg);
   background: var(--trk-surface);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   flex-shrink: 0;
 }
 
@@ -425,8 +360,8 @@
 .route-detail-meta {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding-top: 12px;
+  gap: var(--sheet-section-gap);
+  padding-top: var(--space-md);
   border-top: 1px solid var(--trk-border);
   flex-shrink: 0;
 }
@@ -441,7 +376,7 @@
 .route-detail-actions {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-md);
   flex-shrink: 0;
 }
 
@@ -449,11 +384,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 14px 16px;
+  gap: var(--button-gap);
+  padding: var(--button-padding-md);
   border: 1px solid var(--trk-red);
   background: var(--trk-surface);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-base);
   font-size: 14px;
@@ -506,10 +441,6 @@
 
 /* Mobile optimizations */
 @media (max-width: 768px) {
-  .route-sheet-header h2 {
-    font-size: 16px;
-  }
-
   .route-section h3 {
     font-size: 13px;
   }
@@ -520,11 +451,15 @@
 
   .route-action-button {
     font-size: 13px;
-    padding: 12px 14px;
+    padding: var(--button-padding-sm);
   }
 
   .route-item {
-    padding: 10px;
+    padding: var(--list-item-padding-mobile);
+  }
+
+  .category-header {
+    padding: var(--list-item-padding-mobile);
   }
 
   .route-item-name {

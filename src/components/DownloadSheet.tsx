@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import type { LngLatBounds } from 'maplibre-gl'
-import BottomSheet from './BottomSheet'
+import Sheet from './Sheet'
 import { offlineMapService, type DownloadArea, type DownloadProgress } from '../services/offlineMapService'
 import '../styles/DownloadSheet.css'
 
@@ -224,7 +224,7 @@ const DownloadSheet = ({
   }
 
   return (
-    <BottomSheet
+    <Sheet
       isOpen={isOpen}
       onClose={handleClose}
       peekHeight={40}
@@ -232,18 +232,6 @@ const DownloadSheet = ({
       initialHeight={viewMode === 'list' ? 'half' : 'half'}
     >
       <div className="download-sheet">
-        <div className="download-sheet-header">
-          <h2>Last ned kart</h2>
-          <button
-            className="download-sheet-close"
-            onClick={handleClose}
-            aria-label="Lukk"
-            disabled={isDownloading}
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
-
         <div className="download-sheet-content">
           {viewMode === 'downloading' ? (
             // Download in progress
@@ -381,7 +369,7 @@ const DownloadSheet = ({
           )}
         </div>
       </div>
-    </BottomSheet>
+    </Sheet>
   )
 }
 

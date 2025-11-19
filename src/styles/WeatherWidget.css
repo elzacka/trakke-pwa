@@ -1,3 +1,4 @@
+@import './design-tokens.css';
 /* Weather Widget - Compact map overlay matching compass size */
 
 .weather-widget {

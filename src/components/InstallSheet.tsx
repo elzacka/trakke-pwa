@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import BottomSheet from './BottomSheet'
+import Sheet from './Sheet'
 import '../styles/InstallSheet.css'
 
 interface InstallSheetProps {
@@ -25,7 +25,7 @@ const InstallSheet = ({ isOpen, onClose, onInstall, canInstall, platform }: Inst
   const isIOS = platform === 'ios'
 
   return (
-    <BottomSheet
+    <Sheet
       isOpen={isOpen}
       onClose={onClose}
       peekHeight={40}
@@ -33,17 +33,6 @@ const InstallSheet = ({ isOpen, onClose, onInstall, canInstall, platform }: Inst
       initialHeight="peek"
     >
       <div className="install-sheet">
-        <div className="install-sheet-header">
-          <h2>Installer</h2>
-          <button
-            className="install-sheet-close"
-            onClick={onClose}
-            aria-label="Lukk"
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
-
         <div className="install-sheet-content">
           <div className="install-benefits">
             <p>Offline-tilgang</p>
@@ -68,7 +57,7 @@ const InstallSheet = ({ isOpen, onClose, onInstall, canInstall, platform }: Inst
           )}
         </div>
       </div>
-    </BottomSheet>
+    </Sheet>
   )
 }
 

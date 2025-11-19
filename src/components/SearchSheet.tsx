@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import BottomSheet from './BottomSheet'
+import Sheet from './Sheet'
 import { searchService, SearchResult } from '../services/searchService'
 import { UI_DELAYS } from '../config/timings'
 import '../styles/SearchSheet.css'
@@ -135,7 +135,7 @@ const SearchSheet = ({ isOpen, onClose, onResultSelect }: SearchSheetProps) => {
   }
 
   return (
-    <BottomSheet
+    <Sheet
       isOpen={isOpen}
       onClose={handleClose}
       peekHeight={30}
@@ -143,17 +143,6 @@ const SearchSheet = ({ isOpen, onClose, onResultSelect }: SearchSheetProps) => {
       initialHeight="peek"
     >
       <div className="search-sheet">
-        <div className="search-sheet-header">
-          <h2>Søk</h2>
-          <button
-            className="search-sheet-close"
-            onClick={handleClose}
-            aria-label="Lukk"
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
-
         <div className="search-sheet-input-container">
           <div className="search-sheet-input-wrapper">
             <span className="material-symbols-outlined search-sheet-icon">search</span>
@@ -222,7 +211,7 @@ const SearchSheet = ({ isOpen, onClose, onResultSelect }: SearchSheetProps) => {
           )}
         </div>
       </div>
-    </BottomSheet>
+    </Sheet>
   )
 }
 

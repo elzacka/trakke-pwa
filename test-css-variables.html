@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    :root {
+      --test-padding: 12px 14px;
+      --test-gap: 8px;
+    }
+    
+    .test-box {
+      padding: var(--test-padding);
+      background: lightblue;
+      margin: 20px;
+    }
+    
+    .test-container {
+      display: flex;
+      gap: var(--test-gap);
+      background: lightgray;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>CSS Variable Test</h1>
+  <div class="test-box">
+    This box should have padding: 12px 14px
+  </div>
+  <div class="test-container">
+    <div style="background: pink; padding: 10px;">Item 1</div>
+    <div style="background: pink; padding: 10px;">Item 2</div>
+    <div style="background: pink; padding: 10px;">Item 3</div>
+  </div>
+  <p>Open DevTools and inspect elements to verify computed styles.</p>
+</body>
+</html>

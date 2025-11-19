@@ -70,7 +70,7 @@ npm run lint         # ESLint check (TypeScript, React)
 ### UI Modes
 
 The app has two UI modes controlled by `App.tsx`:
-- **Zen Mode** (default): Auto-hiding controls, collapsible welcome header, FAB menu, bottom sheets
+- **Zen Mode** (default): Auto-hiding controls, collapsible welcome header, FAB menu, sheets
 - **Classic Mode**: Always-visible controls, panels
 
 Current state: Zen Mode is the primary interface.
@@ -90,9 +90,9 @@ Current state: Zen Mode is the primary interface.
 - Coordinates between sheets and map interactions
 - Controls drawing modes (routes, waypoints, area selection)
 
-**Bottom Sheet Pattern** (mobile-first):
+**Sheet Pattern** (mobile-first):
 ```
-BottomSheet (reusable container)
+Sheet (reusable container)
 ├── SearchSheet (place/address search)
 │   ├── Address filter toggle (home icon button)
 │   ├── Contextual hint text for address filter
@@ -294,14 +294,14 @@ isSelectingArea: boolean     // Two clicks to select download area
 
 ### Adding a New Sheet
 
-1. Create component extending BottomSheet:
+1. Create component extending Sheet:
 ```typescript
-import BottomSheet from './BottomSheet'
+import Sheet from './Sheet'
 
 const MySheet = ({ isOpen, onClose }: MySheetProps) => (
-  <BottomSheet isOpen={isOpen} onClose={onClose} peekHeight={40} halfHeight={70}>
+  <Sheet isOpen={isOpen} onClose={onClose} peekHeight={40} halfHeight={70}>
     {/* content */}
-  </BottomSheet>
+  </Sheet>
 )
 ```
 
@@ -675,7 +675,7 @@ Key files to understand the architecture:
 - `src/services/elevationService.ts` - Elevation data from Kartverket Høydedata API
 
 **UI Components**:
-- `src/components/BottomSheet.tsx` - Reusable sheet container
+- `src/components/Sheet.tsx` - Reusable sheet container
 - `src/components/FABMenu.tsx` - Floating action button menu
 - `src/components/SearchSheet.tsx` - Place/address search
 - `src/components/DownloadSheet.tsx` - Offline map downloads

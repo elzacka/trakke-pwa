@@ -2,7 +2,7 @@
 // Detailed weather forecast in bottom sheet
 
 import { useState, useEffect } from 'react'
-import BottomSheet from './BottomSheet'
+import Sheet from './Sheet'
 import weatherService, { type WeatherForecast } from '../services/weatherService'
 import '../styles/WeatherSheet.css'
 
@@ -49,19 +49,8 @@ const WeatherSheet = ({ isOpen, onClose, lat, lon }: WeatherSheetProps) => {
   }
 
   return (
-    <BottomSheet isOpen={isOpen} onClose={onClose} peekHeight={40} halfHeight={70}>
+    <Sheet isOpen={isOpen} onClose={onClose} peekHeight={40} halfHeight={70}>
       <div className="weather-sheet">
-        <div className="weather-sheet-header">
-          <h2>Værvarsling</h2>
-          <button
-            className="weather-sheet-close"
-            onClick={onClose}
-            aria-label="Lukk"
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
-
         <div className="weather-sheet-content">
           {loading && (
             <div className="weather-loading">
@@ -201,7 +190,7 @@ const WeatherSheet = ({ isOpen, onClose, lat, lon }: WeatherSheetProps) => {
           )}
         </div>
       </div>
-    </BottomSheet>
+    </Sheet>
   )
 }
 

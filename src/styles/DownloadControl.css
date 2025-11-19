@@ -1,3 +1,4 @@
+@import './design-tokens.css';
 /* Download Control - Minimal and integrated */
 .download-toggle {
   width: 44px;

@@ -112,7 +112,7 @@ trakke_pwa/
 │   ├── components/          # React components
 │   │   ├── Map.tsx         # MapLibre GL map orchestrator
 │   │   ├── FABMenu.tsx     # Floating action button
-│   │   ├── BottomSheet.tsx # Reusable sheet container
+│   │   ├── Sheet.tsx       # Reusable sheet container
 │   │   ├── SearchSheet.tsx, DownloadSheet.tsx, RouteSheet.tsx
 │   │   ├── CategorySheet.tsx, POIDetailsSheet.tsx
 │   │   ├── SettingsSheet.tsx, InstallSheet.tsx, InfoSheet.tsx

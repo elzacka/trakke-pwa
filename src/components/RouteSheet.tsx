@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import BottomSheet from './BottomSheet'
+import Sheet from './Sheet'
 import { routeService, type Route, type Waypoint, type Project } from '../services/routeService'
 import { exportRouteToGpx, exportMultipleRoutesToGpx, downloadGpx, canExportRoute } from '../utils/gpxExport'
 import elevationService, { type ElevationProfile } from '../services/elevationService'
@@ -363,17 +363,6 @@ const RouteSheet = ({
   // List view
   const renderListView = () => (
     <div className="route-sheet">
-      <div className="route-sheet-header">
-        <h2>Ruter og punkter</h2>
-        <button
-          className="route-sheet-close"
-          onClick={onClose}
-          aria-label="Lukk"
-        >
-          <span className="material-symbols-outlined">close</span>
-        </button>
-      </div>
-
       {/* Tab switcher */}
       <div className="route-tabs">
         <button
@@ -635,24 +624,6 @@ const RouteSheet = ({
 
     return (
       <div className="route-sheet">
-        <div className="route-sheet-header">
-          <button
-            className="route-sheet-back"
-            onClick={handleBack}
-            aria-label="Tilbake"
-          >
-            <span className="material-symbols-outlined">arrow_back</span>
-          </button>
-          <h2>{project.name}</h2>
-          <button
-            className="route-sheet-close"
-            onClick={onClose}
-            aria-label="Lukk"
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
-
         <div className="route-sheet-content">
           <div className="route-detail">
             {project.description && (
@@ -733,24 +704,6 @@ const RouteSheet = ({
   const renderRouteDetail = (route: Route) => {
     return (
       <div className="route-sheet">
-        <div className="route-sheet-header">
-          <button
-            className="route-sheet-back"
-            onClick={handleBack}
-            aria-label="Tilbake"
-          >
-            <span className="material-symbols-outlined">arrow_back</span>
-          </button>
-          <h2>{route.name}</h2>
-          <button
-            className="route-sheet-close"
-            onClick={onClose}
-            aria-label="Lukk"
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
-
         <div className="route-sheet-content">
           <div className="route-detail">
             {route.description && (
@@ -864,7 +817,7 @@ const RouteSheet = ({
   }
 
   return (
-    <BottomSheet
+    <Sheet
       isOpen={isOpen}
       onClose={onClose}
       peekHeight={40}
@@ -874,7 +827,7 @@ const RouteSheet = ({
       {viewMode === 'list' && renderListView()}
       {viewMode === 'detail' && selectedRoute && renderRouteDetail(selectedRoute)}
       {viewMode === 'detail' && selectedProject && renderProjectDetail(selectedProject)}
-    </BottomSheet>
+    </Sheet>
   )
 }
 

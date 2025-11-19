@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import BottomSheet from './BottomSheet'
+import Sheet from './Sheet'
 import { poiService, type POICategory } from '../services/poiService'
 import { getIconConfig } from '../services/iconService'
 import '../styles/CategorySheet.css'
@@ -75,7 +75,7 @@ const CategorySheet = ({ isOpen, onClose, onCategorySelect }: CategorySheetProps
   }
 
   return (
-    <BottomSheet
+    <Sheet
       isOpen={isOpen}
       onClose={onClose}
       peekHeight={40}
@@ -83,17 +83,6 @@ const CategorySheet = ({ isOpen, onClose, onCategorySelect }: CategorySheetProps
       initialHeight="half"
     >
       <div className="category-sheet">
-        <div className="category-sheet-header">
-          <h2>Kategorier</h2>
-          <button
-            className="category-sheet-close"
-            onClick={onClose}
-            aria-label="Lukk"
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
-
         <div className="category-sheet-content">
           <div className="category-menu">
             {CATEGORY_GROUPS.map((group) => (
@@ -166,7 +155,7 @@ const CategorySheet = ({ isOpen, onClose, onCategorySelect }: CategorySheetProps
           </div>
         </div>
       </div>
-    </BottomSheet>
+    </Sheet>
   )
 }
 

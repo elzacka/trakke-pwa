@@ -102,8 +102,10 @@ const dbService = {
 | `cache.kartverket.no` | WMTS Tiles | Kartverket | Norway 🇳🇴 | Map tile imagery | ✅ | Norwegian Mapping Authority, EU/EØS government agency |
 | `ws.geonorge.no` | SSR API | Kartverket | Norway 🇳🇴 | Place name search | ✅ | Sentralt Stedsnavnregister (SSR), Norwegian government |
 | `ws.geonorge.no` | Address API | Kartverket | Norway 🇳🇴 | Address geocoding | ✅ | Norwegian address registry, government data |
+| `ws.geonorge.no` | Høydedata API | Kartverket | Norway 🇳🇴 | Elevation data (DTM 10m) | ✅ | Norwegian Digital Terrain Model, government data |
 | `ogc.dsb.no` | WFS Service | DSB | Norway 🇳🇴 | Public shelter (Tilfluktsrom) locations | ✅ | Direktoratet for samfunnssikkerhet og beredskap, Norwegian government |
 | `overpass-api.de` | Overpass API | FOSSGIS e.V. | Germany 🇩🇪 | POI data (caves, towers, war memorials, wilderness shelters) from OpenStreetMap | ✅ | German non-profit, EU-based, public OSM data, no tracking |
+| `api.met.no` | Locationforecast 2.0 | MET Norway | Norway 🇳🇴 | Weather forecasts | ⚠️ | Norwegian Meteorological Institute, **logs user IP addresses** in Oslo datacenter. CC BY 4.0 license. Direct API calls (no proxy). |
 
 **Privacy guarantees for all approved services:**
 - No user tracking or analytics

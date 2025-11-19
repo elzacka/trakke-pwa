@@ -93,7 +93,39 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
                           REST API.
                         </a>
                       </li>
+                      <li>
+                        Høydedata for høydeprofiler. {' '}
+                        <a
+                          href="https://hoydedata.no/LaserInnsyn2/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Høydedata API (DTM 10m).
+                        </a>
+                      </li>
                     </ul>
+                  </section>
+
+                  <section className="info-section">
+                    <h3>MET Norway</h3>
+                    <p>
+                      Værvarsling for Norge. {' '}
+                      <a
+                        href="https://api.met.no/weatherapi/locationforecast/2.0/documentation"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Locationforecast 2.0 API.
+                      </a>
+                      {' '}
+                      <a
+                        href="https://creativecommons.org/licenses/by/4.0/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        CC BY 4.0 lisens.
+                      </a>
+                    </p>
                   </section>
 
                   <section className="info-section">

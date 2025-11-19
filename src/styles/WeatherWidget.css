@@ -2,8 +2,10 @@
 
 .weather-widget {
   position: absolute;
-  /* Position directly below compass button (10px + 44px + 4px gap) */
-  top: calc(max(10px, env(safe-area-inset-top)) + 44px + 4px);
+  /* Position directly below compass button */
+  /* Compass is at top: max(10px, safe-area), so widget at same + compass height + gap */
+  top: calc(max(10px, env(safe-area-inset-top)) + 48px);  /* 44px compass + 4px gap */
+  /* Align exactly with compass right edge */
   right: max(10px, env(safe-area-inset-right));
   background: var(--trk-surface);
   border-radius: var(--radius-md);  /* Match MapLibre control border radius (12px) */

@@ -16,6 +16,8 @@ import InstallSheet from './InstallSheet'
 import WaypointDetailsSheet from './WaypointDetailsSheet'
 import RouteDetailsSheet from './RouteDetailsSheet'
 import MapPreferencesSheet from './MapPreferencesSheet'
+import WeatherWidget from './WeatherWidget'
+import WeatherSheet from './WeatherSheet'
 import MeasurementTools, { type MeasurementMode } from './MeasurementTools'
 import { useAutoHide } from '../hooks/useAutoHide'
 import { useViewportPOIs } from '../hooks/useViewportPOIs'
@@ -102,6 +104,7 @@ const Map = ({ zenMode }: MapProps) => {
   const [installSheetOpen, setInstallSheetOpen] = useState(false)
   const [fabMenuOpen, setFabMenuOpen] = useState(false)
   const [mapPreferencesSheetOpen, setMapPreferencesSheetOpen] = useState(false)
+  const [weatherSheetOpen, setWeatherSheetOpen] = useState(false)
 
   // PWA Installation
   const { canInstall, isInstalled, platform, promptInstall } = useInstallPrompt()
@@ -1972,6 +1975,9 @@ const Map = ({ zenMode }: MapProps) => {
     setInfoSheetOpen(true)
   }
 
+  const handleWeatherClick = () => {
+    setWeatherSheetOpen(true)
+  }
 
   const handleMapPreferencesClick = () => {
     setMapPreferencesSheetOpen(true)
@@ -2383,10 +2389,11 @@ const Map = ({ zenMode }: MapProps) => {
             onLocationClick={handleLocationClick}
             onMapPreferencesClick={handleMapPreferencesClick}
             onMeasurementClick={handleMeasurementClick}
+            onWeatherClick={handleWeatherClick}
             onInstallClick={() => setInstallSheetOpen(true)}
             showInstall={!isInstalled && (canInstall || platform === 'ios')}
             visible={controlsVisible}
-            sheetsOpen={searchSheetOpen || infoSheetOpen || downloadSheetOpen || routeSheetOpen || categorySheetOpen || poiDetailsSheetOpen || installSheetOpen || mapPreferencesSheetOpen}
+            sheetsOpen={searchSheetOpen || infoSheetOpen || downloadSheetOpen || routeSheetOpen || categorySheetOpen || poiDetailsSheetOpen || installSheetOpen || mapPreferencesSheetOpen || weatherSheetOpen}
             menuOpen={fabMenuOpen}
             onMenuOpenChange={setFabMenuOpen}
           />
@@ -2622,6 +2629,22 @@ const Map = ({ zenMode }: MapProps) => {
             onClose={() => setMapPreferencesSheetOpen(false)}
             onPreferencesChange={(newPreferences) => setMapPreferences(newPreferences)}
           />
+
+          <WeatherSheet
+            isOpen={weatherSheetOpen}
+            onClose={() => setWeatherSheetOpen(false)}
+            lat={userLocation?.coords.latitude || MAP_CONFIG.DEFAULT_CENTER[1]}
+            lon={userLocation?.coords.longitude || MAP_CONFIG.DEFAULT_CENTER[0]}
+          />
+
+          {/* Weather widget - show when user has location */}
+          {userLocation && (
+            <WeatherWidget
+              lat={userLocation.coords.latitude}
+              lon={userLocation.coords.longitude}
+              onExpand={() => setWeatherSheetOpen(true)}
+            />
+          )}
         </>
       ) : (
         <>

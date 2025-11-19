@@ -10,6 +10,7 @@ interface FABMenuProps {
   onLocationClick: () => void
   onMapPreferencesClick: () => void
   onMeasurementClick: () => void
+  onWeatherClick: () => void
   onInstallClick?: () => void
   showInstall?: boolean
   visible?: boolean
@@ -27,6 +28,7 @@ const FABMenu = ({
   onLocationClick,
   onMapPreferencesClick,
   onMeasurementClick,
+  onWeatherClick,
   onInstallClick,
   showInstall = false,
   menuOpen,
@@ -131,6 +133,15 @@ const FABMenu = ({
           >
             <span className="material-symbols-outlined">layers</span>
             <span className="fab-menu-label">Kategorier</span>
+          </button>
+          <button
+            className="fab-menu-item"
+            onClick={() => handleMenuItemClick(onWeatherClick)}
+            aria-label="Vær"
+            role="menuitem"
+          >
+            <span className="material-symbols-outlined">partly_cloudy_day</span>
+            <span className="fab-menu-label">Vær</span>
           </button>
           <button
             className="fab-menu-item group-separator"

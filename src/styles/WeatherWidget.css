@@ -1,16 +1,15 @@
-/* Weather Widget - Compact map overlay matching FAB size */
+/* Weather Widget - Compact map overlay matching compass size */
 
 .weather-widget {
   position: absolute;
-  top: 120px;  /* Below compass control */
-  right: 20px;
+  /* Position directly below compass button (10px + 44px + 4px gap) */
+  top: calc(max(10px, env(safe-area-inset-top)) + 44px + 4px);
+  right: max(10px, env(safe-area-inset-right));
   background: var(--trk-surface);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  width: 56px;
-  height: 56px;
-  min-width: var(--touch-target-min);
-  min-height: var(--touch-target-min);
+  border-radius: 4px;  /* Match MapLibre control border radius */
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  width: 44px;
+  height: 44px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -18,17 +17,16 @@
   cursor: pointer;
   transition: all var(--transition-base);
   z-index: 10;
-  padding: 6px;
+  padding: 4px;
   gap: 2px;
 }
 
 .weather-widget:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transform: translateY(-1px);
+  background-color: var(--trk-surface-subtle);
 }
 
 .weather-widget:active {
-  transform: translateY(0);
+  background-color: var(--trk-bg);
 }
 
 .weather-widget.loading,
@@ -43,14 +41,14 @@
 
 /* Weather icon (emoji) */
 .weather-icon {
-  font-size: 24px;
+  font-size: 20px;
   line-height: 1;
   flex-shrink: 0;
 }
 
 /* Temperature display */
 .weather-temp {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--trk-text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -59,10 +57,10 @@
 
 /* Loading spinner */
 .weather-widget.loading .spinning {
-  font-size: 24px;
+  font-size: 20px;
   color: var(--trk-text-soft);
   animation: spin 1s linear infinite;
-  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
 }
 
 @keyframes spin {
@@ -76,26 +74,12 @@
 
 /* Error icon */
 .weather-widget.error .material-symbols-outlined {
-  font-size: 24px;
+  font-size: 20px;
   color: var(--trk-red);
-  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
 }
 
-/* Mobile optimizations */
-@media (max-width: 768px) {
-  .weather-widget {
-    top: 100px;
-    right: 16px;
-  }
-
-  .weather-icon {
-    font-size: 22px;
-  }
-
-  .weather-temp {
-    font-size: 12px;
-  }
-}
+/* Mobile: No size changes needed, already optimized for touch */
 
 /* Accessibility */
 .weather-widget:focus {

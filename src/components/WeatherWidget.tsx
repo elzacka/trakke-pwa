@@ -55,8 +55,6 @@ const WeatherWidget = ({ lat, lon, onExpand }: WeatherWidgetProps) => {
   const { current } = forecast
   const emoji = weatherService.getWeatherEmoji(current.symbol)
   const temp = Math.round(current.temperature)
-  const wind = Math.round(current.windSpeed)
-  const precip = Math.round(current.precipitationProbability)
 
   return (
     <div
@@ -64,23 +62,11 @@ const WeatherWidget = ({ lat, lon, onExpand }: WeatherWidgetProps) => {
       onClick={onExpand}
       role="button"
       tabIndex={0}
-      aria-label={`Vær: ${temp} grader, ${emoji}, vind ${wind} m/s`}
-      title="Klikk for detaljer"
+      aria-label={`Vær: ${temp} grader, ${emoji}. Klikk for detaljer`}
+      title="Klikk for værdetaljer"
     >
       <div className="weather-icon">{emoji}</div>
-      <div className="weather-info">
-        <div className="weather-temp">{temp}°</div>
-        <div className="weather-wind">
-          <span className="material-symbols-outlined">air</span>
-          {wind} m/s
-        </div>
-        {precip > 0 && (
-          <div className="weather-precip">
-            <span className="material-symbols-outlined">water_drop</span>
-            {precip}%
-          </div>
-        )}
-      </div>
+      <div className="weather-temp">{temp}°</div>
     </div>
   )
 }

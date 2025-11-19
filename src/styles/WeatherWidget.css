@@ -1,20 +1,25 @@
-/* Weather Widget - Compact map overlay */
+/* Weather Widget - Compact map overlay matching FAB size */
 
 .weather-widget {
   position: absolute;
   top: 120px;  /* Below compass control */
   right: 20px;
   background: var(--trk-surface);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  padding: 12px 14px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 56px;
+  height: 56px;
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
   cursor: pointer;
   transition: all var(--transition-base);
   z-index: 10;
-  min-width: 120px;
+  padding: 6px;
+  gap: 2px;
 }
 
 .weather-widget:hover {
@@ -28,8 +33,6 @@
 
 .weather-widget.loading,
 .weather-widget.error {
-  min-width: auto;
-  padding: 10px;
   cursor: default;
 }
 
@@ -40,43 +43,18 @@
 
 /* Weather icon (emoji) */
 .weather-icon {
-  font-size: 28px;
+  font-size: 24px;
   line-height: 1;
   flex-shrink: 0;
 }
 
-/* Weather info section */
-.weather-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-  color: var(--trk-text-soft);
-}
-
+/* Temperature display */
 .weather-temp {
-  font-size: 18px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--trk-text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-.weather-wind,
-.weather-precip {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-}
-
-.weather-wind .material-symbols-outlined,
-.weather-precip .material-symbols-outlined {
-  font-size: 14px;
-  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 14;
-}
-
-.weather-precip {
-  color: var(--trk-brand);
+  line-height: 1;
 }
 
 /* Loading spinner */
@@ -108,21 +86,14 @@
   .weather-widget {
     top: 100px;
     right: 16px;
-    padding: 10px 12px;
-    min-width: 100px;
   }
 
   .weather-icon {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .weather-temp {
-    font-size: 16px;
-  }
-
-  .weather-wind,
-  .weather-precip {
-    font-size: 10px;
+    font-size: 12px;
   }
 }
 

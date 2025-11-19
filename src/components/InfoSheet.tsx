@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import BottomSheet from './BottomSheet'
 import '../styles/InfoSheet.css'
 
@@ -10,8 +10,11 @@ interface InfoSheetProps {
 const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
 
-  // Detect if mobile device
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+  // Detect if mobile device (memoized to prevent recomputation on every render)
+  const isMobile = useMemo(
+    () => /iPhone|iPad|iPod|Android/i.test(navigator.userAgent),
+    []
+  )
 
   const toggleSection = (sectionId: string) => {
     const newExpanded = new Set(expandedSections)

@@ -99,6 +99,7 @@ BottomSheet (reusable container)
 │   └── Auto-focus on open and toggle
 ├── DownloadSheet (offline area download)
 ├── RouteSheet (routes & waypoints management)
+│   └── ElevationProfileChart (elevation profile visualization)
 ├── CategorySheet (POI categories)
 │   ├── Category groups (Service, Natur, Infrastruktur, Historie)
 │   ├── Toggle categories on/off
@@ -115,6 +116,13 @@ BottomSheet (reusable container)
 ├── InstallSheet (PWA installation prompt)
 └── InfoSheet (data sources & attribution)
 ```
+
+**ElevationProfileChart** (Chart.js integration):
+- Self-hosted Chart.js (no CDN, privacy-first)
+- Uses class-based lifecycle managers (ChartLifecycleManager, ChartConfigurationFactory)
+- Proper canvas reuse to prevent Chart.js "Canvas already in use" errors
+- Efficient update path: updates data without destroying/recreating chart
+- Cleanup on unmount prevents memory leaks
 
 **FABMenu** (Floating Action Button):
 - Primary action: Opens menu (tap hamburger icon)
@@ -169,6 +177,12 @@ All services are singletons exported as instances:
 - Stores settings in localStorage (non-sensitive data only)
 - Currently manages: coordinate format preference
 - Default format: DD (decimal degrees)
+
+**elevationService.ts** - Elevation profile data
+- Fetches elevation data from Kartverket Høydedata API
+- Uses DTM 10m (Digital Terrain Model) grid
+- Calculates elevation gain/loss for routes
+- Returns array of elevation values with distances
 
 ### State Management Pattern
 
@@ -379,6 +393,83 @@ for (const element of data.elements) {
 
 **Critical**: Always filter out bare geometry nodes (nodes without tags) to prevent duplicate markers. Only process elements with tags (features).
 
+### Integrating Chart.js (or Similar Canvas Libraries)
+
+Chart.js requires careful lifecycle management to prevent "Canvas already in use" errors in React:
+
+```typescript
+// Pattern: Separate concerns with class-based managers
+class ChartLifecycleManager {
+  private chart: Chart | null = null
+
+  initialize(canvas: HTMLCanvasElement, config: ChartConfiguration): void {
+    // Defensive: destroy existing chart before creating new one
+    this.destroy()
+
+    // Double-check Chart.js internal registry
+    const existingChart = Chart.getChart(canvas)
+    if (existingChart) existingChart.destroy()
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) throw new Error('Cannot get 2D context')
+
+    this.chart = new Chart(ctx, config)
+  }
+
+  updateData(newData: any): void {
+    if (!this.chart) return
+    this.chart.data = newData
+    this.chart.update('none') // 'none' disables animation for immediate update
+  }
+
+  destroy(): void {
+    if (this.chart) {
+      this.chart.destroy()
+      this.chart = null
+    }
+  }
+}
+
+// Component pattern: use refs for managers, cleanup on unmount
+const MyChartComponent = ({ data }: Props) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const chartManagerRef = useRef(new ChartLifecycleManager())
+  const mountedRef = useRef(true)
+
+  // Cleanup on unmount (runs once)
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false
+      chartManagerRef.current.destroy()
+    }
+  }, [])
+
+  // Chart updates (runs when data changes)
+  useEffect(() => {
+    if (!canvasRef.current || !mountedRef.current) return
+
+    const manager = chartManagerRef.current
+
+    if (manager.hasChart()) {
+      // Efficient: update existing chart
+      manager.updateData(data)
+    } else {
+      // Initialize new chart
+      manager.initialize(canvasRef.current, config)
+    }
+  }, [data])
+
+  return <canvas ref={canvasRef} />
+}
+```
+
+**Key principles**:
+- Separate lifecycle management (ChartLifecycleManager) from configuration (ChartConfigurationFactory)
+- Use refs for chart instances (never state)
+- Destroy chart only on unmount, not on every data change
+- Update data in-place when possible instead of destroying/recreating
+- Defensive programming: check for existing charts before initialization
+
 ## Code Quality & Best Practices
 
 **Recent Code Review Findings**: A comprehensive review identified and fixed critical issues. When working with this codebase, be aware of these patterns:
@@ -581,6 +672,7 @@ Key files to understand the architecture:
 - `src/services/poiService.ts` - POI fetching and caching (DSB WFS + Overpass API for OSM data)
 - `src/services/coordinateService.ts` - Coordinate format conversion
 - `src/services/settingsService.ts` - User settings (localStorage)
+- `src/services/elevationService.ts` - Elevation data from Kartverket Høydedata API
 
 **UI Components**:
 - `src/components/BottomSheet.tsx` - Reusable sheet container
@@ -588,6 +680,7 @@ Key files to understand the architecture:
 - `src/components/SearchSheet.tsx` - Place/address search
 - `src/components/DownloadSheet.tsx` - Offline map downloads
 - `src/components/RouteSheet.tsx` - Routes & waypoints management
+- `src/components/ElevationProfileChart.tsx` - Chart.js elevation profile (class-based lifecycle managers)
 - `src/components/CategorySheet.tsx` - POI category selection
 - `src/components/POIDetailsSheet.tsx` - POI information display
 - `src/components/SettingsSheet.tsx` - App settings
@@ -613,6 +706,10 @@ Key files to understand the architecture:
 5. **CSP in Dev**: CSP only injected in production builds. External resources work in dev but may fail in production if CSP not updated.
 
 6. **MapLibre Source Cleanup**: Always check if source/layer exists before adding. Use map.getSource()/getLayer() to avoid "source already exists" errors.
+
+7. **Chart.js Canvas Reuse**: Never destroy and recreate Chart.js instances on every data change. This causes "Canvas already in use" errors. Instead: create once on mount, update data in-place, destroy only on unmount. See ElevationProfileChart.tsx for reference implementation.
+
+8. **Third-Party Library Integration**: When integrating libraries with DOM manipulation (Chart.js, D3, etc.), use class-based managers in refs to separate lifecycle from React's render cycle. Never store library instances in React state.
 
 ## Roadmap & Features
 

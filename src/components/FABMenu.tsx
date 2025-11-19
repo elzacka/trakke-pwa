@@ -65,29 +65,30 @@ const FABMenu = ({
     }
   }
 
-  // Close menu on outside click
+  // Close menu on outside click or escape key (consolidated effect)
   useEffect(() => {
+    if (!isOpen) return
+
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement
-      if (isOpen && !target.closest('.fab-container')) {
+      if (!target.closest('.fab-container')) {
+        setIsOpen(false)
+      }
+    }
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
         setIsOpen(false)
       }
     }
 
     document.addEventListener('click', handleClickOutside)
-    return () => document.removeEventListener('click', handleClickOutside)
-  }, [isOpen])
-
-  // Close menu on escape key
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        setIsOpen(false)
-      }
-    }
-
     document.addEventListener('keydown', handleEscape)
-    return () => document.removeEventListener('keydown', handleEscape)
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
   }, [isOpen])
 
   // FAB is always visible

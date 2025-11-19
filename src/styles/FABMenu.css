@@ -75,14 +75,26 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  animation: fabMenuSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Calculate max-height to prevent overlap with top controls */
+  /* Weather widget is at: safe-area-top + 10px + 10px + 44px + 4px = safe-area + 68px */
+  /* Menu should not extend beyond: viewport - (safe-area + 68px + 44px widget + 8px gap) */
+  max-height: calc(100vh - max(10px, env(safe-area-inset-top)) - 68px - 44px - 8px - 72px - max(var(--space-xl), calc(var(--space-xl) + var(--safe-area-inset-bottom))));
+  overflow-y: auto;
+  overflow-x: visible;
+  /* Hide scrollbar but keep functionality */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   z-index: 1;
+}
+
+.fab-menu::-webkit-scrollbar {
+  display: none;
 }
 
 @keyframes fabMenuSlideUp {
   from {
     opacity: 0;
-    transform: translateY(20px) scale(0.9);
+    transform: translateY(16px) scale(0.95);
   }
   to {
     opacity: 1;
@@ -104,15 +116,41 @@
   transition: all var(--transition-fast) cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
   min-width: 120px;
+  position: relative;
   /* Prevent double-tap zoom on mobile */
   touch-action: manipulation;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
+  /* Staggered animation */
+  animation: fabMenuItemSlideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1) backwards;
 }
 
+@keyframes fabMenuItemSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Staggered animation delays for each item */
+.fab-menu-item:nth-child(1) { animation-delay: 0ms; }
+.fab-menu-item:nth-child(2) { animation-delay: 30ms; }
+.fab-menu-item:nth-child(3) { animation-delay: 60ms; }
+.fab-menu-item:nth-child(4) { animation-delay: 90ms; }
+.fab-menu-item:nth-child(5) { animation-delay: 120ms; }
+.fab-menu-item:nth-child(6) { animation-delay: 150ms; }
+.fab-menu-item:nth-child(7) { animation-delay: 180ms; }
+.fab-menu-item:nth-child(8) { animation-delay: 210ms; }
+.fab-menu-item:nth-child(9) { animation-delay: 240ms; }
+.fab-menu-item:nth-child(10) { animation-delay: 270ms; }
+.fab-menu-item:nth-child(11) { animation-delay: 300ms; }
+
 .fab-menu-item:hover {
-  background: var(--trk-surface-subtle);
   box-shadow: var(--shadow-xl);
   transform: translateX(-4px);
 }
@@ -135,9 +173,37 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Group separator for logical grouping */
+/* Remove group separator - use consistent spacing */
 .fab-menu-item.group-separator {
-  margin-bottom: 16px;
+  margin-bottom: 0;
+}
+
+/* Icon hierarchy - Group 1 (Core Navigation) - Filled icons for emphasis */
+.fab-menu-item:nth-child(1) .material-symbols-outlined,
+.fab-menu-item:nth-child(2) .material-symbols-outlined,
+.fab-menu-item:nth-child(3) .material-symbols-outlined {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+}
+
+/* Group 2 (Active Tools) - Standard weight */
+.fab-menu-item:nth-child(4) .material-symbols-outlined,
+.fab-menu-item:nth-child(5) .material-symbols-outlined,
+.fab-menu-item:nth-child(6) .material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+}
+
+/* Group 3 (Configuration) - Lighter weight */
+.fab-menu-item:nth-child(7) .material-symbols-outlined,
+.fab-menu-item:nth-child(8) .material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+}
+
+/* Group 4 (Meta/Help) - Lightest weight */
+.fab-menu-item:nth-child(9) .material-symbols-outlined,
+.fab-menu-item:nth-child(10) .material-symbols-outlined,
+.fab-menu-item:nth-child(11) .material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 20;
+  opacity: 0.9;
 }
 
 /* Mobile/Tablet optimizations */
@@ -166,10 +232,24 @@
     font-size: var(--text-sm);
   }
 
-  /* Reduce group separator spacing on mobile for better fit */
-  .fab-menu-item.group-separator {
-    margin-bottom: 8px;
+
+  /* Adjust max-height calculation for mobile */
+  .fab-menu {
+    max-height: calc(100vh - max(10px, env(safe-area-inset-top)) - 68px - 44px - 8px - 68px - max(var(--space-lg), calc(var(--space-lg) + var(--safe-area-inset-bottom))));
   }
+}
+
+/* Enhanced focus indicators for accessibility */
+.fab-menu-item:focus-visible {
+  outline: 3px solid var(--trk-blue);
+  outline-offset: 2px;
+  box-shadow: var(--shadow-xl), 0 0 0 5px rgba(30, 108, 224, 0.1);
+}
+
+.fab-primary:focus-visible {
+  outline: 3px solid var(--trk-blue);
+  outline-offset: 3px;
+  box-shadow: var(--shadow-lg), 0 0 0 5px rgba(30, 108, 224, 0.15);
 }
 
 /* Accessibility - reduce motion */
@@ -177,10 +257,26 @@
   .fab-primary,
   .fab-menu-item {
     transition: none;
+    animation: none;
   }
 
   .fab-menu {
     animation: none;
+  }
+
+  .fab-menu-item:nth-child(1),
+  .fab-menu-item:nth-child(2),
+  .fab-menu-item:nth-child(3),
+  .fab-menu-item:nth-child(4),
+  .fab-menu-item:nth-child(5),
+  .fab-menu-item:nth-child(6),
+  .fab-menu-item:nth-child(7),
+  .fab-menu-item:nth-child(8),
+  .fab-menu-item:nth-child(9),
+  .fab-menu-item:nth-child(10),
+  .fab-menu-item:nth-child(11) {
+    animation: none;
+    animation-delay: 0ms;
   }
 
   .fab-primary .material-symbols-outlined {

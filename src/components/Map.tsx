@@ -175,6 +175,19 @@ const Map = ({ zenMode }: MapProps) => {
     isMobile: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   })
 
+  // Refs for keyboard shortcuts (to avoid frequent listener re-registrations)
+  const keyboardStateRef = useRef({
+    searchSheetOpen: false,
+    routeSheetOpen: false,
+    downloadSheetOpen: false,
+    categorySheetOpen: false,
+    mapPreferencesSheetOpen: false,
+    infoSheetOpen: false,
+    poiDetailsSheetOpen: false,
+    installSheetOpen: false,
+    fabMenuOpen: false
+  })
+
   // Update refs whenever state changes
   useEffect(() => {
     clickStateRef.current.isDrawingRoute = isDrawingRoute
@@ -182,7 +195,32 @@ const Map = ({ zenMode }: MapProps) => {
     clickStateRef.current.isSelectingArea = isSelectingArea
     clickStateRef.current.measurementActive = measurementActive
     clickStateRef.current.measurementMode = measurementMode
-  }, [isDrawingRoute, isPlacingWaypoint, isSelectingArea, measurementActive, measurementMode])
+
+    keyboardStateRef.current.searchSheetOpen = searchSheetOpen
+    keyboardStateRef.current.routeSheetOpen = routeSheetOpen
+    keyboardStateRef.current.downloadSheetOpen = downloadSheetOpen
+    keyboardStateRef.current.categorySheetOpen = categorySheetOpen
+    keyboardStateRef.current.mapPreferencesSheetOpen = mapPreferencesSheetOpen
+    keyboardStateRef.current.infoSheetOpen = infoSheetOpen
+    keyboardStateRef.current.poiDetailsSheetOpen = poiDetailsSheetOpen
+    keyboardStateRef.current.installSheetOpen = installSheetOpen
+    keyboardStateRef.current.fabMenuOpen = fabMenuOpen
+  }, [
+    isDrawingRoute,
+    isPlacingWaypoint,
+    isSelectingArea,
+    measurementActive,
+    measurementMode,
+    searchSheetOpen,
+    routeSheetOpen,
+    downloadSheetOpen,
+    categorySheetOpen,
+    mapPreferencesSheetOpen,
+    infoSheetOpen,
+    poiDetailsSheetOpen,
+    installSheetOpen,
+    fabMenuOpen
+  ])
 
   const { visible: controlsVisible, show: showControls, hide: hideControls } = useAutoHide({
     delay: 5000,
@@ -533,7 +571,7 @@ const Map = ({ zenMode }: MapProps) => {
     }
   }
 
-  // Comprehensive keyboard shortcuts handler
+  // Comprehensive keyboard shortcuts handler (uses refs to avoid frequent re-registrations)
   useEffect(() => {
     // Skip keyboard shortcuts on mobile devices
     if (clickStateRef.current.isMobile) return
@@ -556,7 +594,7 @@ const Map = ({ zenMode }: MapProps) => {
       // Ctrl+B: Toggle FAB menu
       if (e.ctrlKey && e.key === 'b') {
         e.preventDefault()
-        setFabMenuOpen(!fabMenuOpen)
+        setFabMenuOpen((prev) => !prev)
         return
       }
 
@@ -564,30 +602,33 @@ const Map = ({ zenMode }: MapProps) => {
       if (e.key === 'Escape') {
         e.preventDefault()
 
+        const state = keyboardStateRef.current
+        const clickState = clickStateRef.current
+
         // Priority order: drawing modes > open sheets > FAB menu
-        if (isDrawingRoute) {
+        if (clickState.isDrawingRoute) {
           setIsDrawingRoute(false)
           setRoutePoints([])
           cleanupDrawingLayers()
-        } else if (isPlacingWaypoint) {
+        } else if (clickState.isPlacingWaypoint) {
           setIsPlacingWaypoint(false)
-        } else if (searchSheetOpen) {
+        } else if (state.searchSheetOpen) {
           setSearchSheetOpen(false)
-        } else if (routeSheetOpen) {
+        } else if (state.routeSheetOpen) {
           setRouteSheetOpen(false)
-        } else if (downloadSheetOpen) {
+        } else if (state.downloadSheetOpen) {
           setDownloadSheetOpen(false)
-        } else if (categorySheetOpen) {
+        } else if (state.categorySheetOpen) {
           setCategorySheetOpen(false)
-        } else if (mapPreferencesSheetOpen) {
+        } else if (state.mapPreferencesSheetOpen) {
           setMapPreferencesSheetOpen(false)
-        } else if (infoSheetOpen) {
+        } else if (state.infoSheetOpen) {
           setInfoSheetOpen(false)
-        } else if (poiDetailsSheetOpen) {
+        } else if (state.poiDetailsSheetOpen) {
           setPoiDetailsSheetOpen(false)
-        } else if (installSheetOpen) {
+        } else if (state.installSheetOpen) {
           setInstallSheetOpen(false)
-        } else if (fabMenuOpen) {
+        } else if (state.fabMenuOpen) {
           setFabMenuOpen(false)
         }
         return
@@ -596,7 +637,8 @@ const Map = ({ zenMode }: MapProps) => {
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isDrawingRoute, isPlacingWaypoint, searchSheetOpen, routeSheetOpen, downloadSheetOpen, categorySheetOpen, mapPreferencesSheetOpen, infoSheetOpen, poiDetailsSheetOpen, installSheetOpen, fabMenuOpen])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Empty deps - register once, use refs for current state
 
   // Toggle visibility of routes and waypoints
   useEffect(() => {

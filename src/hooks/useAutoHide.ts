@@ -41,7 +41,8 @@ export const useAutoHide = (options: UseAutoHideOptions = {}) => {
     return () => {
       clearTimeout(timerRef.current)
     }
-  }, [initialVisible, show]) // Include show to avoid stale closure
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialVisible]) // Only run on mount/initialVisible change, not when show changes
 
   return { visible, show, hide, toggle }
 }

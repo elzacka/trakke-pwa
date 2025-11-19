@@ -122,6 +122,8 @@ const RouteSheet = ({
   }
 
   const handleRouteClick = (route: Route) => {
+    // Clear elevation state before switching routes to prevent chart reuse
+    setElevationProfile(null)
     setSelectedRoute(route)
     setViewMode('detail')
     onSelectRoute(route)
@@ -132,6 +134,7 @@ const RouteSheet = ({
       setViewMode('list')
       setSelectedRoute(null)
       setSelectedProject(null)
+      setElevationProfile(null)
     } else {
       onClose()
     }

@@ -133,26 +133,84 @@ class WeatherService {
       throw new Error('No weather data available from MET Norway')
     }
 
-    const current = this.parseWeatherTimepoint(timeseries[0])
+    // Find the closest timepoint to current time (MET returns future forecasts)
+    const now = new Date()
+    let closestIndex = 0
+    let minTimeDiff = Math.abs(new Date(timeseries[0].time).getTime() - now.getTime())
 
-    // Next 24 hours (hourly data)
-    const hourly = timeseries.slice(0, 24).map(t => this.parseWeatherTimepoint(t))
+    for (let i = 1; i < Math.min(5, timeseries.length); i++) {
+      const timeDiff = Math.abs(new Date(timeseries[i].time).getTime() - now.getTime())
+      if (timeDiff < minTimeDiff) {
+        minTimeDiff = timeDiff
+        closestIndex = i
+      }
+    }
 
-    // Next 7 days (6-hour intervals for daily overview)
-    const daily = timeseries
-      .filter((_: any, i: number) => i % 6 === 0)
-      .slice(0, 7)
-      .map(t => this.parseWeatherTimepoint(t))
+    const current = this.parseWeatherTimepoint(timeseries[closestIndex])
 
-    const now = Date.now()
+    // Next 24 hours (hourly data from current point)
+    const hourly = timeseries.slice(closestIndex, closestIndex + 24).map(t => this.parseWeatherTimepoint(t))
+
+    // Next 7 days: Group by calendar day (Norway timezone) and take noon forecast for each day
+    const daily = this.groupByDay(timeseries.slice(closestIndex))
+
+    const nowTimestamp = Date.now()
     return {
       location: { lat, lon },
       current,
       hourly,
       daily,
-      fetchedAt: now,
-      expiresAt: now + this.CACHE_TTL
+      fetchedAt: nowTimestamp,
+      expiresAt: nowTimestamp + this.CACHE_TTL
     }
+  }
+
+  /**
+   * Group forecast data by calendar day and return one representative forecast per day
+   * Takes the forecast closest to noon (12:00) for each unique day
+   */
+  private groupByDay(timeseries: WeatherTimepoint[]): WeatherData[] {
+    const dayMap = new Map<string, WeatherTimepoint[]>()
+
+    // Group timepoints by calendar day (YYYY-MM-DD in Norway timezone)
+    for (const timepoint of timeseries) {
+      const date = new Date(timepoint.time)
+      // Use Norwegian timezone (UTC+1/UTC+2)
+      const dateKey = date.toLocaleDateString('no-NO', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        timeZone: 'Europe/Oslo'
+      })
+
+      if (!dayMap.has(dateKey)) {
+        dayMap.set(dateKey, [])
+      }
+      dayMap.get(dateKey)!.push(timepoint)
+    }
+
+    // For each day, select the forecast closest to noon (12:00)
+    const dailyForecasts: WeatherData[] = []
+
+    for (const [, timepoints] of dayMap) {
+      // Find timepoint closest to 12:00 (noon)
+      let closestToNoon = timepoints[0]
+      let minDiff = Math.abs(new Date(timepoints[0].time).getHours() - 12)
+
+      for (const tp of timepoints) {
+        const hour = new Date(tp.time).getHours()
+        const diff = Math.abs(hour - 12)
+        if (diff < minDiff) {
+          minDiff = diff
+          closestToNoon = tp
+        }
+      }
+
+      dailyForecasts.push(this.parseWeatherTimepoint(closestToNoon))
+    }
+
+    // Return up to 7 days
+    return dailyForecasts.slice(0, 7)
   }
 
   /**

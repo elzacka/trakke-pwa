@@ -27,7 +27,7 @@ export interface ElevationProfile {
 
 class ElevationService {
   private readonly API_URL = 'https://ws.geonorge.no/hoydedata/v1/punkt'
-  private readonly BATCH_SIZE = 100  // Kartverket API limit: 100 points per request
+  private readonly BATCH_SIZE = 50  // Kartverket API limit: max 50 points per request
   private readonly CACHE_TTL = 7 * 24 * 60 * 60 * 1000  // 7 days (elevation data is static)
   private readonly SAMPLE_INTERVAL = 100  // Sample coordinates every ~100 meters
 
@@ -118,26 +118,24 @@ class ElevationService {
 
   /**
    * Fetch elevation for batch of coordinates from Kartverket API
+   * Uses GET /punkt endpoint with punkter query parameter
+   * API format: punkter=[[lon,lat],[lon,lat],...] (max 50 points)
    */
   private async fetchElevationBatch(
     coords: [number, number][]
   ): Promise<ElevationPoint[]> {
-    // Convert to Kartverket API format: { x: lon, y: lat }
-    const punkter = coords.map(([lon, lat]) => ({ x: lon, y: lat }))
+    // Convert to API format: [[lon, lat], [lon, lat], ...]
+    // Note: API expects [east/lon, north/lat] order
+    const punkterParam = JSON.stringify(coords)
 
-    const requestBody = {
-      punkter,
-      koordsys: 4326  // WGS84 coordinate system
-    }
+    // Build query parameters
+    const params = new URLSearchParams({
+      koordsys: '4326',  // WGS84 coordinate system (EPSG:4326)
+      punkter: punkterParam
+    })
 
     try {
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-      })
+      const response = await fetch(`${this.API_URL}?${params.toString()}`)
 
       if (!response.ok) {
         throw new Error(`Kartverket Høydedata API returned ${response.status}: ${response.statusText}`)

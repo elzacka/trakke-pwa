@@ -144,7 +144,7 @@ Implemented via vite.config.ts custom plugin (production builds only):
       content="default-src 'self';
                script-src 'self';
                style-src 'self' 'unsafe-inline';
-               img-src 'self' data: https://cache.kartverket.no;
+               img-src 'self' data: blob: https://cache.kartverket.no;
                font-src 'self';
                connect-src 'self' https://cache.kartverket.no https://ws.geonorge.no https://ogc.dsb.no https://overpass-api.de;
                worker-src 'self';">
@@ -153,7 +153,7 @@ Implemented via vite.config.ts custom plugin (production builds only):
 **CSP Rationale:**
 - `connect-src`: Restricts network requests to approved Norwegian government APIs only
 - `font-src 'self'`: All fonts served locally (Exo 2 variable font)
-- `img-src`: Map tiles from Kartverket only
+- `img-src`: Map tiles from Kartverket, data URIs for inline images, blob URIs for SVG icon processing
 - `script-src 'self'`: No external JavaScript (all bundled)
 - `style-src 'unsafe-inline'`: Required for React CSS-in-JS (consider removing in future)
 

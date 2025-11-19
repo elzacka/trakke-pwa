@@ -728,7 +728,11 @@ const Map = ({ zenMode }: MapProps) => {
 
         // Helper function to load SVG and convert to Image
         const loadSVGAsImage = async (path: string, color: string): Promise<HTMLImageElement> => {
+          console.log('[Map] Loading SVG icon from:', path)
           const response = await fetch(path)
+          if (!response.ok) {
+            throw new Error(`Failed to fetch SVG: ${response.status} ${response.statusText}`)
+          }
           const svgText = await response.text()
 
           // Recolor SVG to match category color
@@ -740,10 +744,12 @@ const Map = ({ zenMode }: MapProps) => {
           return new Promise((resolve, reject) => {
             const img = new Image()
             img.onload = () => {
+              console.log('[Map] Successfully loaded SVG icon:', path)
               URL.revokeObjectURL(url)
               resolve(img)
             }
             img.onerror = () => {
+              console.error('[Map] Failed to load SVG image from blob URL:', path)
               URL.revokeObjectURL(url)
               reject(new Error(`Failed to load SVG: ${path}`))
             }
@@ -798,6 +804,8 @@ const Map = ({ zenMode }: MapProps) => {
         // Load SVG icons for all POI categories from OSM-Carto
         try {
           const baseUrl = import.meta.env.BASE_URL
+          console.log('[Map] BASE_URL:', baseUrl)
+
           const caveImg = await loadSVGAsImage(`${baseUrl}icons/osm-carto/cave.svg`, '#8b4513')
           map.current.addImage('cave-icon', imageToMapIcon(caveImg, size))
 
@@ -809,6 +817,8 @@ const Map = ({ zenMode }: MapProps) => {
 
           const wildernessShelterImg = await loadSVGAsImage(`${baseUrl}icons/osm-carto/shelter.svg`, '#b45309')
           map.current.addImage('wilderness-shelter-icon', imageToMapIcon(wildernessShelterImg, size))
+
+          console.log('[Map] All SVG icons loaded successfully')
         } catch (error) {
           console.error('[Map] Failed to load SVG icons, using fallback circles:', error)
 

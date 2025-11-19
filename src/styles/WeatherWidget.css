@@ -6,8 +6,10 @@
   top: calc(max(10px, env(safe-area-inset-top)) + 44px + 4px);
   right: max(10px, env(safe-area-inset-right));
   background: var(--trk-surface);
-  border-radius: 4px;  /* Match MapLibre control border radius */
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-md);  /* Match MapLibre control border radius (12px) */
+  box-shadow: var(--shadow-sm);  /* Match MapLibre control shadow */
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));  /* Match parent container drop-shadow */
+  border: none;
   width: 44px;
   height: 44px;
   display: flex;
@@ -15,10 +17,11 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition: background-color var(--transition-fast);
   z-index: 10;
   padding: 4px;
   gap: 2px;
+  overflow: hidden;  /* Ensure rounded corners clip content */
 }
 
 .weather-widget:hover {

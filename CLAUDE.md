@@ -618,7 +618,7 @@ Key files to understand the architecture:
 
 **For current feature status and complete roadmap**, see the **[README.md](README.md#-roadmap)** roadmap section.
 
-**Quick status**: Phase 2 in progress (POI categories, coordinate formats implemented; projects/GPX export pending)
+**Quick status**: Phase 2 complete (POI categories, coordinate formats, projects, GPX export). Phase 3 in progress (elevation profiles complete; weather integration pending).
 
 **Upcoming phases**:
 - Phase 3: Elevation profiles, weather, route planning, photo geotagging

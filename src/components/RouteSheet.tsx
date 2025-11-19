@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import BottomSheet from './BottomSheet'
 import { routeService, type Route, type Waypoint, type Project } from '../services/routeService'
 import { exportRouteToGpx, exportMultipleRoutesToGpx, downloadGpx, canExportRoute } from '../utils/gpxExport'
+import elevationService, { type ElevationProfile } from '../services/elevationService'
+import ElevationProfileChart from './ElevationProfileChart'
 import '../styles/RouteSheet.css'
 
 interface RouteSheetProps {
@@ -51,6 +53,8 @@ const RouteSheet = ({
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set())
+  const [elevationProfile, setElevationProfile] = useState<ElevationProfile | null>(null)
+  const [loadingElevation, setLoadingElevation] = useState(false)
 
   // Load routes and waypoints when sheet opens or data changes
   useEffect(() => {
@@ -58,6 +62,32 @@ const RouteSheet = ({
       loadData()
     }
   }, [isOpen, onDataChanged])
+
+  // Load elevation profile when route is selected
+  useEffect(() => {
+    if (!selectedRoute || !selectedRoute.coordinates || selectedRoute.coordinates.length < 2) {
+      setElevationProfile(null)
+      return
+    }
+
+    const loadElevation = async () => {
+      setLoadingElevation(true)
+      try {
+        const profile = await elevationService.getElevationProfile(
+          selectedRoute.id,
+          selectedRoute.coordinates
+        )
+        setElevationProfile(profile)
+      } catch (error) {
+        console.error('Failed to load elevation profile:', error)
+        setElevationProfile(null)
+      } finally {
+        setLoadingElevation(false)
+      }
+    }
+
+    loadElevation()
+  }, [selectedRoute])
 
   const loadData = async () => {
     setIsLoading(true)
@@ -757,6 +787,55 @@ const RouteSheet = ({
                 <p>Fullført: {formatDate(route.completedAt)}</p>
               )}
             </div>
+
+            {/* Elevation Profile Section */}
+            {route.coordinates && route.coordinates.length >= 2 && (
+              <section className="route-section" style={{ marginTop: '24px' }}>
+                <h3>Høydeprofil</h3>
+                {loadingElevation && (
+                  <div style={{ padding: '20px', textAlign: 'center', color: '#6b7280' }}>
+                    <p>Laster høydedata...</p>
+                  </div>
+                )}
+                {!loadingElevation && elevationProfile && (
+                  <>
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(2, 1fr)',
+                      gap: '8px',
+                      marginBottom: '16px',
+                      fontSize: '13px'
+                    }}>
+                      <div>
+                        <span style={{ color: '#6b7280' }}>Stigning:</span>{' '}
+                        <strong>{elevationProfile.statistics.totalGain} m</strong>
+                      </div>
+                      <div>
+                        <span style={{ color: '#6b7280' }}>Nedstigning:</span>{' '}
+                        <strong>{elevationProfile.statistics.totalLoss} m</strong>
+                      </div>
+                      <div>
+                        <span style={{ color: '#6b7280' }}>Min høyde:</span>{' '}
+                        <strong>{elevationProfile.statistics.minElevation} m</strong>
+                      </div>
+                      <div>
+                        <span style={{ color: '#6b7280' }}>Maks høyde:</span>{' '}
+                        <strong>{elevationProfile.statistics.maxElevation} m</strong>
+                      </div>
+                    </div>
+                    <ElevationProfileChart
+                      elevations={elevationProfile.points.map(p => p.z)}
+                      distances={elevationService.getCumulativeDistances(elevationProfile.points)}
+                    />
+                  </>
+                )}
+                {!loadingElevation && !elevationProfile && (
+                  <p style={{ padding: '20px', textAlign: 'center', color: '#6b7280', fontSize: '14px' }}>
+                    Kunne ikke laste høydedata
+                  </p>
+                )}
+              </section>
+            )}
 
             <div className="route-detail-actions">
               <button

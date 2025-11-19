@@ -10,6 +10,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "chart.js": "^4.5.1",
     "maplibre-gl": "^5.11.0",
     "mgrs": "^2.1.0",
     "proj4": "^2.19.10",

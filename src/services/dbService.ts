@@ -2,13 +2,15 @@
 // Manages offline data storage for user preferences and cached data
 
 const DB_NAME = 'trakke-db'
-const DB_VERSION = 3
+const DB_VERSION = 4
 const STORE_NAME = 'userData'
 const TILES_STORE = 'offlineTiles'
 const AREAS_STORE = 'downloadedAreas'
 const ROUTES_STORE = 'routes'
 const WAYPOINTS_STORE = 'waypoints'
 const PROJECTS_STORE = 'projects'
+const ELEVATION_STORE = 'elevationProfiles'
+const WEATHER_STORE = 'weatherCache'
 
 class DatabaseService {
   private db: IDBDatabase | null = null
@@ -104,6 +106,29 @@ class DatabaseService {
 
           console.log('Object store created:', PROJECTS_STORE)
         }
+
+        // Create elevation profiles store (v4)
+        if (oldVersion < 4 && !db.objectStoreNames.contains(ELEVATION_STORE)) {
+          const elevationStore = db.createObjectStore(ELEVATION_STORE, {
+            keyPath: 'routeId'
+          })
+
+          elevationStore.createIndex('fetchedAt', 'fetchedAt', { unique: false })
+
+          console.log('Object store created:', ELEVATION_STORE)
+        }
+
+        // Create weather cache store (v4)
+        if (oldVersion < 4 && !db.objectStoreNames.contains(WEATHER_STORE)) {
+          const weatherStore = db.createObjectStore(WEATHER_STORE, {
+            keyPath: 'id'
+          })
+
+          weatherStore.createIndex('expiresAt', 'expiresAt', { unique: false })
+          weatherStore.createIndex('location', ['lat', 'lon'], { unique: false })
+
+          console.log('Object store created:', WEATHER_STORE)
+        }
       }
     })
   }
@@ -171,6 +196,11 @@ class DatabaseService {
         reject(new Error(`Failed to clear database: ${request.error?.message || 'Unknown error'}`))
       }
     })
+  }
+
+  // Get database instance for direct access (used by elevation/weather services)
+  async getDatabase(): Promise<IDBDatabase> {
+    return await this.init()
   }
 
   // Downloaded Areas methods (using dedicated downloadedAreas store)

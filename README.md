@@ -262,23 +262,26 @@ See [DEPENDENCIES.md](DEPENDENCIES.md) for complete dependency list with exact v
 - IndexedDB for local data storage
 - Privacy-first architecture (no tracking)
 
-### Phase 2 (In Progress)
-**Completed:**
+### Phase 2 (Completed)
 - **Search functionality** - Place names and addresses (Kartverket APIs)
 - **Offline map downloads** - Select area and download for offline use
 - **Routes and waypoints** - Draw routes, place waypoints, calculate distances
 - **POI categories** - Emergency shelters (DSB WFS), wilderness shelters, caves, towers, war memorials (Overpass API)
 - **Coordinate formats** - DD, DMS, DDM, UTM, MGRS support
 - **Settings** - Coordinate format preferences
+- **Projects management** - Organize routes and waypoints into projects
+- **GPX export** - Export routes and projects as GPX 1.1 files for GPS devices
+
+### Phase 3 (In Progress)
+**Completed:**
+- **Elevation profiles** - Automatic elevation charts using Kartverket DTM data (10m resolution)
+  - Total gain/loss calculations
+  - Min/max/average elevation statistics
+  - Interactive Chart.js visualization
+  - 7-day IndexedDB caching
 
 **In Development:**
-- Route editing and management UI improvements
-- Projects/tracks management
-- GPX export functionality
-
-### Phase 3 (Planned)
-- Elevation profiles using DTM data
-- Weather integration (Yr.no/MET Norway - requires privacy review)
+- Weather integration (MET Norway - privacy review complete, proxy deployment pending)
 - Route planning with trail snapping
 - Photo geotagging for waypoints
 

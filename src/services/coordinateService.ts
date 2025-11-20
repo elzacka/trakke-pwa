@@ -1,5 +1,6 @@
 import proj4 from 'proj4'
 import * as mgrs from 'mgrs'
+import { devError } from '../constants'
 
 export type CoordinateFormat = 'DD' | 'DMS' | 'DDM' | 'UTM' | 'MGRS'
 
@@ -111,7 +112,7 @@ class CoordinateService {
         copyText
       }
     } catch (error) {
-      console.error('UTM conversion error:', error)
+      devError('UTM conversion error:', error)
       return {
         format: 'UTM',
         display: 'UTM conversion error',
@@ -134,7 +135,7 @@ class CoordinateService {
         copyText: mgrsString
       }
     } catch (error) {
-      console.error('MGRS conversion error:', error)
+      devError('MGRS conversion error:', error)
       return {
         format: 'MGRS',
         display: 'MGRS conversion error',

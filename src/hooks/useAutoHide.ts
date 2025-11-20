@@ -10,6 +10,12 @@ export const useAutoHide = (options: UseAutoHideOptions = {}) => {
   const { delay = UI_DELAYS.AUTO_HIDE_CONTROLS, initialVisible = true } = options
   const [visible, setVisible] = useState(initialVisible)
   const timerRef = useRef<number | undefined>(undefined)
+  const delayRef = useRef(delay)
+
+  // Sync delay ref
+  useEffect(() => {
+    delayRef.current = delay
+  }, [delay])
 
   const show = useCallback(() => {
     setVisible(true)
@@ -17,8 +23,8 @@ export const useAutoHide = (options: UseAutoHideOptions = {}) => {
 
     timerRef.current = window.setTimeout(() => {
       setVisible(false)
-    }, delay)
-  }, [delay])
+    }, delayRef.current)
+  }, [])
 
   const hide = useCallback(() => {
     setVisible(false)
@@ -41,8 +47,7 @@ export const useAutoHide = (options: UseAutoHideOptions = {}) => {
     return () => {
       clearTimeout(timerRef.current)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialVisible]) // Only run on mount/initialVisible change, not when show changes
+  }, [initialVisible, show])
 
   return { visible, show, hide, toggle }
 }

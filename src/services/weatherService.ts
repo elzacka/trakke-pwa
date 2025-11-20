@@ -3,6 +3,7 @@
 // Caches forecasts in IndexedDB for 2 hours
 
 import { dbService } from './dbService'
+import { devLog, devError } from '../constants'
 
 interface WeatherInstant {
   air_temperature: number
@@ -33,6 +34,12 @@ interface WeatherTimepoint {
   }
 }
 
+interface MetApiResponse {
+  properties: {
+    timeseries: WeatherTimepoint[]
+  }
+}
+
 export interface WeatherData {
   temperature: number
   feelsLike?: number
@@ -46,19 +53,33 @@ export interface WeatherData {
   time: string
 }
 
+export interface BathingTemperature {
+  name: string
+  lat: number
+  lon: number
+  heatedWater: boolean
+  temperature: number
+  time: string
+  distance?: number  // Distance from user location in km
+}
+
 export interface WeatherForecast {
   location: { lat: number; lon: number }
   current: WeatherData
   hourly: WeatherData[]  // Next 24 hours
   daily: WeatherData[]   // Next 7 days (6-hour intervals)
+  bathingTemp: BathingTemperature | null  // Nearest bathing temperature (if available)
   fetchedAt: number
   expiresAt: number
 }
 
 class WeatherService {
   private readonly API_URL = 'https://api.met.no/weatherapi/locationforecast/2.0/compact'
+  private readonly BATHING_API_URL = 'https://badetemperaturer.yr.no/api'
   private readonly CACHE_TTL = 2 * 60 * 60 * 1000  // 2 hours (MET updates hourly)
+  private readonly BATHING_CACHE_TTL = 6 * 60 * 60 * 1000  // 6 hours (water temp changes slowly)
   private readonly USER_AGENT = 'Trakke-PWA/1.0 (https://github.com/elzacka/trakke-pwa) hei@tazk.no'
+  private readonly MAX_BATHING_DISTANCE_KM = 50  // Maximum distance to show bathing temp
 
   /**
    * Get weather forecast for coordinates
@@ -75,11 +96,11 @@ class WeatherService {
     // Check IndexedDB cache
     const cached = await this.getCachedForecast(truncLat, truncLon)
     if (cached && Date.now() < cached.expiresAt) {
-      console.log(`[WeatherService] Using cached forecast for ${truncLat},${truncLon}`)
+      devLog(`[WeatherService] Using cached forecast for ${truncLat},${truncLon}`)
       return cached
     }
 
-    console.log(`[WeatherService] Fetching forecast from MET Norway for ${truncLat},${truncLon}`)
+    devLog(`[WeatherService] Fetching forecast from MET Norway for ${truncLat},${truncLon}`)
 
     // Fetch from MET Norway API
     const url = `${this.API_URL}?lat=${truncLat}&lon=${truncLon}`
@@ -104,18 +125,18 @@ class WeatherService {
       }
 
       const metData = await response.json()
-      const forecast = this.parseMetData(metData, truncLat, truncLon)
+      const forecast = await this.parseMetData(metData, truncLat, truncLon)
 
       // Cache in IndexedDB
       await this.cacheForecast(forecast)
 
       return forecast
     } catch (error) {
-      console.error('[WeatherService] Failed to fetch weather:', error)
+      devError('[WeatherService] Failed to fetch weather:', error)
 
       // Try to return stale cache if available
       if (cached) {
-        console.log('[WeatherService] Returning stale cached data due to API error')
+        devLog('[WeatherService] Returning stale cached data due to API error')
         return cached
       }
 
@@ -126,7 +147,7 @@ class WeatherService {
   /**
    * Parse MET Norway API response format
    */
-  private parseMetData(data: any, lat: number, lon: number): WeatherForecast {
+  private async parseMetData(data: MetApiResponse, lat: number, lon: number): Promise<WeatherForecast> {
     const timeseries: WeatherTimepoint[] = data.properties.timeseries
 
     if (!timeseries || timeseries.length === 0) {
@@ -155,11 +176,21 @@ class WeatherService {
     const daily = this.groupByDay(timeseries.slice(closestIndex))
 
     const nowTimestamp = Date.now()
+
+    // Fetch bathing temperature (don't block on failure)
+    let bathingTemp: BathingTemperature | null = null
+    try {
+      bathingTemp = await this.getNearestBathingTemp(lat, lon)
+    } catch (error) {
+      devError('[WeatherService] Failed to fetch bathing temperature:', error)
+    }
+
     return {
       location: { lat, lon },
       current,
       hourly,
       daily,
+      bathingTemp,
       fetchedAt: nowTimestamp,
       expiresAt: nowTimestamp + this.CACHE_TTL
     }
@@ -261,6 +292,110 @@ class WeatherService {
     return directions[index]
   }
 
+  // --- Bathing Temperature Methods ---
+
+  /**
+   * Get nearest bathing temperature location
+   *
+   * PRIVACY NOTE: Requires API key from Yr. Currently returns null until API key is configured.
+   * To get API key, email support@yr.no with subject "Forespørsel om API-nøkkel til badetemperaturer"
+   *
+   * TODO: Add API key configuration when ready to enable this feature
+   */
+  private async getNearestBathingTemp(lat: number, lon: number): Promise<BathingTemperature | null> {
+    // Check cache first
+    const cached = await this.getCachedBathingTemp(lat, lon)
+    if (cached && Date.now() < cached.expiresAt) {
+      devLog('[WeatherService] Using cached bathing temperature')
+      return cached.data
+    }
+
+    // API key not configured yet - return null for now
+    // When ready to enable: Add API key to environment/config and uncomment below
+    devLog('[WeatherService] Bathing temperature API not yet configured (requires API key from Yr)')
+    return null
+
+    /* UNCOMMENT WHEN API KEY IS READY:
+    try {
+      const response = await fetch(`${this.BATHING_API_URL}/watertemperatures`, {
+        headers: {
+          'apikey': 'YOUR_API_KEY_HERE',  // TODO: Move to environment variable
+          'Accept': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error(`Bathing temp API returned ${response.status}`)
+      }
+
+      const data: BathingTemperature[] = await response.json()
+
+      // Find nearest location within MAX_BATHING_DISTANCE_KM
+      const nearest = this.findNearestBathingLocation(data, lat, lon)
+
+      if (nearest) {
+        // Cache the result
+        await this.cacheBathingTemp(lat, lon, nearest)
+      }
+
+      return nearest
+    } catch (error) {
+      devError('[WeatherService] Failed to fetch bathing temperature:', error)
+      return cached?.data || null  // Return stale cache on error
+    }
+    */
+  }
+
+  /**
+   * Find nearest bathing location within max distance
+   * Uses Haversine formula for distance calculation
+   */
+  private findNearestBathingLocation(
+    locations: BathingTemperature[],
+    lat: number,
+    lon: number
+  ): BathingTemperature | null {
+    if (!locations || locations.length === 0) return null
+
+    let nearest: BathingTemperature | null = null
+    let minDistance = this.MAX_BATHING_DISTANCE_KM
+
+    for (const location of locations) {
+      const distance = this.calculateDistance(lat, lon, location.lat, location.lon)
+
+      if (distance < minDistance) {
+        minDistance = distance
+        nearest = { ...location, distance }
+      }
+    }
+
+    return nearest
+  }
+
+  /**
+   * Calculate distance between two coordinates using Haversine formula
+   * Returns distance in kilometers
+   */
+  private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371 // Earth's radius in km
+    const dLat = this.toRadians(lat2 - lat1)
+    const dLon = this.toRadians(lon2 - lon1)
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRadians(lat1)) *
+      Math.cos(this.toRadians(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2)
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    return R * c
+  }
+
+  private toRadians(degrees: number): number {
+    return degrees * (Math.PI / 180)
+  }
+
   // --- IndexedDB Cache Methods ---
 
   /**
@@ -279,12 +414,12 @@ class WeatherService {
           resolve(request.result || null)
         }
         request.onerror = () => {
-          console.error('[WeatherService] Failed to read from cache:', request.error)
+          devError('[WeatherService] Failed to read from cache:', request.error)
           resolve(null)
         }
       })
     } catch (error) {
-      console.error('[WeatherService] Cache read error:', error)
+      devError('[WeatherService] Cache read error:', error)
       return null
     }
   }
@@ -308,16 +443,16 @@ class WeatherService {
 
       return new Promise((resolve, reject) => {
         request.onsuccess = () => {
-          console.log(`[WeatherService] Cached forecast for ${id}`)
+          devLog(`[WeatherService] Cached forecast for ${id}`)
           resolve()
         }
         request.onerror = () => {
-          console.error('[WeatherService] Failed to write to cache:', request.error)
+          devError('[WeatherService] Failed to write to cache:', request.error)
           reject(request.error)
         }
       })
     } catch (error) {
-      console.error('[WeatherService] Cache write error:', error)
+      devError('[WeatherService] Cache write error:', error)
       throw error
     }
   }
@@ -346,17 +481,86 @@ class WeatherService {
             deletedCount++
             cursor.continue()
           } else {
-            console.log(`[WeatherService] Cleared ${deletedCount} expired cache entries`)
+            devLog(`[WeatherService] Cleared ${deletedCount} expired cache entries`)
             resolve(deletedCount)
           }
         }
         request.onerror = () => {
-          console.error('[WeatherService] Failed to clear expired cache:', request.error)
+          devError('[WeatherService] Failed to clear expired cache:', request.error)
           reject(request.error)
         }
       })
     } catch (error) {
-      console.error('[WeatherService] Cache cleanup error:', error)
+      devError('[WeatherService] Cache cleanup error:', error)
+      throw error
+    }
+  }
+
+  // --- Bathing Temperature Cache Methods ---
+
+  /**
+   * Get cached bathing temperature
+   */
+  private async getCachedBathingTemp(
+    lat: number,
+    lon: number
+  ): Promise<{ data: BathingTemperature; expiresAt: number } | null> {
+    try {
+      const db = await dbService.getDatabase()
+      const tx = db.transaction('bathingTempCache', 'readonly')
+      const store = tx.objectStore('bathingTempCache')
+      const id = `${lat},${lon}`
+      const request = store.get(id)
+
+      return new Promise((resolve) => {
+        request.onsuccess = () => {
+          resolve(request.result || null)
+        }
+        request.onerror = () => {
+          devError('[WeatherService] Failed to read bathing temp from cache:', request.error)
+          resolve(null)
+        }
+      })
+    } catch (error) {
+      devError('[WeatherService] Bathing temp cache read error:', error)
+      return null
+    }
+  }
+
+  /**
+   * Cache bathing temperature in IndexedDB
+   */
+  private async cacheBathingTemp(
+    lat: number,
+    lon: number,
+    data: BathingTemperature
+  ): Promise<void> {
+    try {
+      const db = await dbService.getDatabase()
+      const tx = db.transaction('bathingTempCache', 'readwrite')
+      const store = tx.objectStore('bathingTempCache')
+      const id = `${lat},${lon}`
+
+      const cacheEntry = {
+        id,
+        data,
+        expiresAt: Date.now() + this.BATHING_CACHE_TTL
+      }
+
+      const request = store.put(cacheEntry)
+
+      return new Promise((resolve, reject) => {
+        request.onsuccess = () => {
+          devLog(`[WeatherService] Cached bathing temp for ${id}`)
+          resolve()
+        }
+        request.onerror = () => {
+          devError('[WeatherService] Failed to cache bathing temp:', request.error)
+          reject(request.error)
+        }
+      })
+    } catch (error) {
+      devError('[WeatherService] Bathing temp cache write error:', error)
       throw error
     }
   }

@@ -22,8 +22,9 @@ import MeasurementTools, { type MeasurementMode } from './MeasurementTools'
 import { useAutoHide } from '../hooks/useAutoHide'
 import { useViewportPOIs } from '../hooks/useViewportPOIs'
 import { useInstallPrompt } from '../hooks/useInstallPrompt'
-import { MAP_CONFIG } from '../constants'
+import { MAP_CONFIG, devLog, devError } from '../constants'
 import { VALIDATION, UI_DELAYS, GESTURES } from '../config/timings'
+import { validateName } from '../utils/validation'
 import type { SearchResult } from '../services/searchService'
 import type { Route, Waypoint } from '../services/routeService'
 import { routeService } from '../services/routeService'
@@ -33,49 +34,6 @@ import '../styles/Map.css'
 
 interface MapProps {
   zenMode: boolean
-}
-
-// Utility function to validate and sanitize user input
-// Prevents XSS attacks by rejecting any input with HTML/script-related characters
-function validateName(name: string | null, maxLength: number = VALIDATION.MAX_NAME_LENGTH): string | null {
-  if (!name) return null
-  const trimmed = name.trim()
-
-  if (trimmed.length === 0) {
-    alert('Navn kan ikke være tomt')
-    return null
-  }
-
-  if (trimmed.length > maxLength) {
-    alert(`Navn kan ikke være lengre enn ${maxLength} tegn`)
-    return null
-  }
-
-  // Strict XSS protection: reject any input with HTML/script-related characters
-  // This includes: <, >, ", ', /, \, and common script keywords
-  const dangerousPatterns = [
-    /</, />/, /"/, /'/, // HTML/attribute delimiters
-    /&lt;/, /&gt;/, /&quot;/, /&#/, // HTML entities
-    /javascript:/i, /on\w+=/i, // Event handlers
-    /<script/i, /<iframe/i, /<object/i, /<embed/i, // Script tags
-    /\\/  // Backslash (escape sequences)
-  ]
-
-  for (const pattern of dangerousPatterns) {
-    if (pattern.test(trimmed)) {
-      alert('Navn inneholder ugyldige tegn. Kun bokstaver, tall og vanlige tegn er tillatt.')
-      return null
-    }
-  }
-
-  // Additional check: ensure only safe characters (letters, numbers, spaces, basic punctuation)
-  const safePattern = /^[a-zA-ZæøåÆØÅ0-9\s\-_.,()']+$/
-  if (!safePattern.test(trimmed)) {
-    alert('Navn inneholder ugyldige tegn. Kun bokstaver, tall og vanlige tegn er tillatt.')
-    return null
-  }
-
-  return trimmed
 }
 
 const Map = ({ zenMode }: MapProps) => {
@@ -93,6 +51,8 @@ const Map = ({ zenMode }: MapProps) => {
   // Selection overlay state (pixel coordinates for draggable square)
   const [overlayRect, setOverlayRect] = useState<{ top: number; left: number; width: number; height: number } | null>(null)
   const [isDragging, setIsDragging] = useState<string | null>(null) // 'nw' | 'ne' | 'sw' | 'se' | null
+  const overlayRectRef = useRef<{ top: number; left: number; width: number; height: number } | null>(null)
+  const isDraggingRef = useRef<string | null>(null)
 
   // Zen Mode UI state
   const [searchSheetOpen, setSearchSheetOpen] = useState(false)
@@ -270,7 +230,7 @@ const Map = ({ zenMode }: MapProps) => {
       map.current.addControl(
         new NavigationLocationControl({
           onLocationFound: (position) => setUserLocation(position),
-          onLocationError: (error) => console.error('Geolocation error:', error),
+          onLocationError: (error) => devError('Geolocation error:', error),
           showCompass: true,
           visualizePitch: true
         }),
@@ -431,7 +391,7 @@ const Map = ({ zenMode }: MapProps) => {
         try {
           currentMap.removeControl(scaleControl.current)
         } catch (error) {
-          console.error('Failed to remove scale control:', error)
+          devError('Failed to remove scale control:', error)
         } finally {
           scaleControl.current = null
         }
@@ -453,7 +413,7 @@ const Map = ({ zenMode }: MapProps) => {
         try {
           currentMap.removeControl(compassControl.current)
         } catch (error) {
-          console.error('Failed to remove compass control:', error)
+          devError('Failed to remove compass control:', error)
         } finally {
           compassControl.current = null
         }
@@ -659,7 +619,7 @@ const Map = ({ zenMode }: MapProps) => {
     }
 
     // Toggle waypoint markers
-    console.log(`[Waypoints] Visibility effect running. routesVisible: ${routesVisible}, markers count: ${Object.keys(waypointMarkers).length}`)
+    devLog(`[Waypoints] Visibility effect running. routesVisible: ${routesVisible}, markers count: ${Object.keys(waypointMarkers).length}`)
     Object.values(waypointMarkers).forEach((marker) => {
       const element = marker.getElement()
       if (element) {
@@ -668,15 +628,21 @@ const Map = ({ zenMode }: MapProps) => {
         } else {
           element.classList.add('hidden')
         }
-        console.log(`[Waypoints] Set marker visibility to: ${routesVisible ? 'visible' : 'hidden'}`)
+        devLog(`[Waypoints] Set marker visibility to: ${routesVisible ? 'visible' : 'hidden'}`)
       }
     })
   }, [routesVisible, waypointMarkers])
 
+  // Sync refs for overlay dragging (prevents stale closures in event handlers)
+  useEffect(() => {
+    overlayRectRef.current = overlayRect
+    isDraggingRef.current = isDragging
+  }, [overlayRect, isDragging])
+
   // Persist routesVisible preference to localStorage
   useEffect(() => {
     localStorage.setItem('trakke_routes_visible', String(routesVisible))
-    console.log(`[Waypoints] Saved routesVisible to localStorage: ${routesVisible}`)
+    devLog(`[Waypoints] Saved routesVisible to localStorage: ${routesVisible}`)
   }, [routesVisible])
 
   // Initialize POI clustering layers (MapLibre native GeoJSON clustering for 60fps performance)
@@ -688,7 +654,7 @@ const Map = ({ zenMode }: MapProps) => {
     const initializePOILayers = async () => {
       if (!map.current || poiLayersInitialized.current) return
 
-      console.log('[Map] Initializing POI clustering layers...')
+      devLog('[Map] Initializing POI clustering layers...')
 
       try {
         // Add empty GeoJSON source with clustering enabled
@@ -773,7 +739,7 @@ const Map = ({ zenMode }: MapProps) => {
 
         // Helper function to load SVG and convert to Image
         const loadSVGAsImage = async (path: string, color: string): Promise<HTMLImageElement> => {
-          console.log('[Map] Loading SVG icon from:', path)
+          devLog('[Map] Loading SVG icon from:', path)
           const response = await fetch(path)
           if (!response.ok) {
             throw new Error(`Failed to fetch SVG: ${response.status} ${response.statusText}`)
@@ -789,12 +755,12 @@ const Map = ({ zenMode }: MapProps) => {
           return new Promise((resolve, reject) => {
             const img = new Image()
             img.onload = () => {
-              console.log('[Map] Successfully loaded SVG icon:', path)
+              devLog('[Map] Successfully loaded SVG icon:', path)
               URL.revokeObjectURL(url)
               resolve(img)
             }
             img.onerror = () => {
-              console.error('[Map] Failed to load SVG image from blob URL:', path)
+              devError('[Map] Failed to load SVG image from blob URL:', path)
               URL.revokeObjectURL(url)
               reject(new Error(`Failed to load SVG: ${path}`))
             }
@@ -849,7 +815,7 @@ const Map = ({ zenMode }: MapProps) => {
         // Load SVG icons for all POI categories from OSM-Carto
         try {
           const baseUrl = import.meta.env.BASE_URL
-          console.log('[Map] BASE_URL:', baseUrl)
+          devLog('[Map] BASE_URL:', baseUrl)
 
           const caveImg = await loadSVGAsImage(`${baseUrl}icons/osm-carto/cave.svg`, '#8b4513')
           map.current.addImage('cave-icon', imageToMapIcon(caveImg, size))
@@ -863,9 +829,9 @@ const Map = ({ zenMode }: MapProps) => {
           const wildernessShelterImg = await loadSVGAsImage(`${baseUrl}icons/osm-carto/shelter.svg`, '#b45309')
           map.current.addImage('wilderness-shelter-icon', imageToMapIcon(wildernessShelterImg, size))
 
-          console.log('[Map] All SVG icons loaded successfully')
+          devLog('[Map] All SVG icons loaded successfully')
         } catch (error) {
-          console.error('[Map] Failed to load SVG icons, using fallback circles:', error)
+          devError('[Map] Failed to load SVG icons, using fallback circles:', error)
 
           // Fallback: cave icon (brown circle)
           const caveCanvas = document.createElement('canvas')
@@ -929,15 +895,15 @@ const Map = ({ zenMode }: MapProps) => {
         }
 
         poiLayersInitialized.current = true
-        console.log('[Map] POI clustering layers initialized successfully')
+        devLog('[Map] POI clustering layers initialized successfully')
       } catch (error) {
-        console.error('[Map] Failed to initialize POI clustering layers:', error)
+        devError('[Map] Failed to initialize POI clustering layers:', error)
       }
     }
 
     // Wait for map to be fully loaded
     if (!m.loaded()) {
-      console.log('[Map] Waiting for map to load before initializing POI layers')
+      devLog('[Map] Waiting for map to load before initializing POI layers')
       m.once('load', () => {
         initializePOILayers()
       })
@@ -957,7 +923,7 @@ const Map = ({ zenMode }: MapProps) => {
 
     visiblePOIs.forEach((pois, category) => {
       if (activeCategories.has(category)) {
-        console.log(`[Map] Processing ${pois.length} POIs for category ${category}`)
+        devLog(`[Map] Processing ${pois.length} POIs for category ${category}`)
         pois.forEach(poi => {
           // Track duplicate IDs
           const count = idCounts[poi.id] || 0
@@ -984,7 +950,7 @@ const Map = ({ zenMode }: MapProps) => {
     // Log any duplicate POI IDs
     const duplicates = Object.entries(idCounts).filter(([id, count]) => count > 1)
     if (duplicates.length > 0) {
-      console.warn(`[Map] Found ${duplicates.length} duplicate POI IDs:`, duplicates)
+      devError(`[Map] Found ${duplicates.length} duplicate POI IDs:`, duplicates)
     }
 
     const source = map.current.getSource('pois') as maplibregl.GeoJSONSource
@@ -993,7 +959,7 @@ const Map = ({ zenMode }: MapProps) => {
         type: 'FeatureCollection',
         features: features
       })
-      console.log(`[Map] Updated POI source with ${features.length} features (clustering enabled)`)
+      devLog(`[Map] Updated POI source with ${features.length} features (clustering enabled)`)
     }
   }, [visiblePOIs, activeCategories])
 
@@ -1107,7 +1073,7 @@ const Map = ({ zenMode }: MapProps) => {
       mouseDownPos = { x: e.clientX, y: e.clientY }
       hadCtrlKey = e.ctrlKey
 
-      console.log('[Map] Direct DOM mousedown event - modifiers:', {
+      devLog('[Map] Direct DOM mousedown event - modifiers:', {
         ctrlKey: e.ctrlKey,
         shiftKey: e.shiftKey,
         altKey: e.altKey,
@@ -1117,7 +1083,7 @@ const Map = ({ zenMode }: MapProps) => {
     }
 
     const handleMouseUp = async (e: MouseEvent) => {
-      console.log('[Map] Direct DOM mouseup event - modifiers:', {
+      devLog('[Map] Direct DOM mouseup event - modifiers:', {
         ctrlKey: e.ctrlKey,
         hadCtrlKeyOnDown: hadCtrlKey,
         button: e.button
@@ -1136,11 +1102,11 @@ const Map = ({ zenMode }: MapProps) => {
           // Get coordinates from map
           const point = map.current.unproject([e.clientX, e.clientY])
           const coords = `${point.lat.toFixed(6)}, ${point.lng.toFixed(6)}`
-          console.log('[Map] Direct Ctrl+Click detected - Copying coordinates:', coords)
+          devLog('[Map] Direct Ctrl+Click detected - Copying coordinates:', coords)
 
           try {
             await navigator.clipboard.writeText(coords)
-            console.log('[Map] Coordinates copied successfully')
+            devLog('[Map] Coordinates copied successfully')
 
             // Haptic feedback
             if ('vibrate' in navigator) {
@@ -1159,7 +1125,7 @@ const Map = ({ zenMode }: MapProps) => {
               }
             }, UI_DELAYS.NOTIFICATION_DISPLAY)
           } catch (error) {
-            console.error('Failed to copy coordinates:', error)
+            devError('Failed to copy coordinates:', error)
             alert(`Koordinater: ${coords}`)
           }
         }
@@ -1236,7 +1202,7 @@ const Map = ({ zenMode }: MapProps) => {
       }
     }))
 
-    console.log('[Route Drawing] Updating points:', points.length, 'features:', pointFeatures.length)
+    devLog('[Route Drawing] Updating points:', points.length, 'features:', pointFeatures.length)
 
     if (map.current.getSource(pointsSourceId)) {
       const source = map.current.getSource(pointsSourceId) as maplibregl.GeoJSONSource
@@ -1244,9 +1210,9 @@ const Map = ({ zenMode }: MapProps) => {
         type: 'FeatureCollection',
         features: pointFeatures
       })
-      console.log('[Route Drawing] Updated existing points source with', pointFeatures.length, 'features')
+      devLog('[Route Drawing] Updated existing points source with', pointFeatures.length, 'features')
     } else {
-      console.log('[Route Drawing] Creating new points source with', pointFeatures.length, 'features')
+      devLog('[Route Drawing] Creating new points source with', pointFeatures.length, 'features')
       map.current.addSource(pointsSourceId, {
         type: 'geojson',
         data: {
@@ -1433,7 +1399,7 @@ const Map = ({ zenMode }: MapProps) => {
 
     // Debug: Log all modifier keys on every click
     if (mouseEvent) {
-      console.log('[Map] MapLibre click event - modifiers:', {
+      devLog('[Map] MapLibre click event - modifiers:', {
         ctrlKey: mouseEvent.ctrlKey,
         shiftKey: mouseEvent.shiftKey,
         altKey: mouseEvent.altKey,
@@ -1447,11 +1413,11 @@ const Map = ({ zenMode }: MapProps) => {
     if (!isMobile && mouseEvent && mouseEvent.ctrlKey) {
       e.preventDefault()
       const coords = `${e.lngLat.lat.toFixed(6)}, ${e.lngLat.lng.toFixed(6)}`
-      console.log('[Map] Ctrl+Click detected - Copying coordinates:', coords)
+      devLog('[Map] Ctrl+Click detected - Copying coordinates:', coords)
 
       try {
         await navigator.clipboard.writeText(coords)
-        console.log('[Map] Coordinates copied successfully to clipboard')
+        devLog('[Map] Coordinates copied successfully to clipboard')
 
         // Visual feedback using CSS class (safer than inline styles)
         const notification = document.createElement('div')
@@ -1465,7 +1431,7 @@ const Map = ({ zenMode }: MapProps) => {
           }
         }, UI_DELAYS.NOTIFICATION_DISPLAY)
       } catch (error) {
-        console.error('Failed to copy coordinates:', error)
+        devError('Failed to copy coordinates:', error)
         alert(`Koordinater: ${coords}`)
       }
       return
@@ -1501,11 +1467,11 @@ const Map = ({ zenMode }: MapProps) => {
 
     // Waypoint placement mode - create temporary marker instantly
     if (isPlacingWaypoint) {
-      console.log('[Waypoint] Placing waypoint at:', [e.lngLat.lng, e.lngLat.lat])
+      devLog('[Waypoint] Placing waypoint at:', [e.lngLat.lng, e.lngLat.lat])
 
       // Remove any existing temporary marker
       if (tempWaypointMarker.current) {
-        console.log('[Waypoint] Removing existing temp marker')
+        devLog('[Waypoint] Removing existing temp marker')
         tempWaypointMarker.current.remove()
         tempWaypointMarker.current = null
       }
@@ -1515,7 +1481,7 @@ const Map = ({ zenMode }: MapProps) => {
       el.className = 'waypoint-marker temp-waypoint'
       el.innerHTML = '<span class="material-symbols-outlined">location_on</span>'
 
-      console.log('[Waypoint] Created marker element:', el.className)
+      devLog('[Waypoint] Created marker element:', el.className)
 
       // Create marker instantly
       const marker = new maplibregl.Marker({
@@ -1525,7 +1491,7 @@ const Map = ({ zenMode }: MapProps) => {
         .setLngLat([e.lngLat.lng, e.lngLat.lat])
         .addTo(map.current!)
 
-      console.log('[Waypoint] Marker added to map')
+      devLog('[Waypoint] Marker added to map')
 
       // Store temporary marker and coordinates
       tempWaypointMarker.current = marker
@@ -1591,21 +1557,21 @@ const Map = ({ zenMode }: MapProps) => {
     if (!map.current) return
 
     const loadExistingWaypoints = async () => {
-      console.log('[Waypoints] Loading existing waypoints...')
+      devLog('[Waypoints] Loading existing waypoints...')
       try {
         const waypoints = await routeService.getAllWaypoints()
-        console.log(`[Waypoints] Found ${waypoints.length} waypoints in database`)
+        devLog(`[Waypoints] Found ${waypoints.length} waypoints in database`)
 
         // Read current visibility preference from localStorage
         const savedRoutesVisible = localStorage.getItem('trakke_routes_visible')
         const shouldShowRoutes = savedRoutesVisible !== null ? savedRoutesVisible === 'true' : true
-        console.log(`[Waypoints] Visibility preference from localStorage: "${savedRoutesVisible}" -> shouldShowRoutes: ${shouldShowRoutes}`)
+        devLog(`[Waypoints] Visibility preference from localStorage: "${savedRoutesVisible}" -> shouldShowRoutes: ${shouldShowRoutes}`)
 
         // Create markers for all waypoints
         const newMarkers: Record<string, maplibregl.Marker> = {}
 
         waypoints.forEach(waypoint => {
-          console.log(`[Waypoints] Creating marker for "${waypoint.name}" at`, waypoint.coordinates)
+          devLog(`[Waypoints] Creating marker for "${waypoint.name}" at`, waypoint.coordinates)
           const el = document.createElement('div')
           el.className = 'waypoint-marker'
           el.innerHTML = '<span class="material-symbols-outlined">location_on</span>'
@@ -1621,26 +1587,26 @@ const Map = ({ zenMode }: MapProps) => {
           if (!shouldShowRoutes) {
             el.classList.add('hidden')
           }
-          console.log(`[Waypoints] Set marker "${waypoint.name}" visibility to: ${shouldShowRoutes ? 'visible' : 'hidden'}`)
+          devLog(`[Waypoints] Set marker "${waypoint.name}" visibility to: ${shouldShowRoutes ? 'visible' : 'hidden'}`)
 
           newMarkers[waypoint.id] = marker
         })
 
         setWaypointMarkers(newMarkers)
-        console.log(`[Waypoints] Successfully loaded ${waypoints.length} waypoint markers`)
+        devLog(`[Waypoints] Successfully loaded ${waypoints.length} waypoint markers`)
       } catch (error) {
-        console.error('[Waypoints] Failed to load existing waypoints:', error)
+        devError('[Waypoints] Failed to load existing waypoints:', error)
       }
     }
 
     // Wait for map to be fully loaded before adding markers
     if (map.current.loaded()) {
-      console.log('[Waypoints] Map already loaded, loading waypoints now')
+      devLog('[Waypoints] Map already loaded, loading waypoints now')
       loadExistingWaypoints()
     } else {
-      console.log('[Waypoints] Waiting for map to load...')
+      devLog('[Waypoints] Waiting for map to load...')
       map.current.once('load', () => {
-        console.log('[Waypoints] Map loaded, loading waypoints')
+        devLog('[Waypoints] Map loaded, loading waypoints')
         loadExistingWaypoints()
       })
     }
@@ -1692,9 +1658,9 @@ const Map = ({ zenMode }: MapProps) => {
     el.className = 'search-result-marker'
     el.innerHTML = '<span class="material-symbols-outlined">location_on</span>'
 
-    console.log('[Search] Creating search marker at:', [lon, lat])
-    console.log('[Search] Map instance exists:', !!map.current)
-    console.log('[Search] Element created:', el, el.className)
+    devLog('[Search] Creating search marker at:', [lon, lat])
+    devLog('[Search] Map instance exists:', !!map.current)
+    devLog('[Search] Element created:', el, el.className)
 
     searchMarker.current = new maplibregl.Marker({
       element: el
@@ -1703,12 +1669,12 @@ const Map = ({ zenMode }: MapProps) => {
       .setLngLat([lon, lat])
       .addTo(map.current)
 
-    console.log('[Search] Search marker added to map')
-    console.log('[Search] Marker instance:', searchMarker.current)
+    devLog('[Search] Search marker added to map')
+    devLog('[Search] Marker instance:', searchMarker.current)
 
     // Check if element is in DOM after a short delay
     setTimeout(() => {
-      console.log('[Search] Marker element in DOM after 100ms:', document.querySelector('.search-result-marker'))
+      devLog('[Search] Marker element in DOM after 100ms:', document.querySelector('.search-result-marker'))
     }, 100)
 
     // Fly to result location FIRST
@@ -1756,7 +1722,10 @@ const Map = ({ zenMode }: MapProps) => {
   }
 
   const handleMouseMove = (e: MouseEvent | TouchEvent) => {
-    if (!isDragging || !overlayRect || !mapContainer.current || !map.current) return
+    const currentDragging = isDraggingRef.current
+    const currentRect = overlayRectRef.current
+
+    if (!currentDragging || !currentRect || !mapContainer.current || !map.current) return
 
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
@@ -1765,29 +1734,29 @@ const Map = ({ zenMode }: MapProps) => {
     const x = clientX - containerRect.left
     const y = clientY - containerRect.top
 
-    let newRect = { ...overlayRect }
+    let newRect = { ...currentRect }
 
     // Update rect based on which corner is being dragged
-    switch (isDragging) {
+    switch (currentDragging) {
       case 'nw': // Top-left
-        newRect.width = overlayRect.left + overlayRect.width - x
-        newRect.height = overlayRect.top + overlayRect.height - y
+        newRect.width = currentRect.left + currentRect.width - x
+        newRect.height = currentRect.top + currentRect.height - y
         newRect.left = x
         newRect.top = y
         break
       case 'ne': // Top-right
-        newRect.width = x - overlayRect.left
-        newRect.height = overlayRect.top + overlayRect.height - y
+        newRect.width = x - currentRect.left
+        newRect.height = currentRect.top + currentRect.height - y
         newRect.top = y
         break
       case 'sw': // Bottom-left
-        newRect.width = overlayRect.left + overlayRect.width - x
-        newRect.height = y - overlayRect.top
+        newRect.width = currentRect.left + currentRect.width - x
+        newRect.height = y - currentRect.top
         newRect.left = x
         break
       case 'se': // Bottom-right
-        newRect.width = x - overlayRect.left
-        newRect.height = y - overlayRect.top
+        newRect.width = x - currentRect.left
+        newRect.height = y - currentRect.top
         break
     }
 
@@ -1888,7 +1857,7 @@ const Map = ({ zenMode }: MapProps) => {
             }
           },
           (error) => {
-            console.error('Geolocation error:', error)
+            devError('Geolocation error:', error)
           }
         )
       }
@@ -1956,10 +1925,10 @@ const Map = ({ zenMode }: MapProps) => {
       const newCategories = new Set(prev)
       if (newCategories.has(category)) {
         newCategories.delete(category)
-        console.log(`[Map] Deactivated category: ${category}`)
+        devLog(`[Map] Deactivated category: ${category}`)
       } else {
         newCategories.add(category)
-        console.log(`[Map] Activated category: ${category}`)
+        devLog(`[Map] Activated category: ${category}`)
       }
       return newCategories
     })
@@ -1979,7 +1948,7 @@ const Map = ({ zenMode }: MapProps) => {
   }
 
   const handleStartWaypointPlacement = () => {
-    console.log('[Waypoint] Starting waypoint placement mode')
+    devLog('[Waypoint] Starting waypoint placement mode')
     setIsPlacingWaypoint(true)
     setIsDrawingRoute(false) // Ensure mutually exclusive
     // Clear any route drawing in progress
@@ -2072,8 +2041,8 @@ const Map = ({ zenMode }: MapProps) => {
   }
 
   const handleSelectWaypoint = (waypoint: Waypoint) => {
-    console.log('[Waypoints] Selecting waypoint:', waypoint.name, waypoint.id)
-    console.log('[Waypoints] Current waypointMarkers:', Object.keys(waypointMarkers))
+    devLog('[Waypoints] Selecting waypoint:', waypoint.name, waypoint.id)
+    devLog('[Waypoints] Current waypointMarkers:', Object.keys(waypointMarkers))
 
     // Clean up navigation markers when selecting a waypoint
     cleanupNavigationMarkers()
@@ -2082,9 +2051,9 @@ const Map = ({ zenMode }: MapProps) => {
     if (map.current) {
       // Check if marker exists
       if (waypointMarkers[waypoint.id]) {
-        console.log('[Waypoints] Marker exists for', waypoint.id)
+        devLog('[Waypoints] Marker exists for', waypoint.id)
       } else {
-        console.warn('[Waypoints] Marker NOT found for', waypoint.id, '- creating new marker')
+        devError('[Waypoints] Marker NOT found for', waypoint.id, '- creating new marker')
         // Create marker if it doesn't exist
         const el = document.createElement('div')
         el.className = 'waypoint-marker'
@@ -2194,7 +2163,7 @@ const Map = ({ zenMode }: MapProps) => {
         setTempWaypointCoords(null)
       }
     } catch (error) {
-      console.error('Failed to save waypoint:', error)
+      devError('Failed to save waypoint:', error)
       alert('Kunne ikke lagre punkt')
     }
   }
@@ -2217,10 +2186,10 @@ const Map = ({ zenMode }: MapProps) => {
       cleanupDrawingLayers()
 
       // Show success and open route sheet
-      console.log('[Route] Route saved successfully:', name)
+      devLog('[Route] Route saved successfully:', name)
       setRouteSheetOpen(true)
     } catch (error) {
-      console.error('Failed to save route:', error)
+      devError('Failed to save route:', error)
       alert('Kunne ikke lagre ruten')
     }
   }
@@ -2248,12 +2217,12 @@ const Map = ({ zenMode }: MapProps) => {
         updatedAt: Date.now()
       })
 
-      console.log('[Route] Route updated successfully:', name)
+      devLog('[Route] Route updated successfully:', name)
       setEditingRoute(null)
       // Trigger RouteSheet to reload data
       setDataChangeTrigger(prev => prev + 1)
     } catch (error) {
-      console.error('Failed to update route:', error)
+      devError('Failed to update route:', error)
       alert('Kunne ikke oppdatere ruten')
     }
   }
@@ -2269,12 +2238,12 @@ const Map = ({ zenMode }: MapProps) => {
         updatedAt: Date.now()
       })
 
-      console.log('[Waypoint] Waypoint updated successfully:', name)
+      devLog('[Waypoint] Waypoint updated successfully:', name)
       setEditingWaypoint(null)
       // Trigger RouteSheet to reload data and re-group categories
       setDataChangeTrigger(prev => prev + 1)
     } catch (error) {
-      console.error('Failed to update waypoint:', error)
+      devError('Failed to update waypoint:', error)
       alert('Kunne ikke oppdatere punktet')
     }
   }
@@ -2307,7 +2276,7 @@ const Map = ({ zenMode }: MapProps) => {
     // Clear selected route state
     setSelectedRoute(null)
 
-    console.log('[Map] Cleared route from map:', selectedRoute.name)
+    devLog('[Map] Cleared route from map:', selectedRoute.name)
   }
 
   // Clear all waypoint markers from map
@@ -2320,7 +2289,7 @@ const Map = ({ zenMode }: MapProps) => {
     // Clear waypoint markers state
     setWaypointMarkers({})
 
-    console.log('[Map] Cleared all waypoint markers from map')
+    devLog('[Map] Cleared all waypoint markers from map')
   }
 
   return (

@@ -4,6 +4,7 @@
 // - Addresses: Adresseregister © Kartverket
 
 import { levenshteinDistance } from '../utils/levenshtein'
+import { devError } from '../constants'
 
 export interface SearchResult {
   id: string
@@ -88,7 +89,7 @@ class SearchService {
       // Smart filtering for addresses
       return this.smartFilterAddresses(resultsWithRaw, query, limit)
     } catch (error) {
-      console.error('Address search error:', error)
+      devError('Address search error:', error)
       return []
     }
   }
@@ -226,7 +227,7 @@ class SearchService {
       // Smart fuzzy filtering for places
       return this.smartFilterPlaces(resultsWithRaw, query, limit)
     } catch (error) {
-      console.error('Place search error:', error)
+      devError('Place search error:', error)
       return []
     }
   }

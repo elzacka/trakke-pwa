@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react'
 import Sheet from './Sheet'
 import { routeService, type Route, type Waypoint, type Project } from '../services/routeService'
 import { exportRouteToGpx, exportMultipleRoutesToGpx, downloadGpx, canExportRoute } from '../utils/gpxExport'
+import { validateName } from '../utils/validation'
 import elevationService, { type ElevationProfile } from '../services/elevationService'
 import ElevationProfileChart from './ElevationProfileChart'
+import { devLog, devError } from '../constants'
 import '../styles/RouteSheet.css'
 
 interface RouteSheetProps {
@@ -79,7 +81,7 @@ const RouteSheet = ({
         )
         setElevationProfile(profile)
       } catch (error) {
-        console.error('Failed to load elevation profile:', error)
+        devError('Failed to load elevation profile:', error)
         setElevationProfile(null)
       } finally {
         setLoadingElevation(false)
@@ -101,7 +103,7 @@ const RouteSheet = ({
       setWaypoints(loadedWaypoints)
       setProjects(loadedProjects)
     } catch (error) {
-      console.error('Failed to load data:', error)
+      devError('Failed to load data:', error)
     } finally {
       setIsLoading(false)
     }
@@ -146,18 +148,19 @@ const RouteSheet = ({
   }
 
   const handleCreateProject = async () => {
-    const name = window.prompt('Navn på prosjekt:')
-    if (!name || name.trim() === '') return
+    const inputName = window.prompt('Navn på prosjekt:')
+    const name = validateName(inputName)
+    if (!name) return
 
     try {
       await routeService.createProject({
-        name: name.trim(),
+        name,
         routes: [],
         waypoints: []
       })
       await loadData()
     } catch (error) {
-      console.error('Failed to create project:', error)
+      devError('Failed to create project:', error)
       alert('Kunne ikke opprette prosjekt')
     }
   }
@@ -174,7 +177,7 @@ const RouteSheet = ({
         setSelectedProject(null)
       }
     } catch (error) {
-      console.error('Failed to delete project:', error)
+      devError('Failed to delete project:', error)
       alert('Kunne ikke slette prosjektet')
     }
   }
@@ -194,7 +197,7 @@ const RouteSheet = ({
       })
       await loadData()
     } catch (error) {
-      console.error('Failed to add route to project:', error)
+      devError('Failed to add route to project:', error)
       alert('Kunne ikke legge til rute i prosjekt')
     }
   }
@@ -209,7 +212,7 @@ const RouteSheet = ({
       })
       await loadData()
     } catch (error) {
-      console.error('Failed to remove route from project:', error)
+      devError('Failed to remove route from project:', error)
       alert('Kunne ikke fjerne rute fra prosjekt')
     }
   }
@@ -232,7 +235,7 @@ const RouteSheet = ({
       const gpxContent = exportRouteToGpx(route, routeWaypoints)
       downloadGpx(gpxContent, route.name)
     } catch (error) {
-      console.error('Failed to export GPX:', error)
+      devError('Failed to export GPX:', error)
       alert('Kunne ikke eksportere GPX')
     }
   }
@@ -255,7 +258,7 @@ const RouteSheet = ({
       const gpxContent = exportMultipleRoutesToGpx(projectRoutes, projectWaypoints, project.name)
       downloadGpx(gpxContent, project.name)
     } catch (error) {
-      console.error('Failed to export project GPX:', error)
+      devError('Failed to export project GPX:', error)
       alert('Kunne ikke eksportere prosjekt som GPX')
     }
   }
@@ -273,7 +276,7 @@ const RouteSheet = ({
         setSelectedRoute(null)
       }
     } catch (error) {
-      console.error('Failed to delete route:', error)
+      devError('Failed to delete route:', error)
       alert('Kunne ikke slette ruten')
     }
   }
@@ -287,7 +290,7 @@ const RouteSheet = ({
       onDeleteWaypoint(waypointId) // Notify Map to remove from map
       await loadData()
     } catch (error) {
-      console.error('Failed to delete waypoint:', error)
+      devError('Failed to delete waypoint:', error)
       alert('Kunne ikke slette punktet')
     }
   }
@@ -421,7 +424,7 @@ const RouteSheet = ({
                 type="button"
                 className="route-action-button secondary"
                 onClick={() => {
-                  console.log('[RouteSheet] Toggle button clicked, current routesVisible:', routesVisible)
+                  devLog('[RouteSheet] Toggle button clicked, current routesVisible:', routesVisible)
                   onToggleVisibility()
                 }}
               >

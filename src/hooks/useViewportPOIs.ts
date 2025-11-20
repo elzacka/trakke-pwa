@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import type { LngLatBounds } from 'maplibre-gl'
 import { poiService, type POI, type POICategory } from '../services/poiService'
 import { UI_DELAYS, VIEWPORT } from '../config/timings'
+import { devLog, devError } from '../constants'
 
 interface BoundsRect {
   north: number
@@ -90,16 +91,16 @@ export const useViewportPOIs = ({
   // Fetch POIs for all active categories in the current viewport
   const fetchPOIsForViewport = useCallback(async () => {
     if (!map) {
-      console.log('[useViewportPOIs] Map not initialized yet')
+      devLog('[useViewportPOIs] Map not initialized yet')
       return
     }
 
     const zoom = map.getZoom()
-    console.log(`[useViewportPOIs] Current zoom: ${zoom}, minZoom: ${minZoom}, active categories:`, Array.from(activeCategories))
+    devLog(`[useViewportPOIs] Current zoom: ${zoom}, minZoom: ${minZoom}, active categories:`, Array.from(activeCategories))
 
     // Don't show POIs below minimum zoom level
     if (zoom < minZoom) {
-      console.log(`[useViewportPOIs] Zoom ${zoom} < minZoom ${minZoom}, hiding POIs`)
+      devLog(`[useViewportPOIs] Zoom ${zoom} < minZoom ${minZoom}, hiding POIs`)
       setVisiblePOIs(new Map())
       return
     }
@@ -117,7 +118,7 @@ export const useViewportPOIs = ({
     // Skip if a fetch is already in progress for similar viewport
     // This prevents redundant requests during rapid zoom/pan
     if (isFetchingRef.current) {
-      console.log('[useViewportPOIs] Skipping fetch - request already in progress')
+      devLog('[useViewportPOIs] Skipping fetch - request already in progress')
       return
     }
 
@@ -125,12 +126,12 @@ export const useViewportPOIs = ({
     previousZoomRef.current = zoom
 
     if (activeCategories.size === 0) {
-      console.log('[useViewportPOIs] No active categories')
+      devLog('[useViewportPOIs] No active categories')
       setVisiblePOIs(new Map())
       return
     }
 
-    console.log(`[useViewportPOIs] Fetching POIs for bounds:`, bounds)
+    devLog(`[useViewportPOIs] Fetching POIs for bounds:`, bounds)
     setIsLoading(true)
     setError(null)
     isFetchingRef.current = true
@@ -144,7 +145,7 @@ export const useViewportPOIs = ({
           const pois = await poiService.getPOIs(category, bounds, zoom)
           return { category, pois, error: null }
         } catch (err) {
-          console.error(`Failed to fetch POIs for category ${category}:`, err)
+          devError(`Failed to fetch POIs for category ${category}:`, err)
           // Preserve cached POIs on error (e.g., 429 rate limiting) instead of clearing
           const cachedPOIs = latestPOIsRef.current.get(category) || []
           return { category, pois: cachedPOIs, error: err }
@@ -161,10 +162,10 @@ export const useViewportPOIs = ({
         latestPOIsRef.current = newVisiblePOIs
         setVisiblePOIs(newVisiblePOIs)
         setIsLoading(false)
-        console.log(`[useViewportPOIs] Updated visiblePOIs:`, newVisiblePOIs)
+        devLog(`[useViewportPOIs] Updated visiblePOIs:`, newVisiblePOIs)
       }
     } catch (err) {
-      console.error('Failed to fetch viewport POIs:', err)
+      devError('Failed to fetch viewport POIs:', err)
       if (mountedRef.current) {
         setError(err instanceof Error ? err.message : 'Failed to load POIs')
         setIsLoading(false)
@@ -214,69 +215,12 @@ export const useViewportPOIs = ({
   // Reload when active categories change
   useEffect(() => {
     if (!map) return
-    console.log('[useViewportPOIs] Active categories changed, fetching...', Array.from(activeCategories))
+    devLog('[useViewportPOIs] Active categories changed, fetching...', Array.from(activeCategories))
 
-    // Use immediate fetch to avoid stale closure issues
-    const fetchImmediate = async () => {
-      const zoom = map.getZoom()
-
-      if (zoom < minZoom) {
-        setVisiblePOIs(new Map())
-        return
-      }
-
-      const bounds = getBoundsWithBuffer(map.getBounds())
-      previousBoundsRef.current = bounds
-      previousZoomRef.current = zoom
-
-      if (activeCategories.size === 0) {
-        setVisiblePOIs(new Map())
-        return
-      }
-
-      setIsLoading(true)
-      setError(null)
-      isFetchingRef.current = true
-
-      try {
-        const newVisiblePOIs = new Map<POICategory, POI[]>()
-
-        const fetchPromises = Array.from(activeCategories).map(async (category) => {
-          try {
-            const pois = await poiService.getPOIs(category, bounds, zoom)
-            return { category, pois, error: null }
-          } catch (err) {
-            console.error(`Failed to fetch POIs for category ${category}:`, err)
-            // Preserve cached POIs on error (e.g., 429 rate limiting) instead of clearing
-            const cachedPOIs = latestPOIsRef.current.get(category) || []
-            return { category, pois: cachedPOIs, error: err }
-          }
-        })
-
-        const results = await Promise.all(fetchPromises)
-
-        results.forEach(({ category, pois }) => {
-          newVisiblePOIs.set(category, pois)
-        })
-
-        if (mountedRef.current) {
-          latestPOIsRef.current = newVisiblePOIs
-          setVisiblePOIs(newVisiblePOIs)
-          setIsLoading(false)
-        }
-      } catch (err) {
-        console.error('Failed to fetch viewport POIs:', err)
-        if (mountedRef.current) {
-          setError(err instanceof Error ? err.message : 'Failed to load POIs')
-          setIsLoading(false)
-        }
-      } finally {
-        isFetchingRef.current = false
-      }
-    }
-
-    fetchImmediate()
-  }, [activeCategories, map, minZoom, getBoundsWithBuffer])
+    // Reset bounds to force fetch on category change
+    previousBoundsRef.current = null
+    fetchPOIsForViewport()
+  }, [activeCategories, map, fetchPOIsForViewport])
 
   return {
     visiblePOIs,

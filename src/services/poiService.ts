@@ -2,7 +2,7 @@
 // Supports: Emergency shelters (Tilfluktsrom), Wilderness shelters (Gapahuk/vindskjul), Caves (Huler), Observation Towers, War Memorials (Forts, Bunkers, Battlefields)
 
 import { CACHE_CONFIG } from '../config/timings'
-import { devLog } from '../constants'
+import { devLog, devError } from '../constants'
 
 export interface ShelterPOI {
   id: string
@@ -194,7 +194,7 @@ class POIService {
         return [lon, lat] // Return as [lon, lat]
       }
     } catch (error) {
-      console.error('Failed to parse coordinates:', error)
+      devError('Failed to parse coordinates:', error)
     }
     return null
   }
@@ -225,7 +225,7 @@ class POIService {
       // Check for parsing errors
       const parseError = xmlDoc.querySelector('parsererror')
       if (parseError) {
-        console.error('XML parsing error:', parseError.textContent)
+        devError('XML parsing error:', parseError.textContent)
         return shelters
       }
 
@@ -261,7 +261,7 @@ class POIService {
         }
       }
     } catch (error) {
-      console.error('Failed to parse shelter GML:', error)
+      devError('Failed to parse shelter GML:', error)
     }
 
     return shelters
@@ -396,7 +396,7 @@ class POIService {
    */
   private parseOverpassJSON(data: OverpassResponse, category: POICategory): POI[] {
     if (!data.elements || !Array.isArray(data.elements)) {
-      console.warn('[POIService] Invalid Overpass response:', data)
+      devError('[POIService] Invalid Overpass response:', data)
       return []
     }
 
@@ -444,7 +444,7 @@ class POIService {
       if (poi) {
         // Check for duplicates
         if (seenIds.has(poi.id)) {
-          console.warn(`[POIService] Duplicate POI ID: ${poi.id}`)
+          devError(`[POIService] Duplicate POI ID: ${poi.id}`)
           continue
         }
         seenIds.add(poi.id)
@@ -517,13 +517,13 @@ class POIService {
 
         if (!response.ok) {
           const errorText = await response.text().catch(() => 'Unable to read error response')
-          console.error(`[POIService] Overpass error response:`, errorText)
+          devError(`[POIService] Overpass error response:`, errorText)
           throw new Error(`Overpass request failed: ${response.status} ${response.statusText}`)
         }
 
         const contentType = response.headers.get('content-type')
         if (!contentType || !contentType.includes('application/json')) {
-          console.warn(`[POIService] Unexpected content-type: ${contentType}`)
+          devError(`[POIService] Unexpected content-type: ${contentType}`)
         }
 
         return response.json()
@@ -551,15 +551,15 @@ class POIService {
         return pois
       })
       .catch(error => {
-        console.error(`[POIService] Failed to fetch ${category}:`, error)
-        console.error(`[POIService] Error type: ${error.name}`)
-        console.error(`[POIService] Error message: ${error.message}`)
-        console.error(`[POIService] Error stack:`, error.stack)
+        devError(`[POIService] Failed to fetch ${category}:`, error)
+        devError(`[POIService] Error type: ${error.name}`)
+        devError(`[POIService] Error message: ${error.message}`)
+        devError(`[POIService] Error stack:`, error.stack)
 
         // Check for specific error types
         if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-          console.error(`[POIService] Network error - possible CORS issue or network connectivity problem`)
-          console.error(`[POIService] Ensure ${this.OVERPASS_URL} is accessible and CORS-enabled`)
+          devError(`[POIService] Network error - possible CORS issue or network connectivity problem`)
+          devError(`[POIService] Ensure ${this.OVERPASS_URL} is accessible and CORS-enabled`)
         }
 
         this.loading.delete(cacheKey)
@@ -626,9 +626,9 @@ class POIService {
         return shelters
       })
       .catch(error => {
-        console.error('[POIService] Failed to fetch shelters:', error)
-        console.error('[POIService] Error type:', error.name)
-        console.error('[POIService] Error message:', error.message)
+        devError('[POIService] Failed to fetch shelters:', error)
+        devError('[POIService] Error type:', error.name)
+        devError('[POIService] Error message:', error.message)
         this.loading.delete(cacheKey)
 
         // Re-throw error instead of silently returning empty array
@@ -656,7 +656,7 @@ class POIService {
         return this.fetchFromOverpass(category, bounds, zoom)
 
       default:
-        console.warn(`Unknown data source for ${category}`)
+        devError(`Unknown data source for ${category}`)
         return []
     }
   }

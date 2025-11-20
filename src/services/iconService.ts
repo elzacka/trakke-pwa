@@ -2,6 +2,7 @@
 // Uses OSM-Carto symbols for all POI categories (except custom T-marker for Tilfluktsrom)
 
 import { type POICategory } from './poiService'
+import { devError } from '../constants'
 
 /**
  * POI Icon Configuration
@@ -104,7 +105,7 @@ export async function loadSVGIcon(path: string): Promise<string> {
     }
     return await response.text()
   } catch (error) {
-    console.error(`[IconService] Error loading SVG icon:`, error)
+    devError(`[IconService] Error loading SVG icon:`, error)
     return ''
   }
 }

@@ -165,6 +165,14 @@
   line-height: 1.4;
 }
 
+.format-example {
+  font-size: 12px;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  color: var(--trk-text-soft);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
 /* Preferences Actions */
 .preferences-actions {
   margin-top: var(--space-xl);

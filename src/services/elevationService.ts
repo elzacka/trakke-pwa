@@ -3,6 +3,7 @@
 // Caches elevation profiles in IndexedDB for 7 days
 
 import { dbService } from './dbService'
+import { devLog, devError } from '../constants'
 
 interface ElevationPoint {
   x: number  // longitude
@@ -47,15 +48,15 @@ class ElevationService {
     // Check cache first
     const cached = await this.getCachedProfile(routeId)
     if (cached && Date.now() - cached.fetchedAt < this.CACHE_TTL) {
-      console.log(`[ElevationService] Using cached elevation for route ${routeId}`)
+      devLog(`[ElevationService] Using cached elevation for route ${routeId}`)
       return cached
     }
 
-    console.log(`[ElevationService] Fetching elevation for route ${routeId} (${coordinates.length} points)`)
+    devLog(`[ElevationService] Fetching elevation for route ${routeId} (${coordinates.length} points)`)
 
     // Sample coordinates to reduce API load (every ~100m)
     const sampledCoords = this.sampleCoordinates(coordinates, this.SAMPLE_INTERVAL)
-    console.log(`[ElevationService] Sampled ${sampledCoords.length} points from ${coordinates.length} original points`)
+    devLog(`[ElevationService] Sampled ${sampledCoords.length} points from ${coordinates.length} original points`)
 
     // Batch requests (API limit: 100 points per request)
     const elevationPoints: ElevationPoint[] = []
@@ -150,7 +151,7 @@ class ElevationService {
 
       return data.punkter as ElevationPoint[]
     } catch (error) {
-      console.error('[ElevationService] Failed to fetch elevation batch:', error)
+      devError('[ElevationService] Failed to fetch elevation batch:', error)
       throw new Error('Kunne ikke hente høydedata fra Kartverket')
     }
   }
@@ -263,12 +264,12 @@ class ElevationService {
           resolve(request.result || null)
         }
         request.onerror = () => {
-          console.error('[ElevationService] Failed to read from cache:', request.error)
+          devError('[ElevationService] Failed to read from cache:', request.error)
           resolve(null)
         }
       })
     } catch (error) {
-      console.error('[ElevationService] Cache read error:', error)
+      devError('[ElevationService] Cache read error:', error)
       return null
     }
   }
@@ -285,16 +286,16 @@ class ElevationService {
 
       return new Promise((resolve, reject) => {
         request.onsuccess = () => {
-          console.log(`[ElevationService] Cached elevation for route ${profile.routeId}`)
+          devLog(`[ElevationService] Cached elevation for route ${profile.routeId}`)
           resolve()
         }
         request.onerror = () => {
-          console.error('[ElevationService] Failed to write to cache:', request.error)
+          devError('[ElevationService] Failed to write to cache:', request.error)
           reject(request.error)
         }
       })
     } catch (error) {
-      console.error('[ElevationService] Cache write error:', error)
+      devError('[ElevationService] Cache write error:', error)
       throw error
     }
   }
@@ -311,16 +312,16 @@ class ElevationService {
 
       return new Promise((resolve, reject) => {
         request.onsuccess = () => {
-          console.log(`[ElevationService] Cleared cached elevation for route ${routeId}`)
+          devLog(`[ElevationService] Cleared cached elevation for route ${routeId}`)
           resolve()
         }
         request.onerror = () => {
-          console.error('[ElevationService] Failed to clear cache:', request.error)
+          devError('[ElevationService] Failed to clear cache:', request.error)
           reject(request.error)
         }
       })
     } catch (error) {
-      console.error('[ElevationService] Cache clear error:', error)
+      devError('[ElevationService] Cache clear error:', error)
       throw error
     }
   }

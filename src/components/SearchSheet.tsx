@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import Sheet from './Sheet'
 import { searchService, SearchResult } from '../services/searchService'
 import { UI_DELAYS } from '../config/timings'
+import { devLog, devError } from '../constants'
 import '../styles/SearchSheet.css'
 
 interface SearchSheetProps {
@@ -49,7 +50,7 @@ const SearchSheet = ({ isOpen, onClose, onResultSelect }: SearchSheetProps) => {
         setResults(searchResults)
         setSelectedIndex(-1) // Reset selection when new results arrive
       } catch (error) {
-        console.error('Search error:', error)
+        devError('Search error:', error)
         setResults([])
         setSelectedIndex(-1)
       } finally {
@@ -138,8 +139,8 @@ const SearchSheet = ({ isOpen, onClose, onResultSelect }: SearchSheetProps) => {
     <Sheet
       isOpen={isOpen}
       onClose={handleClose}
-      peekHeight={30}
-      halfHeight={60}
+      peekHeight={20}
+      halfHeight={20}
       initialHeight="peek"
     >
       <div className="search-sheet">

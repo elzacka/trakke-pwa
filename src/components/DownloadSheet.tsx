@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import type { LngLatBounds } from 'maplibre-gl'
 import Sheet from './Sheet'
 import { offlineMapService, type DownloadArea, type DownloadProgress } from '../services/offlineMapService'
+import { devError } from '../constants'
 import '../styles/DownloadSheet.css'
 
 interface DownloadSheetProps {
@@ -80,7 +81,7 @@ const DownloadSheet = ({
       const areas = await offlineMapService.getDownloadedAreas()
       setDownloadedAreas(areas)
     } catch (error) {
-      console.error('Failed to load downloaded areas:', error)
+      devError('Failed to load downloaded areas:', error)
     }
   }
 
@@ -141,7 +142,7 @@ const DownloadSheet = ({
         }
       }, 2000)
     } catch (error) {
-      console.error('Download error:', error)
+      devError('Download error:', error)
       setIsDownloading(false)
       setViewMode('list')
       setProgress(null)
@@ -158,7 +159,7 @@ const DownloadSheet = ({
       await offlineMapService.deleteArea(areaId)
       await loadDownloadedAreas()
     } catch (error) {
-      console.error('Failed to delete area:', error)
+      devError('Failed to delete area:', error)
       alert('Kunne ikke slette området')
     }
   }

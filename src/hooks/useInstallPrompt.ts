@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { devLog, devError } from '../constants'
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[]
@@ -39,14 +40,14 @@ export const useInstallPrompt = () => {
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
-      console.log('PWA: beforeinstallprompt event captured')
+      devLog('PWA: beforeinstallprompt event captured')
     }
 
     // Track successful installation
     const handleAppInstalled = () => {
       setIsInstalled(true)
       setDeferredPrompt(null)
-      console.log('PWA: App installed successfully')
+      devLog('PWA: App installed successfully')
 
       // Privacy-compliant local tracking
       const stats = JSON.parse(localStorage.getItem('trakke-install-stats') || '{}')
@@ -67,7 +68,7 @@ export const useInstallPrompt = () => {
 
   const promptInstall = async (): Promise<boolean> => {
     if (!deferredPrompt) {
-      console.log('PWA: No deferred prompt available')
+      devLog('PWA: No deferred prompt available')
       return false
     }
 
@@ -78,7 +79,7 @@ export const useInstallPrompt = () => {
       // Wait for user response
       const { outcome } = await deferredPrompt.userChoice
 
-      console.log(`PWA: User ${outcome} the install prompt`)
+      devLog(`PWA: User ${outcome} the install prompt`)
 
       // Privacy-compliant local tracking
       const stats = JSON.parse(localStorage.getItem('trakke-install-stats') || '{}')
@@ -91,7 +92,7 @@ export const useInstallPrompt = () => {
 
       return outcome === 'accepted'
     } catch (error) {
-      console.error('PWA: Error prompting install:', error)
+      devError('PWA: Error prompting install:', error)
       return false
     }
   }

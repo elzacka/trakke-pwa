@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { searchService, SearchResult } from '../services/searchService'
+import { devLog, devError } from '../constants'
 import '../styles/SearchControl.css'
 
 interface SearchControlProps {
@@ -41,7 +42,7 @@ const SearchControl = ({ onResultSelect }: SearchControlProps) => {
           : await searchService.searchPlaces(query, 8)
         setResults(searchResults)
       } catch (error) {
-        console.error('Search error:', error)
+        devError('Search error:', error)
         setResults([])
       } finally {
         setIsSearching(false)

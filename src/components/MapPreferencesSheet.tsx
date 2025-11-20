@@ -15,6 +15,10 @@ const MapPreferencesSheet = ({ isOpen, onClose, onPreferencesChange }: MapPrefer
     mapPreferencesService.getPreferences()
   )
 
+  // Example coordinates for preview (Norwegian location)
+  const exampleLon = 8.728039696259001
+  const exampleLat = 61.50355374677453
+
   // Load preferences when sheet opens
   useEffect(() => {
     if (isOpen) {
@@ -43,7 +47,7 @@ const MapPreferencesSheet = ({ isOpen, onClose, onPreferencesChange }: MapPrefer
     <Sheet
       isOpen={isOpen}
       onClose={onClose}
-      peekHeight={30}
+      peekHeight={40}
       halfHeight={70}
       initialHeight="half"
     >
@@ -165,24 +169,28 @@ const MapPreferencesSheet = ({ isOpen, onClose, onPreferencesChange }: MapPrefer
             <div className="preference-section">
               <h3 className="preference-section-title">Koordinatformat</h3>
               <div className="coordinate-format-list">
-                {(['DD', 'DMS', 'DDM', 'UTM', 'MGRS'] as CoordinateFormat[]).map((format) => (
-                  <button
-                    key={format}
-                    className={`coordinate-format-option ${preferences.coordinateFormat === format ? 'active' : ''}`}
-                    onClick={() => {
-                      const newPreferences = {
-                        ...preferences,
-                        coordinateFormat: format
-                      }
-                      setPreferences(newPreferences)
-                      mapPreferencesService.savePreferences(newPreferences)
-                      onPreferencesChange(newPreferences)
-                    }}
-                  >
-                    <div className="format-name">{coordinateService.getFormatName(format)}</div>
-                    <div className="format-description">{coordinateService.getFormatDescription(format)}</div>
-                  </button>
-                ))}
+                {(['DD', 'DMS', 'DDM', 'UTM', 'MGRS'] as CoordinateFormat[]).map((format) => {
+                  const formatted = coordinateService.format(exampleLon, exampleLat, format)
+                  return (
+                    <button
+                      key={format}
+                      className={`coordinate-format-option ${preferences.coordinateFormat === format ? 'active' : ''}`}
+                      onClick={() => {
+                        const newPreferences = {
+                          ...preferences,
+                          coordinateFormat: format
+                        }
+                        setPreferences(newPreferences)
+                        mapPreferencesService.savePreferences(newPreferences)
+                        onPreferencesChange(newPreferences)
+                      }}
+                    >
+                      <div className="format-name">{coordinateService.getFormatName(format)}</div>
+                      <div className="format-description">{coordinateService.getFormatDescription(format)}</div>
+                      <div className="format-example">{formatted.display}</div>
+                    </button>
+                  )
+                })}
               </div>
             </div>
           </div>

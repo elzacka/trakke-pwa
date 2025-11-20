@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import weatherService, { type WeatherForecast } from '../services/weatherService'
+import { devError } from '../constants'
 import '../styles/WeatherWidget.css'
 
 interface WeatherWidgetProps {
@@ -24,7 +25,7 @@ const WeatherWidget = ({ lat, lon, onExpand }: WeatherWidgetProps) => {
         const data = await weatherService.getForecast(lat, lon)
         setForecast(data)
       } catch (err) {
-        console.error('[WeatherWidget] Failed to load weather:', err)
+        devError('[WeatherWidget] Failed to load weather:', err)
         setError(err instanceof Error ? err.message : 'Kunne ikke laste værdata')
       } finally {
         setLoading(false)

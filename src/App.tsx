@@ -1,6 +1,7 @@
 import { useEffect, useState, Suspense, lazy } from 'react'
 import ErrorBoundary from './components/ErrorBoundary'
 import { dbService } from './services/dbService'
+import { devError } from './constants'
 import './styles/App.css'
 
 // Lazy load Map component for better initial load performance
@@ -14,7 +15,7 @@ function App() {
   useEffect(() => {
     // Initialize IndexedDB on app load
     dbService.init().catch((error) => {
-      console.error('Failed to initialize database:', error)
+      devError('Failed to initialize database:', error)
     })
   }, [])
 

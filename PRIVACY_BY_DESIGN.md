@@ -106,6 +106,7 @@ const dbService = {
 | `ogc.dsb.no` | WFS Service | DSB | Norway 🇳🇴 | Public shelter (Tilfluktsrom) locations | ✅ | Direktoratet for samfunnssikkerhet og beredskap, Norwegian government |
 | `overpass-api.de` | Overpass API | FOSSGIS e.V. | Germany 🇩🇪 | POI data (caves, towers, war memorials, wilderness shelters) from OpenStreetMap | ✅ | German non-profit, EU-based, public OSM data, no tracking |
 | `api.met.no` | Locationforecast 2.0 | MET Norway | Norway 🇳🇴 | Weather forecasts | ⚠️ | Norwegian Meteorological Institute, **logs user IP addresses** in Oslo datacenter. CC BY 4.0 license. Direct API calls (no proxy). |
+| `badetemperaturer.yr.no` | Bathing Temp API | Yr (MET/NRK) | Norway 🇳🇴 | Bathing/swimming water temperatures | ⏸️ | Yr service by MET Norway/NRK. **Requires API key** (obtain via email to support@yr.no). Feature implemented but disabled until API key configured. |
 
 **Privacy guarantees for all approved services:**
 - No user tracking or analytics

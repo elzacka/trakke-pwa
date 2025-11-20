@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { LngLatBounds } from 'maplibre-gl'
 import { offlineMapService, type DownloadArea, type DownloadProgress } from '../services/offlineMapService'
+import { devError } from '../constants'
 import '../styles/DownloadControl.css'
 
 interface DownloadControlProps {
@@ -71,7 +72,7 @@ const DownloadControl = ({
         onCancelSelection()
       }, 1500)
     } catch (error) {
-      console.error('Download error:', error)
+      devError('Download error:', error)
       setIsDownloading(false)
       setProgress(null)
       alert('Nedlasting feilet')

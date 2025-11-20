@@ -4,7 +4,7 @@
 .search-sheet {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: var(--space-sm);
   flex-shrink: 0;
 }
 
@@ -21,7 +21,7 @@
   display: flex;
   align-items: center;
   gap: var(--sheet-section-gap);
-  padding: var(--list-item-padding-desktop);
+  padding: 8px 12px;
   background: var(--trk-surface-subtle);
   border-radius: var(--radius-md);
   border: 1px solid rgba(0, 0, 0, 0.06);
@@ -129,7 +129,7 @@
   display: flex;
   align-items: center;
   gap: var(--list-item-gap);
-  padding: var(--list-item-padding-desktop);
+  padding: 8px 12px;
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
@@ -185,7 +185,7 @@
 /* Loading and empty states */
 .search-sheet-loading,
 .search-sheet-empty {
-  padding: 24px 16px;
+  padding: 12px 16px;
   text-align: center;
 }
 
@@ -199,11 +199,11 @@
 /* Mobile optimizations */
 @media (max-width: 768px) {
   .search-sheet {
-    gap: var(--space-md);
+    gap: var(--space-sm);
   }
 
   .search-sheet-input-wrapper {
-    padding: var(--list-item-padding-mobile);
+    padding: 8px 12px;
   }
 
   .search-sheet-input {
@@ -220,11 +220,11 @@
   }
 
   .search-sheet-result-item {
-    padding: var(--list-item-padding-mobile);
+    padding: 8px 12px;
   }
 
   .search-sheet-loading,
   .search-sheet-empty {
-    padding: var(--space-lg);
+    padding: 12px 16px;
   }
 }

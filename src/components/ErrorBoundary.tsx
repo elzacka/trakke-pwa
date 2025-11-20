@@ -1,4 +1,5 @@
 import { Component, ErrorInfo, ReactNode } from 'react'
+import { devError } from '../constants'
 import '../styles/ErrorBoundary.css'
 
 interface ErrorBoundaryProps {
@@ -41,7 +42,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log error details for debugging
-    console.error('ErrorBoundary caught an error:', error, errorInfo)
+    devError('ErrorBoundary caught an error:', error, errorInfo)
 
     this.setState({
       error,

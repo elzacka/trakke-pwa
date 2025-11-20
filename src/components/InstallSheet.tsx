@@ -28,8 +28,8 @@ const InstallSheet = ({ isOpen, onClose, onInstall, canInstall, platform }: Inst
     <Sheet
       isOpen={isOpen}
       onClose={onClose}
-      peekHeight={40}
-      halfHeight={60}
+      peekHeight={20}
+      halfHeight={40}
       initialHeight="peek"
     >
       <div className="install-sheet">

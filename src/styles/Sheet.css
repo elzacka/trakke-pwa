@@ -49,8 +49,23 @@
     border-radius: var(--sheet-border-radius);
     max-width: 600px;
     width: 90%;
-    max-height: 80vh;
-    min-height: 300px;
+    max-height: 60vh;  /* Default for most sheets */
+    min-height: 200px;
+  }
+
+  /* Compact sheets - simple forms and info displays */
+  .poi-details-sheet .sheet,
+  .waypoint-details-sheet .sheet,
+  .route-details-sheet .sheet,
+  .install-sheet .sheet {
+    max-height: 50vh;
+  }
+
+  /* Content-heavy sheets - long lists and nested sections */
+  .route-sheet .sheet,
+  .info-sheet .sheet,
+  .download-sheet .sheet {
+    max-height: 70vh;
   }
 
   .sheet.sheet-peek,
@@ -155,13 +170,13 @@
 
 /* Peek state: show small portion at top */
 .sheet-mobile.sheet-peek {
-  max-height: 40vh;
+  max-height: 20vh;
   transform: translateY(0);
 }
 
 /* Half state: show half screen */
 .sheet-mobile.sheet-half {
-  max-height: 60vh;
+  max-height: var(--half-height, 70vh);
   transform: translateY(0);
 }
 

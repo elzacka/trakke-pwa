@@ -307,8 +307,8 @@ const POIDetailsSheet = ({ isOpen, onClose, poi }: POIDetailsSheetProps) => {
     <Sheet
       isOpen={isOpen}
       onClose={onClose}
-      peekHeight={40}
-      halfHeight={70}
+      peekHeight={30}
+      halfHeight={50}
       initialHeight="half"
     >
       <div className="poi-details-sheet">

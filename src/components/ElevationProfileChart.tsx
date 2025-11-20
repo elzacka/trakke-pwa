@@ -13,6 +13,7 @@ import {
   Tooltip,
   ChartConfiguration
 } from 'chart.js'
+import { devLog, devError } from '../constants'
 
 // Register Chart.js components once globally (tree-shaking friendly)
 Chart.register(CategoryScale, LinearScale, LineElement, PointElement, Filler, Tooltip)
@@ -233,7 +234,7 @@ const ElevationProfileChart = ({ elevations, distances, className }: ElevationPr
         const config = ChartConfigurationFactory.create(elevations, distances)
         chartManager.initialize(canvasRef.current, config)
       } catch (error) {
-        console.error('Failed to initialize elevation chart:', error)
+        devError('Failed to initialize elevation chart:', error)
         // Defensive: ensure cleanup on initialization failure
         chartManager.destroy()
       }

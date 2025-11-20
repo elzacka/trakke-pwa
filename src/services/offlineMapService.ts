@@ -2,6 +2,7 @@
 // Downloads and caches map tiles for offline use
 
 import { dbService } from './dbService'
+import { devLog, devError } from '../constants'
 
 export interface DownloadArea {
   id: string
@@ -117,7 +118,7 @@ class OfflineMapService {
             currentSize += result.value
           } else {
             failedTiles++
-            console.error(
+            devError(
               `Failed to download tile ${batch[index].z}/${batch[index].x}/${batch[index].y}`
             )
           }
@@ -174,7 +175,7 @@ class OfflineMapService {
 
       return arrayBuffer.byteLength
     } catch (error) {
-      console.error(`Error downloading tile ${z}/${x}/${y}:`, error)
+      devError(`Error downloading tile ${z}/${x}/${y}:`, error)
       return null
     }
   }
@@ -193,7 +194,7 @@ class OfflineMapService {
   async deleteArea(areaId: string): Promise<void> {
     // Delete area metadata from IndexedDB
     await dbService.deleteDownloadedArea(areaId)
-    console.log(`Deleted area ${areaId} metadata`)
+    devLog(`Deleted area ${areaId} metadata`)
 
     // TODO: Optionally delete associated tiles from cache
     // This would require tracking which tiles belong to which area

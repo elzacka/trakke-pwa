@@ -2,6 +2,7 @@
 // Stores user preferences for map display (scale bar, compass, rotation, etc.)
 
 import type { CoordinateFormat } from './coordinateService'
+import { devLog, devError } from '../constants'
 
 export interface MapPreferences {
   showScaleBar: boolean
@@ -38,7 +39,7 @@ class MapPreferencesService {
         return { ...DEFAULT_PREFERENCES, ...parsed }
       }
     } catch (error) {
-      console.error('Failed to load map preferences:', error)
+      devError('Failed to load map preferences:', error)
     }
     return { ...DEFAULT_PREFERENCES }
   }
@@ -49,9 +50,9 @@ class MapPreferencesService {
   savePreferences(preferences: MapPreferences): void {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences))
-      console.log('Map preferences saved')
+      devLog('Map preferences saved')
     } catch (error) {
-      console.error('Failed to save map preferences:', error)
+      devError('Failed to save map preferences:', error)
     }
   }
 

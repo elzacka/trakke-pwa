@@ -1,8 +1,10 @@
 // IndexedDB service for Tråkke PWA
 // Manages offline data storage for user preferences and cached data
 
+import { devLog, devError } from '../constants'
+
 const DB_NAME = 'trakke-db'
-const DB_VERSION = 4
+const DB_VERSION = 5
 const STORE_NAME = 'userData'
 const TILES_STORE = 'offlineTiles'
 const AREAS_STORE = 'downloadedAreas'
@@ -11,6 +13,7 @@ const WAYPOINTS_STORE = 'waypoints'
 const PROJECTS_STORE = 'projects'
 const ELEVATION_STORE = 'elevationProfiles'
 const WEATHER_STORE = 'weatherCache'
+const BATHING_TEMP_STORE = 'bathingTempCache'
 
 class DatabaseService {
   private db: IDBDatabase | null = null
@@ -27,7 +30,7 @@ class DatabaseService {
 
       request.onsuccess = () => {
         this.db = request.result
-        console.log('IndexedDB initialized successfully')
+        devLog('IndexedDB initialized successfully')
         resolve(this.db)
       }
 
@@ -45,7 +48,7 @@ class DatabaseService {
           store.createIndex('type', 'type', { unique: false })
           store.createIndex('timestamp', 'timestamp', { unique: false })
 
-          console.log('Object store created:', STORE_NAME)
+          devLog('Object store created:', STORE_NAME)
         }
 
         // Create offline tiles store (v2)
@@ -56,7 +59,7 @@ class DatabaseService {
 
           tilesStore.createIndex('timestamp', 'timestamp', { unique: false })
 
-          console.log('Object store created:', TILES_STORE)
+          devLog('Object store created:', TILES_STORE)
         }
 
         // Create downloaded areas store (v2)
@@ -67,7 +70,7 @@ class DatabaseService {
 
           areasStore.createIndex('downloadedAt', 'downloadedAt', { unique: false })
 
-          console.log('Object store created:', AREAS_STORE)
+          devLog('Object store created:', AREAS_STORE)
         }
 
         // Create routes store (v3)
@@ -80,7 +83,7 @@ class DatabaseService {
           routesStore.createIndex('updatedAt', 'updatedAt', { unique: false })
           routesStore.createIndex('completedAt', 'completedAt', { unique: false })
 
-          console.log('Object store created:', ROUTES_STORE)
+          devLog('Object store created:', ROUTES_STORE)
         }
 
         // Create waypoints store (v3)
@@ -92,7 +95,7 @@ class DatabaseService {
           waypointsStore.createIndex('createdAt', 'createdAt', { unique: false })
           waypointsStore.createIndex('updatedAt', 'updatedAt', { unique: false })
 
-          console.log('Object store created:', WAYPOINTS_STORE)
+          devLog('Object store created:', WAYPOINTS_STORE)
         }
 
         // Create projects store (v3)
@@ -104,7 +107,7 @@ class DatabaseService {
           projectsStore.createIndex('createdAt', 'createdAt', { unique: false })
           projectsStore.createIndex('updatedAt', 'updatedAt', { unique: false })
 
-          console.log('Object store created:', PROJECTS_STORE)
+          devLog('Object store created:', PROJECTS_STORE)
         }
 
         // Create elevation profiles store (v4)
@@ -115,7 +118,7 @@ class DatabaseService {
 
           elevationStore.createIndex('fetchedAt', 'fetchedAt', { unique: false })
 
-          console.log('Object store created:', ELEVATION_STORE)
+          devLog('Object store created:', ELEVATION_STORE)
         }
 
         // Create weather cache store (v4)
@@ -127,7 +130,18 @@ class DatabaseService {
           weatherStore.createIndex('expiresAt', 'expiresAt', { unique: false })
           weatherStore.createIndex('location', ['lat', 'lon'], { unique: false })
 
-          console.log('Object store created:', WEATHER_STORE)
+          devLog('Object store created:', WEATHER_STORE)
+        }
+
+        // Create bathing temperature cache store (v5)
+        if (oldVersion < 5 && !db.objectStoreNames.contains(BATHING_TEMP_STORE)) {
+          const bathingTempStore = db.createObjectStore(BATHING_TEMP_STORE, {
+            keyPath: 'id'
+          })
+
+          bathingTempStore.createIndex('expiresAt', 'expiresAt', { unique: false })
+
+          devLog('Object store created:', BATHING_TEMP_STORE)
         }
       }
     })
@@ -188,7 +202,7 @@ class DatabaseService {
       const request = store.clear()
 
       request.onsuccess = () => {
-        console.log('Database cleared')
+        devLog('Database cleared')
         resolve()
       }
 

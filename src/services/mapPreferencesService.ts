@@ -2,6 +2,7 @@
 // Stores user preferences for map display (scale bar, compass, rotation, etc.)
 
 import type { CoordinateFormat } from './coordinateService'
+import type { BaseLayerType } from '../constants'
 import { devLog, devError } from '../constants'
 
 export interface MapPreferences {
@@ -12,6 +13,7 @@ export interface MapPreferences {
   offlineOnly: boolean
   coordinateFormat: CoordinateFormat
   showWeatherWidget: boolean
+  baseLayer: BaseLayerType
 }
 
 const DEFAULT_PREFERENCES: MapPreferences = {
@@ -21,7 +23,8 @@ const DEFAULT_PREFERENCES: MapPreferences = {
   enlargePointer: false,
   offlineOnly: false,
   coordinateFormat: 'DD',
-  showWeatherWidget: false
+  showWeatherWidget: false,
+  baseLayer: 'topo'
 }
 
 const STORAGE_KEY = 'trakke_map_preferences'

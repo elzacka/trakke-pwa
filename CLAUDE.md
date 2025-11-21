@@ -250,7 +250,14 @@ isSelectingArea: boolean     // Two clicks to select download area
 
 ### Map Layers & Sources
 
-**Base layer**: Kartverket WMTS raster tiles
+**Base layers**: Kartverket WMTS raster tiles (user-selectable)
+- **Topographic** (`topo`): Full color topographic map (default)
+- **Grayscale** (`grayscale`): Monochrome topographic map (`topograatone`)
+- Switching managed via MapPreferencesSheet (Settings)
+- Preference stored in localStorage
+- Map initializes both sources, toggles visibility for instant switching
+
+**Satellite imagery investigation (2025-01)**: Kartverket WMTS service does not currently provide satellite/orthophoto layers. Request sent to Kartverket for information about WMTS satellite availability. Norge i bilder WMS service (`https://wms.geonorge.no/skwms1/wms.nib`) exists but is not compatible with MapLibre GL JS tile-based architecture or offline caching. **Awaiting Kartverket response** before implementing satellite layer.
 
 **Dynamic GeoJSON layers** (added/removed programmatically):
 - `drawing-route` - Line being drawn (brand green, 4px wide)

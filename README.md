@@ -5,7 +5,10 @@ A Progressive Web Application for Norwegian outdoor navigation with offline capa
 ## Current Features
 
 **Interactive Topographic Map**
-- Kartverket WMTS topographic tiles (Norway)
+- Kartverket WMTS tiles with dual base layer support:
+  - **Topographic** (full color) - default
+  - **Grayscale** (monochrome topographic)
+- User-selectable via Settings (MapPreferencesSheet)
 - Responsive zoom and pan controls
 - Pitch control (0° default, tiltable for 3D view)
 - Scale indicator and compass
@@ -26,6 +29,7 @@ A Progressive Web Application for Norwegian outdoor navigation with offline capa
 
 **Offline Map Downloads**
 - Select custom areas for offline use
+- Base layer selection (topographic or grayscale)
 - Configurable zoom level range
 - Download progress tracking
 - Manage downloaded areas
@@ -281,6 +285,7 @@ See [DEPENDENCIES.md](DEPENDENCIES.md) for complete dependency list with exact v
   - 7-day IndexedDB caching
 
 **In Development:**
+- **Satellite imagery layer** - Investigating Kartverket WMTS satellite/orthophoto availability (request sent to Kartverket)
 - Weather integration (MET Norway - privacy review complete, proxy deployment pending)
 - Route planning with trail snapping
 - Photo geotagging for waypoints

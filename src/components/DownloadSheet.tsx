@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import type { LngLatBounds } from 'maplibre-gl'
 import Sheet from './Sheet'
 import { offlineMapService, type DownloadArea, type DownloadProgress } from '../services/offlineMapService'
-import { devError } from '../constants'
+import { devError, type BaseLayerType } from '../constants'
 import '../styles/DownloadSheet.css'
 
 interface DownloadSheetProps {
@@ -34,6 +34,7 @@ const DownloadSheet = ({
   const [areaName, setAreaName] = useState('')
   const [minZoom, setMinZoom] = useState(Math.max(3, zoom - 2))
   const [maxZoom, setMaxZoom] = useState(Math.min(18, zoom + 2))
+  const [baseLayer, setBaseLayer] = useState<BaseLayerType>('topo')
   const [downloadedAreas, setDownloadedAreas] = useState<DownloadArea[]>([])
 
   // Track if component is mounted to prevent state updates after unmount
@@ -105,7 +106,8 @@ const DownloadSheet = ({
       zoomLevels: {
         min: minZoom,
         max: maxZoom
-      }
+      },
+      baseLayer
     }
 
     const tileCount = offlineMapService.calculateTileCount(area)
@@ -199,7 +201,8 @@ const DownloadSheet = ({
       zoomLevels: {
         min: minZoom,
         max: maxZoom
-      }
+      },
+      baseLayer
     }
 
     const tileCount = offlineMapService.calculateTileCount(area)
@@ -274,6 +277,26 @@ const DownloadSheet = ({
               </div>
 
               <div className="configure-section">
+                <label>Kartlag</label>
+                <div className="base-layer-selector">
+                  <button
+                    className={`base-layer-option ${baseLayer === 'topo' ? 'active' : ''}`}
+                    onClick={() => setBaseLayer('topo')}
+                  >
+                    <span className="material-symbols-outlined">terrain</span>
+                    <span>Topografisk</span>
+                  </button>
+                  <button
+                    className={`base-layer-option ${baseLayer === 'grayscale' ? 'active' : ''}`}
+                    onClick={() => setBaseLayer('grayscale')}
+                  >
+                    <span className="material-symbols-outlined">filter_b_and_w</span>
+                    <span>Gråtone</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="configure-section">
                 <label>Zoom-nivåer</label>
                 <div className="zoom-inputs">
                   <div className="zoom-input-group">
@@ -336,7 +359,7 @@ const DownloadSheet = ({
                         >
                           <span className="area-name">{area.name}</span>
                           <span className="area-details">
-                            {formatAreaSize(area.bounds)} · Zoom {area.zoomLevels.min}-{area.zoomLevels.max}
+                            {formatAreaSize(area.bounds)} · Zoom {area.zoomLevels.min}-{area.zoomLevels.max} · {area.baseLayer === 'grayscale' ? 'Gråtone' : 'Topografisk'}
                           </span>
                         </div>
                         <button

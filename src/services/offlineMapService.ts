@@ -2,7 +2,7 @@
 // Downloads and caches map tiles for offline use
 
 import { dbService } from './dbService'
-import { devLog, devError } from '../constants'
+import { MAP_CONFIG, devLog, devError, type BaseLayerType } from '../constants'
 
 export interface DownloadArea {
   id: string
@@ -17,6 +17,7 @@ export interface DownloadArea {
     min: number
     max: number
   }
+  baseLayer: BaseLayerType // Which layer(s) to download
   downloadedAt?: number
   tileCount?: number
 }
@@ -31,11 +32,18 @@ export interface DownloadProgress {
 }
 
 class OfflineMapService {
-  private readonly TILE_URL_TEMPLATE =
-    'https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png'
   private readonly TILE_SIZE_ESTIMATE = 15000 // ~15KB average per tile
   private readonly MAX_TILES = 20000 // Hard limit to prevent browser/device issues
   private readonly WARNING_THRESHOLD = 1000 // Warn user for downloads over this size
+
+  /**
+   * Get tile URL template for a specific base layer
+   */
+  private getTileUrlTemplate(baseLayer: BaseLayerType): string {
+    return baseLayer === 'grayscale'
+      ? MAP_CONFIG.TILE_URL_GRAYSCALE
+      : MAP_CONFIG.TILE_URL_TOPO
+  }
 
   /**
    * Calculate number of tiles needed for area
@@ -109,7 +117,7 @@ class OfflineMapService {
       for (let i = 0; i < tiles.length; i += batchSize) {
         const batch = tiles.slice(i, i + batchSize)
         const results = await Promise.allSettled(
-          batch.map((tile) => this.downloadTile(tile.z, tile.x, tile.y))
+          batch.map((tile) => this.downloadTile(tile.z, tile.x, tile.y, area.baseLayer))
         )
 
         results.forEach((result, index) => {
@@ -119,7 +127,7 @@ class OfflineMapService {
           } else {
             failedTiles++
             devError(
-              `Failed to download tile ${batch[index].z}/${batch[index].x}/${batch[index].y}`
+              `Failed to download tile ${area.baseLayer}/${batch[index].z}/${batch[index].x}/${batch[index].y}`
             )
           }
         })
@@ -152,9 +160,11 @@ class OfflineMapService {
   private async downloadTile(
     z: number,
     x: number,
-    y: number
+    y: number,
+    baseLayer: BaseLayerType
   ): Promise<number | null> {
-    const url = this.TILE_URL_TEMPLATE.replace('{z}', z.toString())
+    const urlTemplate = this.getTileUrlTemplate(baseLayer)
+    const url = urlTemplate.replace('{z}', z.toString())
       .replace('{x}', x.toString())
       .replace('{y}', y.toString())
 
@@ -165,8 +175,8 @@ class OfflineMapService {
       const blob = await response.blob()
       const arrayBuffer = await blob.arrayBuffer()
 
-      // Store in IndexedDB
-      const tileKey = `${z}/${x}/${y}`
+      // Store in IndexedDB with layer-specific key
+      const tileKey = `${baseLayer}/${z}/${x}/${y}`
       await dbService.saveData('tile', {
         key: tileKey,
         data: arrayBuffer,
@@ -175,7 +185,7 @@ class OfflineMapService {
 
       return arrayBuffer.byteLength
     } catch (error) {
-      devError(`Error downloading tile ${z}/${x}/${y}:`, error)
+      devError(`Error downloading tile ${baseLayer}/${z}/${x}/${y}:`, error)
       return null
     }
   }

@@ -10,12 +10,19 @@ export const MAP_CONFIG = {
   MAX_ZOOM: 18,
   MIN_ZOOM: 3,
 
-  // Kartverket tile URL
+  // Kartverket tile URLs
+  TILE_URL_TOPO: 'https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png',
+  TILE_URL_GRAYSCALE: 'https://cache.kartverket.no/v1/wmts/1.0.0/topograatone/default/webmercator/{z}/{y}/{x}.png',
+
+  // Legacy tile URL (deprecated - use TILE_URL_TOPO)
   TILE_URL: 'https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png',
 
   // Attribution
   ATTRIBUTION: '© <a href="https://www.kartverket.no/" target="_blank">Kartverket</a>',
 } as const
+
+// Base Layer Types
+export type BaseLayerType = 'topo' | 'grayscale'
 
 // UI Timing
 export const TIMING = {

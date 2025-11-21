@@ -104,6 +104,64 @@
   transform: translateX(20px);
 }
 
+/* Base Layer Selector */
+.preference-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--trk-border);
+}
+
+.preference-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--trk-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 12px 0;
+}
+
+.base-layer-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.base-layer-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 12px;
+  background: var(--trk-surface);
+  border: 2px solid var(--trk-border);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--trk-text);
+  cursor: pointer;
+  transition: var(--transition-base);
+}
+
+.base-layer-option:hover {
+  background: var(--trk-bg);
+  border-color: var(--trk-brand);
+}
+
+.base-layer-option.active {
+  background: var(--trk-brand-tint);
+  border-color: var(--trk-brand);
+  color: var(--trk-brand);
+}
+
+.base-layer-option:active {
+  transform: translateY(1px);
+}
+
+.base-layer-option .material-symbols-outlined {
+  font-size: 24px;
+}
+
 /* Coordinate Format Selector */
 .coordinate-format-list {
   display: flex;

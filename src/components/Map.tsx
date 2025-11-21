@@ -22,7 +22,7 @@ import MeasurementTools, { type MeasurementMode } from './MeasurementTools'
 import { useAutoHide } from '../hooks/useAutoHide'
 import { useViewportPOIs } from '../hooks/useViewportPOIs'
 import { useInstallPrompt } from '../hooks/useInstallPrompt'
-import { MAP_CONFIG, devLog, devError } from '../constants'
+import { MAP_CONFIG, devLog, devError, type BaseLayerType } from '../constants'
 import { VALIDATION, UI_DELAYS, GESTURES } from '../config/timings'
 import { validateName } from '../utils/validation'
 import type { SearchResult } from '../services/searchService'
@@ -116,6 +116,12 @@ const Map = ({ zenMode }: MapProps) => {
     mapPreferencesService.getPreferences()
   )
 
+  // Base layer state (derived from preferences)
+  const [baseLayer, setBaseLayer] = useState<BaseLayerType>(() => {
+    const prefs = mapPreferencesService.getPreferences()
+    return prefs.baseLayer
+  })
+
   // Map control refs (for scale bar, compass)
   const scaleControl = useRef<maplibregl.ScaleControl | null>(null)
   const compassControl = useRef<maplibregl.NavigationControl | null>(null)
@@ -190,7 +196,7 @@ const Map = ({ zenMode }: MapProps) => {
   useEffect(() => {
     if (map.current || !mapContainer.current) return
 
-    // Initialize map with Kartverket WMTS topographic layer
+    // Initialize map with dual base layers (topo and grayscale)
     map.current = new maplibregl.Map({
       container: mapContainer.current,
       style: {
@@ -198,18 +204,37 @@ const Map = ({ zenMode }: MapProps) => {
         sources: {
           'kartverket-topo': {
             type: 'raster',
-            tiles: [
-              'https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png'
-            ],
+            tiles: [MAP_CONFIG.TILE_URL_TOPO],
             tileSize: 256,
-            attribution: zenMode ? '' : '© Kartverket'
+            attribution: zenMode ? '' : MAP_CONFIG.ATTRIBUTION
+          },
+          'kartverket-grayscale': {
+            type: 'raster',
+            tiles: [MAP_CONFIG.TILE_URL_GRAYSCALE],
+            tileSize: 256,
+            attribution: zenMode ? '' : MAP_CONFIG.ATTRIBUTION
           }
         },
         layers: [
+          // Grayscale layer (bottom - hidden by default)
+          {
+            id: 'kartverket-grayscale-layer',
+            type: 'raster',
+            source: 'kartverket-grayscale',
+            layout: {
+              visibility: baseLayer === 'grayscale' ? 'visible' : 'none'
+            },
+            minzoom: 0,
+            maxzoom: 22
+          },
+          // Topo layer (top - visible by default)
           {
             id: 'kartverket-topo-layer',
             type: 'raster',
             source: 'kartverket-topo',
+            layout: {
+              visibility: baseLayer === 'topo' ? 'visible' : 'none'
+            },
             minzoom: 0,
             maxzoom: 22
           }
@@ -485,6 +510,25 @@ const Map = ({ zenMode }: MapProps) => {
       }
     }
   }, [waypointDetailsSheetOpen])
+
+  // Effect: Switch base layer when preference changes
+  useEffect(() => {
+    if (!map.current) return
+
+    try {
+      if (baseLayer === 'grayscale') {
+        map.current.setLayoutProperty('kartverket-topo-layer', 'visibility', 'none')
+        map.current.setLayoutProperty('kartverket-grayscale-layer', 'visibility', 'visible')
+        devLog('Switched to grayscale base layer')
+      } else {
+        map.current.setLayoutProperty('kartverket-grayscale-layer', 'visibility', 'none')
+        map.current.setLayoutProperty('kartverket-topo-layer', 'visibility', 'visible')
+        devLog('Switched to topographic base layer')
+      }
+    } catch (error) {
+      devError('Failed to switch base layer:', error)
+    }
+  }, [baseLayer])
 
   // Keep FAB visible when any sheet is open
   useEffect(() => {
@@ -2547,7 +2591,10 @@ const Map = ({ zenMode }: MapProps) => {
           <MapPreferencesSheet
             isOpen={mapPreferencesSheetOpen}
             onClose={() => setMapPreferencesSheetOpen(false)}
-            onPreferencesChange={(newPreferences) => setMapPreferences(newPreferences)}
+            onPreferencesChange={(newPreferences) => {
+              setMapPreferences(newPreferences)
+              setBaseLayer(newPreferences.baseLayer)
+            }}
           />
 
           <WeatherSheet

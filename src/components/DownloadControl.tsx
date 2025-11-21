@@ -41,7 +41,8 @@ const DownloadControl = ({
       zoomLevels: {
         min: Math.max(3, zoom - 2),
         max: Math.min(18, zoom + 2)
-      }
+      },
+      baseLayer: 'topo' // Default to topographic layer
     }
 
     const tileCount = offlineMapService.calculateTileCount(area)
@@ -102,7 +103,8 @@ const DownloadControl = ({
       zoomLevels: {
         min: Math.max(3, zoom - 2),
         max: Math.min(18, zoom + 2)
-      }
+      },
+      baseLayer: 'topo' // Default to topographic layer
     }
 
     const tileCount = offlineMapService.calculateTileCount(area)

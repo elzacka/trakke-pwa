@@ -11,21 +11,21 @@
 .map-preferences-content {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-lg) 24px 24px;
+  padding: 0;
 }
 
 .preferences-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: 8px;
 }
 
 .preference-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: var(--space-lg);
-  padding: var(--space-lg);
+  gap: 12px;
+  padding: 12px 14px;
   background: var(--trk-surface);
   border: 1px solid var(--trk-border);
   border-radius: var(--radius-md);
@@ -41,19 +41,19 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
+  gap: 4px;
 }
 
 .preference-label {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--trk-text);
 }
 
 .preference-description {
-  font-size: 14px;
+  font-size: 12px;
   color: var(--trk-text-muted);
-  line-height: 1.4;
+  line-height: 1.3;
 }
 
 /* Toggle Switch */
@@ -104,33 +104,19 @@
   transform: translateX(20px);
 }
 
-/* Preference Section (for grouped settings) */
-.preference-section {
-  margin-top: var(--space-xl);
-  padding-top: var(--space-xl);
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.preference-section-title {
-  margin: 0 0 var(--space-lg) 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--trk-text);
-}
-
 /* Coordinate Format Selector */
 .coordinate-format-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: 8px;
 }
 
 .coordinate-format-option {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--space-xs);
-  padding: var(--space-md) var(--space-lg);
+  gap: 4px;
+  padding: 10px 12px;
   background: var(--trk-surface);
   border: 2px solid var(--trk-border);
   border-radius: var(--radius-md);
@@ -154,29 +140,29 @@
 }
 
 .format-name {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--trk-text);
 }
 
 .format-description {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--trk-text-muted);
-  line-height: 1.4;
+  line-height: 1.3;
 }
 
 .format-example {
-  font-size: 12px;
+  font-size: 11px;
   font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
   color: var(--trk-text-soft);
-  line-height: 1.4;
+  line-height: 1.3;
   margin-top: 2px;
 }
 
 /* Preferences Actions */
 .preferences-actions {
-  margin-top: var(--space-xl);
-  padding-top: var(--space-xl);
+  margin-top: 20px;
+  padding-top: 16px;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 
@@ -185,12 +171,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-sm);
-  padding: 14px 20px;
+  gap: 8px;
+  padding: 12px 16px;
   background: var(--trk-surface);
   border: 2px solid var(--trk-border);
   border-radius: var(--radius-md);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--trk-text-muted);
   cursor: pointer;
@@ -214,27 +200,27 @@
 
 /* Responsive adjustments */
 @media (max-width: 480px) {
-  .map-preferences-header {
-    padding: var(--space-lg) 20px;
-  }
-
-  .map-preferences-header h2 {
-    font-size: 16px;
-  }
-
-  .map-preferences-content {
-    padding: var(--space-md) 20px 20px;
-  }
-
   .preference-item {
-    padding: 14px;
+    padding: 10px 12px;
   }
 
   .preference-label {
-    font-size: 15px;
+    font-size: 13px;
   }
 
   .preference-description {
+    font-size: 11px;
+  }
+
+  .format-name {
     font-size: 13px;
+  }
+
+  .format-description {
+    font-size: 11px;
+  }
+
+  .format-example {
+    font-size: 10px;
   }
 }

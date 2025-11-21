@@ -118,7 +118,18 @@
   margin: 12px auto 16px;
   cursor: grab;
   flex-shrink: 0;
-  touch-action: none;
+  /* Add larger touch area without changing visual size */
+  position: relative;
+}
+
+.sheet-handle::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  right: -20px;
+  bottom: -20px;
+  /* Invisible larger touch target */
 }
 
 .sheet-handle:active {
@@ -154,63 +165,73 @@
   background: var(--trk-text-soft);
 }
 
-/* Mobile: Position sheets at top */
+/* Mobile: Standard bottom sheet positioning */
 .sheet-mobile {
   position: fixed;
-  top: 0;
+  bottom: 0;
   left: 0;
   right: 0;
-  bottom: auto;
-  border-radius: 0 0 16px 16px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
-  max-height: calc(100svh - 96px); /* Use small viewport height, leave space for FAB */
+  top: auto;
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+  max-height: calc(100svh - env(safe-area-inset-top));
   height: auto;
-  transform-origin: top center;
+  transform-origin: bottom center;
+  will-change: transform;
 }
 
-/* Peek state: show small portion at top */
+/* Peek state: show small portion at bottom */
 .sheet-mobile.sheet-peek {
-  max-height: 20vh;
+  height: var(--peek-height, 20vh);
+  max-height: var(--peek-height, 20vh);
   transform: translateY(0);
 }
 
 /* Half state: show half screen */
 .sheet-mobile.sheet-half {
-  max-height: var(--half-height, 70vh);
+  height: var(--half-height, 50vh);
+  max-height: var(--half-height, 50vh);
   transform: translateY(0);
 }
 
-/* Full state: almost full screen, leave room for FAB */
+/* Full state: almost full screen */
 .sheet-mobile.sheet-full {
-  max-height: calc(100svh - 96px);
+  height: calc(100svh - env(safe-area-inset-top) - 40px);
+  max-height: calc(100svh - env(safe-area-inset-top) - 40px);
   transform: translateY(0);
-  border-radius: 0 0 16px 16px;
+  border-radius: 16px 16px 0 0;
 }
 
-/* Closed state: hide above screen */
+/* Closed state: hide below screen */
 .sheet-mobile.sheet-closed {
-  transform: translateY(-100%);
+  transform: translateY(100%);
   pointer-events: none;
 }
 
 /* When keyboard is visible, constrain height to visible viewport */
 .sheet-mobile.keyboard-visible {
-  max-height: calc(var(--viewport-height, 100vh) - 20px);
-  top: 0;
+  max-height: var(--viewport-height, 100vh);
+  bottom: 0;
 }
 
 .sheet-mobile.keyboard-visible.sheet-peek {
-  max-height: min(40vh, calc(var(--viewport-height, 100vh) - 20px));
+  height: min(var(--peek-height, 20vh), var(--viewport-height, 100vh));
+  max-height: min(var(--peek-height, 20vh), var(--viewport-height, 100vh));
 }
 
-.sheet-mobile.keyboard-visible.sheet-half,
+.sheet-mobile.keyboard-visible.sheet-half {
+  height: min(var(--half-height, 50vh), var(--viewport-height, 100vh));
+  max-height: min(var(--half-height, 50vh), var(--viewport-height, 100vh));
+}
+
 .sheet-mobile.keyboard-visible.sheet-full {
-  max-height: calc(var(--viewport-height, 100vh) - 20px);
+  height: var(--viewport-height, 100vh);
+  max-height: var(--viewport-height, 100vh);
 }
 
-/* Handle at top for mobile (reversed position) */
+/* Handle at top for mobile bottom sheets */
 .sheet-mobile .sheet-handle {
-  margin: 16px auto 12px;
+  margin: 12px auto 16px;
 }
 
 .sheet-mobile .sheet-content {

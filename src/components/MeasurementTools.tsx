@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import Sheet from './Sheet'
 import { measurementService } from '../services/measurementService'
 import '../styles/MeasurementTools.css'
 
@@ -58,27 +59,17 @@ const MeasurementTools = ({
     }
   }
 
-  if (!isActive) return null
-
   return (
-    <div className="measurement-tools">
-      <div className="measurement-header">
-        <div className="measurement-title">
-          <span className="material-symbols-outlined">
-            {mode === 'distance' ? 'straighten' : 'square_foot'}
-          </span>
-          <h3>{mode === 'distance' ? 'Måle avstand' : 'Måle areal'}</h3>
-        </div>
-        <button
-          className="measurement-close"
-          onClick={onClose}
-          aria-label="Lukk"
-        >
-          <span className="material-symbols-outlined">close</span>
-        </button>
-      </div>
-
-      <div className="measurement-content">
+    <Sheet
+      isOpen={isActive}
+      onClose={onClose}
+      peekHeight={40}
+      halfHeight={50}
+      initialHeight="peek"
+      showBackdrop={false}
+    >
+      <div className="measurement-tools">
+        <div className="measurement-content">
         {!mode ? (
           <div className="measurement-mode-selector">
             <p className="measurement-instruction">Velg måletype:</p>
@@ -155,8 +146,9 @@ const MeasurementTools = ({
             </div>
           </>
         )}
+        </div>
       </div>
-    </div>
+    </Sheet>
   )
 }
 

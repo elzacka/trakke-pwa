@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import Sheet from './Sheet'
 import { searchService, SearchResult } from '../services/searchService'
 import { UI_DELAYS } from '../config/timings'
@@ -121,12 +121,12 @@ const SearchSheet = ({ isOpen, onClose, onResultSelect }: SearchSheetProps) => {
     }
   }, [selectedIndex])
 
-  const handleResultClick = (result: SearchResult) => {
+  const handleResultClick = useCallback((result: SearchResult) => {
     onResultSelect(result)
     setQuery('')
     setResults([])
     onClose()
-  }
+  }, [onResultSelect, onClose])
 
   const handleClose = () => {
     setQuery('')
@@ -140,31 +140,40 @@ const SearchSheet = ({ isOpen, onClose, onResultSelect }: SearchSheetProps) => {
       isOpen={isOpen}
       onClose={handleClose}
       peekHeight={20}
-      halfHeight={20}
-      initialHeight="peek"
+      halfHeight={40}
+      initialHeight="half"
     >
       <div className="search-sheet">
         <div className="search-sheet-input-container">
-          <div className="search-sheet-input-wrapper">
-            <span className="material-symbols-outlined search-sheet-icon">search</span>
-            <input
-              ref={inputRef}
-              type="text"
-              className="search-sheet-input"
-              placeholder={includeAddresses ? 'Søk steder, adresser' : 'Søk steder'}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              aria-label="Søkefelt"
-            />
-            <button
-              className={`search-sheet-filter ${includeAddresses ? 'active' : ''}`}
-              onClick={() => setIncludeAddresses(!includeAddresses)}
-              title={includeAddresses ? 'Kun steder' : 'Inkluder adresser'}
-              aria-label={includeAddresses ? 'Kun steder' : 'Inkluder adresser'}
-            >
-              <span className="material-symbols-outlined">home</span>
-            </button>
-          </div>
+          <form onSubmit={(e) => e.preventDefault()}>
+            <div className="search-sheet-input-wrapper">
+              <span className="material-symbols-outlined search-sheet-icon">search</span>
+              <input
+                ref={inputRef}
+                type="search"
+                className="search-sheet-input"
+                placeholder={includeAddresses ? 'Søk steder, adresser' : 'Søk steder'}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                aria-label="Søkefelt"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck="false"
+                inputMode="search"
+                enterKeyHint="search"
+              />
+              <button
+                type="button"
+                className={`search-sheet-filter ${includeAddresses ? 'active' : ''}`}
+                onClick={() => setIncludeAddresses(!includeAddresses)}
+                title={includeAddresses ? 'Kun steder' : 'Inkluder adresser'}
+                aria-label={includeAddresses ? 'Kun steder' : 'Inkluder adresser'}
+              >
+                <span className="material-symbols-outlined">home</span>
+              </button>
+            </div>
+          </form>
           <div className="search-sheet-hint">
             <span className="hint-text">
               Trykk <span className="material-symbols-outlined hint-home-icon">home</span> for å inkludere adresser

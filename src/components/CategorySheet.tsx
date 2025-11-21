@@ -19,11 +19,6 @@ interface CategoryGroup {
 
 const CATEGORY_GROUPS: CategoryGroup[] = [
   {
-    id: 'emergency',
-    name: 'Service',
-    categories: ['shelters']
-  },
-  {
     id: 'outdoor',
     name: 'Friluftsliv',
     categories: ['wilderness_shelters', 'caves', 'observation_towers']
@@ -32,6 +27,11 @@ const CATEGORY_GROUPS: CategoryGroup[] = [
     id: 'culture',
     name: 'Kultur',
     categories: ['war_memorials']
+  },
+  {
+    id: 'emergency',
+    name: 'Service',
+    categories: ['shelters']
   }
   // Future categories:
   // { id: 'infrastructure', name: 'Infrastruktur', categories: ['parking', 'facilities'] }
@@ -78,9 +78,9 @@ const CategorySheet = ({ isOpen, onClose, onCategorySelect }: CategorySheetProps
     <Sheet
       isOpen={isOpen}
       onClose={onClose}
-      peekHeight={40}
-      halfHeight={70}
-      initialHeight="half"
+      peekHeight={30}
+      halfHeight={45}
+      initialHeight="peek"
     >
       <div className="category-sheet">
         <div className="category-sheet-content">

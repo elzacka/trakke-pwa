@@ -11,14 +11,14 @@
 .info-sheet-content {
   flex: 1;
   overflow-y: auto;
-  padding: var(--sheet-inner-padding);
+  padding: 0;
 }
 
 /* Menu Container */
 .info-menu {
   display: flex;
   flex-direction: column;
-  gap: var(--sheet-section-gap);
+  gap: 6px;
 }
 
 /* Section Group (Accordion) */
@@ -34,7 +34,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--section-header-padding-desktop);
+  padding: 12px 16px;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -48,7 +48,7 @@
 }
 
 .info-section-title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--trk-text);
   flex: 1;
@@ -67,8 +67,8 @@
 .info-section-content {
   display: flex;
   flex-direction: column;
-  padding: var(--nested-content-padding);
-  gap: var(--sheet-item-gap);
+  padding: 8px 12px 12px 12px;
+  gap: 8px;
 }
 
 .info-section {
@@ -78,18 +78,18 @@
 }
 
 .info-section h3 {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--trk-text);
   margin: 0;
 }
 
 .info-section h4 {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--trk-text);
-  margin: 16px 0 8px 0;
-  padding-top: 8px;
+  margin: 12px 0 6px 0;
+  padding-top: 6px;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 
@@ -100,16 +100,16 @@
 }
 
 .info-section p {
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: 12px;
+  line-height: 1.4;
   color: var(--trk-text-muted);
   margin: 0;
 }
 
 .info-detail {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--trk-text-soft);
-  line-height: 1.4;
+  line-height: 1.3;
 }
 
 .info-section a {
@@ -123,47 +123,52 @@
 }
 
 .info-list {
-  margin: 8px 0;
-  padding-left: 20px;
-  font-size: 13px;
-  line-height: 1.5;
+  margin: 6px 0;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.4;
   color: var(--trk-text-muted);
 }
 
 .info-list li {
-  margin: 4px 0;
+  margin: 3px 0;
 }
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
   .info-section-header {
-    padding: var(--section-header-padding-mobile);
+    padding: 10px 12px;
   }
 
   .info-section-title {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .info-section-content {
-    padding: var(--nested-content-padding);
-    gap: 14px;
+    padding: 8px 12px 12px 12px;
+    gap: 8px;
   }
 
   .info-section h3 {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .info-section h4 {
-    font-size: 12px;
-    margin: 12px 0 6px 0;
-    padding-top: 6px;
+    font-size: 11px;
+    margin: 10px 0 5px 0;
+    padding-top: 5px;
   }
 
   .info-section p {
-    font-size: 12px;
+    font-size: 11px;
   }
 
   .info-detail {
+    font-size: 10px;
+  }
+
+  .info-list {
     font-size: 11px;
+    padding-left: 16px;
   }
 }

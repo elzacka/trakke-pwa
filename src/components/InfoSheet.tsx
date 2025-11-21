@@ -31,7 +31,7 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
       isOpen={isOpen}
       onClose={onClose}
       peekHeight={40}
-      halfHeight={70}
+      halfHeight={50}
       initialHeight="half"
     >
       <div className="info-sheet">

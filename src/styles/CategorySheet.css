@@ -8,14 +8,14 @@
 .category-sheet-content {
   flex: 1;
   overflow-y: auto;
-  padding: var(--sheet-inner-padding);
+  padding: 0;
 }
 
 /* Category Menu Container */
 .category-menu {
   display: flex;
   flex-direction: column;
-  gap: var(--sheet-section-gap);
+  gap: 6px;
 }
 
 /* Section (Main Menu Item) */
@@ -31,7 +31,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--section-header-padding-desktop);
+  padding: 12px 16px;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -45,7 +45,7 @@
 }
 
 .category-section-title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--trk-text);
   flex: 1;
@@ -64,19 +64,19 @@
 .category-section-content {
   display: flex;
   flex-direction: column;
-  padding: var(--nested-content-padding);
-  gap: var(--sheet-item-gap);
+  padding: 8px 12px 12px 12px;
+  gap: 4px;
 }
 
 /* Category Option (Sub-menu Item) */
 .category-option {
   display: flex;
   align-items: center;
-  gap: var(--list-item-gap);
-  padding: var(--list-item-padding-desktop);
+  gap: 10px;
+  padding: 10px 12px;
   background: var(--trk-surface);
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   cursor: pointer;
   transition: background 0.15s ease;
   text-align: left;
@@ -111,15 +111,15 @@
 }
 
 .category-option-name {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--trk-text);
   margin-bottom: 0;
-  line-height: 20px;
+  line-height: 18px;
 }
 
 .category-option-count {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--trk-text-soft);
 }
 
@@ -134,15 +134,15 @@
 /* Mobile adjustments */
 @media (max-width: 768px) {
   .category-section-header {
-    padding: var(--section-header-padding-mobile);
+    padding: 10px 12px;
   }
 
   .category-section-title {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .category-option {
-    padding: var(--list-item-padding-mobile);
+    padding: 8px 10px;
   }
 
   .category-option-icon .material-symbols-outlined {
@@ -150,11 +150,12 @@
   }
 
   .category-option-name {
-    font-size: 14px;
+    font-size: 13px;
+    line-height: 16px;
   }
 
   .category-option-count {
-    font-size: 12px;
+    font-size: 11px;
   }
 
   .category-option-check {

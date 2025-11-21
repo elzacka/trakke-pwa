@@ -1236,17 +1236,19 @@ const Map = ({ zenMode }: MapProps) => {
   }
 
   // Update measurement layers on map
-  const updateMeasurementLayers = (points: Array<[number, number]>) => {
-    if (!map.current) return
+  const updateMeasurementLayers = (points: Array<[number, number]>, mode: MeasurementMode = measurementMode) => {
+    if (!map.current || !mode) return
 
-    const sourceId = measurementMode === 'distance' ? 'measurement-line' : 'measurement-polygon'
-    const layerId = measurementMode === 'distance' ? 'measurement-line-layer' : 'measurement-polygon-layer'
+    devLog('[Map] updateMeasurementLayers - mode:', mode, 'points:', points.length)
+
+    const sourceId = mode === 'distance' ? 'measurement-line' : 'measurement-polygon'
+    const layerId = mode === 'distance' ? 'measurement-line-layer' : 'measurement-polygon-layer'
     const pointsSourceId = 'measurement-points'
     const pointsLayerId = 'measurement-points-layer'
 
     // Clear old layers if mode changed
-    const otherSourceId = measurementMode === 'distance' ? 'measurement-polygon' : 'measurement-line'
-    const otherLayerId = measurementMode === 'distance' ? 'measurement-polygon-layer' : 'measurement-line-layer'
+    const otherSourceId = mode === 'distance' ? 'measurement-polygon' : 'measurement-line'
+    const otherLayerId = mode === 'distance' ? 'measurement-polygon-layer' : 'measurement-line-layer'
     if (map.current.getLayer(otherLayerId)) {
       map.current.removeLayer(otherLayerId)
     }
@@ -1255,8 +1257,8 @@ const Map = ({ zenMode }: MapProps) => {
     }
 
     // Update or create line/polygon layer
-    if (points.length >= (measurementMode === 'distance' ? 2 : 3)) {
-      const geometry = measurementMode === 'distance'
+    if (points.length >= (mode === 'distance' ? 2 : 3)) {
+      const geometry = mode === 'distance'
         ? { type: 'LineString' as const, coordinates: points }
         : { type: 'Polygon' as const, coordinates: [[...points, points[0]]] } // Close polygon
 
@@ -1277,7 +1279,7 @@ const Map = ({ zenMode }: MapProps) => {
           }
         })
 
-        if (measurementMode === 'distance') {
+        if (mode === 'distance') {
           map.current.addLayer({
             id: layerId,
             type: 'line',
@@ -1314,7 +1316,7 @@ const Map = ({ zenMode }: MapProps) => {
       if (map.current.getLayer(layerId)) {
         map.current.removeLayer(layerId)
       }
-      if (measurementMode === 'area' && map.current.getLayer(`${layerId}-outline`)) {
+      if (mode === 'area' && map.current.getLayer(`${layerId}-outline`)) {
         map.current.removeLayer(`${layerId}-outline`)
       }
       if (map.current.getSource(sourceId)) {
@@ -1440,9 +1442,10 @@ const Map = ({ zenMode }: MapProps) => {
     // Measurement mode
     if (measurementActive && measurementMode) {
       const newPoint: [number, number] = [e.lngLat.lng, e.lngLat.lat]
+      devLog('[Map] Measurement click - mode:', measurementMode, 'point:', newPoint)
       setMeasurementPoints(prevPoints => {
         const updatedPoints = [...prevPoints, newPoint]
-        updateMeasurementLayers(updatedPoints)
+        devLog('[Map] Updated measurement points:', updatedPoints)
         return updatedPoints
       })
       return

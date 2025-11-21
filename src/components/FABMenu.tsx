@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import '../styles/FABMenu.css'
 
 interface FABMenuProps {
@@ -38,13 +38,13 @@ const FABMenu = ({
 
   // Use external state if provided, otherwise use internal state
   const isOpen = menuOpen !== undefined ? menuOpen : internalIsOpen
-  const setIsOpen = (open: boolean) => {
+  const setIsOpen = useCallback((open: boolean) => {
     if (onMenuOpenChange) {
       onMenuOpenChange(open)
     } else {
       setInternalIsOpen(open)
     }
-  }
+  }, [onMenuOpenChange])
 
   const handlePrimaryClick = () => {
     // Toggle menu open/close
@@ -89,7 +89,7 @@ const FABMenu = ({
       document.removeEventListener('click', handleClickOutside)
       document.removeEventListener('keydown', handleEscape)
     }
-  }, [isOpen])
+  }, [isOpen, setIsOpen])
 
   // FAB is always visible
   return (

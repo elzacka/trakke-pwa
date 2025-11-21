@@ -12,6 +12,7 @@ interface SheetProps {
   initialHeight?: SheetHeight
   height?: SheetHeight // External height control
   onHeightChange?: (height: SheetHeight) => void
+  showBackdrop?: boolean // Whether to show the backdrop (default: true)
 }
 
 const Sheet = ({
@@ -22,7 +23,8 @@ const Sheet = ({
   halfHeight = 50,
   initialHeight = 'peek',
   height: externalHeight,
-  onHeightChange
+  onHeightChange,
+  showBackdrop = true
 }: SheetProps) => {
   const [internalHeight, setInternalHeight] = useState<SheetHeight>(initialHeight)
 
@@ -71,13 +73,8 @@ const Sheet = ({
       const keyboardIsVisible = windowHeight - newHeight > 150 // 150px threshold for keyboard
       setKeyboardVisible(keyboardIsVisible)
 
-      // Update sheet position if exists
-      if (sheetRef.current && keyboardIsVisible) {
-        // Position sheet at the top of visual viewport
-        sheetRef.current.style.top = `${offsetTop}px`
-      } else if (sheetRef.current) {
-        sheetRef.current.style.top = '0px'
-      }
+      // For bottom sheets, the CSS max-height constraints handle keyboard visibility
+      // No need to manipulate position or transform
     }
 
     handleViewportResize() // Initial call
@@ -94,29 +91,31 @@ const Sheet = ({
     }
   }, [isMobile])
 
-  const handleHandleTouchStart = (e: React.TouchEvent) => {
-    startY.current = e.touches[0].clientY
-    currentY.current = e.touches[0].clientY
+  const handleDragStart = (clientY: number) => {
+    startY.current = clientY
+    currentY.current = clientY
   }
 
-  const handleHandleTouchMove = (e: React.TouchEvent) => {
-    currentY.current = e.touches[0].clientY
+  const handleDragMove = (clientY: number) => {
+    currentY.current = clientY
   }
 
-  const handleHandleTouchEnd = () => {
+  const handleDragEnd = () => {
     const diff = startY.current - currentY.current
     const threshold = 50
 
     if (Math.abs(diff) < threshold) return
 
     if (isMobile) {
-      // Mobile: top-positioned sheets, swipe down to expand, up to close
-      if (diff < 0) {
-        // Swipe down (expand)
+      // Mobile: bottom-positioned sheets
+      // Swipe up: finger moves up, currentY < startY, diff > 0 (positive)
+      // Swipe down: finger moves down, currentY > startY, diff < 0 (negative)
+      if (diff > 0) {
+        // Swipe up (expand)
         if (height === 'peek') updateHeight('half')
         else if (height === 'half') updateHeight('full')
       } else {
-        // Swipe up (collapse)
+        // Swipe down (collapse)
         if (height === 'full') updateHeight('half')
         else if (height === 'half') updateHeight('peek')
         else if (height === 'peek') onClose()
@@ -134,6 +133,39 @@ const Sheet = ({
         else if (height === 'peek') onClose()
       }
     }
+  }
+
+  // Touch event handlers
+  const handleHandleTouchStart = (e: React.TouchEvent) => {
+    handleDragStart(e.touches[0].clientY)
+  }
+
+  const handleHandleTouchMove = (e: React.TouchEvent) => {
+    e.preventDefault() // Prevent page scroll during drag
+    handleDragMove(e.touches[0].clientY)
+  }
+
+  const handleHandleTouchEnd = () => {
+    handleDragEnd()
+  }
+
+  // Mouse event handlers for desktop
+  const handleHandleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault()
+    handleDragStart(e.clientY)
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      handleDragMove(moveEvent.clientY)
+    }
+
+    const handleMouseUp = () => {
+      handleDragEnd()
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
   }
 
   useEffect(() => {
@@ -162,7 +194,7 @@ const Sheet = ({
 
   return (
     <>
-      {isOpen && height !== 'closed' && (
+      {showBackdrop && isOpen && height !== 'closed' && (
         <div
           className="sheet-backdrop"
           onClick={onClose}
@@ -186,6 +218,7 @@ const Sheet = ({
           onTouchStart={handleHandleTouchStart}
           onTouchMove={handleHandleTouchMove}
           onTouchEnd={handleHandleTouchEnd}
+          onMouseDown={handleHandleMouseDown}
         />
         <div className="sheet-content">
           {children}

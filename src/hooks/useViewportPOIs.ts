@@ -53,6 +53,7 @@ export const useViewportPOIs = ({
     mountedRef.current = true
     return () => {
       mountedRef.current = false
+      isFetchingRef.current = false
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current)
       }

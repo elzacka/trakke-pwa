@@ -39,15 +39,20 @@ export const useAutoHide = (options: UseAutoHideOptions = {}) => {
     }
   }, [visible, show, hide])
 
+  // Handle initial visibility without depending on show callback
   useEffect(() => {
     if (initialVisible) {
-      show()
+      setVisible(true)
+      clearTimeout(timerRef.current)
+      timerRef.current = window.setTimeout(() => {
+        setVisible(false)
+      }, delayRef.current)
     }
 
     return () => {
       clearTimeout(timerRef.current)
     }
-  }, [initialVisible, show])
+  }, [initialVisible])
 
   return { visible, show, hide, toggle }
 }

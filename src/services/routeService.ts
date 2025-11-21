@@ -84,7 +84,7 @@ class RouteService {
         resolve(newWaypoint)
       }
 
-      request.onerror = (event: Event) => {
+      request.onerror = () => {
         reject(new Error(`Failed to create waypoint: ${request.error?.message || 'Unknown error'}`))
       }
     })
@@ -103,7 +103,7 @@ class RouteService {
         resolve(request.result || null)
       }
 
-      request.onerror = (event: Event) => {
+      request.onerror = () => {
         reject(new Error(`Failed to get waypoint (ID: ${id}): ${request.error?.message || 'Unknown error'}`))
       }
     })
@@ -130,8 +130,8 @@ class RouteService {
         }
       }
 
-      request.onerror = (event: Event) => {
-        reject(new Error(`Failed to get waypoints: ${(event.target as IDBRequest).error?.message || 'Unknown error'}`))
+      request.onerror = () => {
+        reject(new Error(`Failed to get waypoints: ${request.error?.message || 'Unknown error'}`))
       }
     })
   }
@@ -161,7 +161,7 @@ class RouteService {
         resolve(updated)
       }
 
-      request.onerror = (event: Event) => {
+      request.onerror = () => {
         reject(new Error(`Failed to update waypoint (ID: ${id}): ${request.error?.message || 'Unknown error'}`))
       }
     })
@@ -181,7 +181,7 @@ class RouteService {
         resolve()
       }
 
-      request.onerror = (event: Event) => {
+      request.onerror = () => {
         reject(new Error(`Failed to delete waypoint (ID: ${id}): ${request.error?.message || 'Unknown error'}`))
       }
     })
@@ -209,7 +209,7 @@ class RouteService {
         resolve(newRoute)
       }
 
-      request.onerror = (event: Event) => {
+      request.onerror = () => {
         reject(new Error(`Failed to create route: ${request.error?.message || 'Unknown error'}`))
       }
     })
@@ -228,7 +228,7 @@ class RouteService {
         resolve(request.result || null)
       }
 
-      request.onerror = (event: Event) => {
+      request.onerror = () => {
         reject(new Error(`Failed to get route (ID: ${id}): ${request.error?.message || 'Unknown error'}`))
       }
     })
@@ -255,8 +255,8 @@ class RouteService {
         }
       }
 
-      request.onerror = (event: Event) => {
-        reject(new Error(`Failed to get routes: ${(event.target as IDBRequest).error?.message || 'Unknown error'}`))
+      request.onerror = () => {
+        reject(new Error(`Failed to get routes: ${request.error?.message || 'Unknown error'}`))
       }
     })
   }
@@ -286,7 +286,7 @@ class RouteService {
         resolve(updated)
       }
 
-      request.onerror = (event: Event) => {
+      request.onerror = () => {
         reject(new Error(`Failed to update route (ID: ${id}): ${request.error?.message || 'Unknown error'}`))
       }
     })
@@ -306,7 +306,7 @@ class RouteService {
         resolve()
       }
 
-      request.onerror = (event: Event) => {
+      request.onerror = () => {
         reject(new Error(`Failed to delete route (ID: ${id}): ${request.error?.message || 'Unknown error'}`))
       }
     })
@@ -334,7 +334,7 @@ class RouteService {
         resolve(newProject)
       }
 
-      request.onerror = (event: Event) => {
+      request.onerror = () => {
         reject(new Error(`Failed to create project: ${request.error?.message || 'Unknown error'}`))
       }
     })
@@ -353,7 +353,7 @@ class RouteService {
         resolve(request.result || null)
       }
 
-      request.onerror = (event: Event) => {
+      request.onerror = () => {
         reject(new Error(`Failed to get project (ID: ${id}): ${request.error?.message || 'Unknown error'}`))
       }
     })
@@ -380,8 +380,8 @@ class RouteService {
         }
       }
 
-      request.onerror = (event: Event) => {
-        reject(new Error(`Failed to get projects: ${(event.target as IDBRequest).error?.message || 'Unknown error'}`))
+      request.onerror = () => {
+        reject(new Error(`Failed to get projects: ${request.error?.message || 'Unknown error'}`))
       }
     })
   }
@@ -411,7 +411,7 @@ class RouteService {
         resolve(updated)
       }
 
-      request.onerror = (event: Event) => {
+      request.onerror = () => {
         reject(new Error(`Failed to update project (ID: ${id}): ${request.error?.message || 'Unknown error'}`))
       }
     })
@@ -431,7 +431,7 @@ class RouteService {
         resolve()
       }
 
-      request.onerror = (event: Event) => {
+      request.onerror = () => {
         reject(new Error(`Failed to delete project (ID: ${id}): ${request.error?.message || 'Unknown error'}`))
       }
     })

@@ -228,9 +228,9 @@ const DownloadSheet = ({
     <Sheet
       isOpen={isOpen}
       onClose={handleClose}
-      peekHeight={40}
-      halfHeight={70}
-      initialHeight={viewMode === 'list' ? 'half' : 'half'}
+      peekHeight={25}
+      halfHeight={40}
+      initialHeight={viewMode === 'list' ? 'peek' : 'half'}
     >
       <div className="download-sheet">
         <div className="download-sheet-content">

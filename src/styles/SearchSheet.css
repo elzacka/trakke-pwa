@@ -4,16 +4,18 @@
 .search-sheet {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
-  flex-shrink: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
-/* Input container */
+/* Input container - sticky at top */
 .search-sheet-input-container {
   display: flex;
   flex-direction: column;
   gap: var(--sheet-section-gap);
   flex-shrink: 0;
+  background: var(--trk-surface);
+  padding-bottom: var(--space-sm);
 }
 
 /* Input wrapper */
@@ -109,19 +111,21 @@
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
 }
 
-/* Results area */
+/* Results area - scrollable */
 .search-sheet-results {
   display: flex;
   flex-direction: column;
   gap: var(--sheet-section-gap);
-  flex-shrink: 0;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .search-sheet-results-list {
   display: flex;
   flex-direction: column;
   gap: var(--sheet-item-gap);
-  flex-shrink: 0;
 }
 
 .search-sheet-result-item {

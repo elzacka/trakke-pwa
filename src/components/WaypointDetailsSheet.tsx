@@ -75,7 +75,7 @@ const WaypointDetailsSheet = ({
       isOpen={isOpen}
       onClose={handleCancel}
       peekHeight={40}
-      halfHeight={70}
+      halfHeight={50}
       initialHeight="half"
     >
       <div className="waypoint-details-sheet">

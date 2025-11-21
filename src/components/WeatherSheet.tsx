@@ -257,31 +257,83 @@ const WeatherSheet = ({ isOpen, onClose, lat, lon }: WeatherSheetProps) => {
                     {/* Hourly Forecast for Selected Day */}
                     <section className="weather-section">
                       <h3>Timevarsel</h3>
-                      <div className="weather-hourly">
-                        {getHoursForDay(selectedDayIndex).map((hour, index) => (
-                          <div key={index} className="weather-hour">
-                            <div className="weather-hour-time">{formatTime(hour.time)}</div>
-                            <div className="weather-hour-icon">
-                              <img
-                                src={weatherService.getWeatherIcon(hour.symbol)}
-                                alt={hour.symbol}
-                                className="weather-icon weather-icon-small"
-                              />
+                      {(() => {
+                        const hoursForDay = getHoursForDay(selectedDayIndex)
+                        if (hoursForDay.length === 0) {
+                          // No hourly data available for this day
+                          const dayData = forecast.daily[selectedDayIndex]
+                          return (
+                            <div className="weather-no-hourly">
+                              <div className="weather-day-summary">
+                                <div className="weather-day-summary-main">
+                                  <div className="weather-day-summary-icon">
+                                    <img
+                                      src={weatherService.getWeatherIcon(dayData.symbol)}
+                                      alt={dayData.symbol}
+                                      className="weather-icon weather-icon-large"
+                                    />
+                                  </div>
+                                  <div className="weather-day-summary-temp">
+                                    {Math.round(dayData.temperature)}°
+                                  </div>
+                                </div>
+                                <div className="weather-day-summary-details">
+                                  <div className="weather-detail">
+                                    <span className="material-symbols-outlined">air</span>
+                                    <span>
+                                      {Math.round(dayData.windSpeed)} m/s{' '}
+                                      {weatherService.getWindDirection(dayData.windDirection)}
+                                    </span>
+                                  </div>
+                                  <div className="weather-detail">
+                                    <span className="material-symbols-outlined">water_drop</span>
+                                    <span>{Math.round(dayData.precipitationProbability)}% nedbør</span>
+                                  </div>
+                                  <div className="weather-detail">
+                                    <span className="material-symbols-outlined">humidity_percentage</span>
+                                    <span>{Math.round(dayData.humidity)}% fuktighet</span>
+                                  </div>
+                                  <div className="weather-detail">
+                                    <span className="material-symbols-outlined">cloud</span>
+                                    <span>{Math.round(dayData.cloudCoverage)}% skydekke</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <p className="weather-no-hourly-message">
+                                Timevarsel er kun tilgjengelig for de nærmeste 2-3 dagene. Viser dagsvarsel for denne dagen.
+                              </p>
                             </div>
-                            <div className="weather-hour-temp">
-                              {Math.round(hour.temperature)}°
-                            </div>
-                            <div className="weather-hour-wind">
-                              <span className="material-symbols-outlined">air</span>
-                              <span>{Math.round(hour.windSpeed)}</span>
-                            </div>
-                            <div className="weather-hour-precip">
-                              <span className="material-symbols-outlined">water_drop</span>
-                              <span>{Math.round(hour.precipitationProbability)}%</span>
-                            </div>
+                          )
+                        }
+
+                        return (
+                          <div className="weather-hourly">
+                            {hoursForDay.map((hour, index) => (
+                              <div key={index} className="weather-hour">
+                                <div className="weather-hour-time">{formatTime(hour.time)}</div>
+                                <div className="weather-hour-icon">
+                                  <img
+                                    src={weatherService.getWeatherIcon(hour.symbol)}
+                                    alt={hour.symbol}
+                                    className="weather-icon weather-icon-small"
+                                  />
+                                </div>
+                                <div className="weather-hour-temp">
+                                  {Math.round(hour.temperature)}°
+                                </div>
+                                <div className="weather-hour-wind">
+                                  <span className="material-symbols-outlined">air</span>
+                                  <span>{Math.round(hour.windSpeed)}</span>
+                                </div>
+                                <div className="weather-hour-precip">
+                                  <span className="material-symbols-outlined">water_drop</span>
+                                  <span>{Math.round(hour.precipitationProbability)}%</span>
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
+                        )
+                      })()}
                     </section>
                   </div>
                 </>

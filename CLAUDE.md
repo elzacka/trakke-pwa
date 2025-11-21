@@ -90,9 +90,9 @@ Current state: Zen Mode is the primary interface.
 - Coordinates between sheets and map interactions
 - Controls drawing modes (routes, waypoints, area selection)
 
-**Sheet Pattern** (mobile-first):
+**Sheet Pattern** (standard bottom sheet on mobile):
 ```
-Sheet (reusable container)
+Sheet (reusable container - slides up from bottom on mobile, centered modal on desktop)
 ├── SearchSheet (place/address search)
 │   ├── Address filter toggle (home icon button)
 │   ├── Contextual hint text for address filter

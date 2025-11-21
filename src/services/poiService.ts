@@ -502,7 +502,7 @@ class POIService {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'application/json',
-        'User-Agent': 'Tråkke PWA/0.1.0 (Norwegian outdoor navigation app, contact: github.com/yourusername/trakke-pwa)'
+        'User-Agent': 'Tråkke PWA/0.1.0 (Norwegian outdoor navigation app, contact: hei@tazk.no)'
       },
       body: `data=${encodeURIComponent(query)}`,
       mode: 'cors',

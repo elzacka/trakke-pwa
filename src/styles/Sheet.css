@@ -53,6 +53,21 @@
     min-height: 200px;
   }
 
+  /* Draggable sheet positioning */
+  .sheet-positioned {
+    transition: none;
+  }
+
+  .sheet-dragging {
+    cursor: grabbing;
+    user-select: none;
+  }
+
+  .sheet-dragging * {
+    cursor: grabbing !important;
+    user-select: none;
+  }
+
   /* Compact sheets - simple forms and info displays */
   .poi-details-sheet .sheet,
   .waypoint-details-sheet .sheet,
@@ -82,9 +97,20 @@
     pointer-events: none;
   }
 
-  /* Hide handle on desktop - not needed for modal style */
+  /* Show handle on desktop for dragging */
   .sheet-handle {
-    display: none;
+    display: block;
+    cursor: move;
+    opacity: 0.3;
+    transition: opacity 0.2s ease;
+  }
+
+  .sheet-handle:hover {
+    opacity: 0.6;
+  }
+
+  .sheet:hover .sheet-handle {
+    opacity: 0.5;
   }
 }
 

@@ -45,6 +45,11 @@ const Sheet = ({
   const startY = useRef(0)
   const currentY = useRef(0)
 
+  // Draggable positioning state (desktop only)
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const dragStartPos = useRef<{ x: number; y: number; sheetX: number; sheetY: number } | null>(null)
+
   // Detect mobile device
   useEffect(() => {
     const checkMobile = () => {
@@ -149,8 +154,11 @@ const Sheet = ({
     handleDragEnd()
   }
 
-  // Mouse event handlers for desktop
+  // Mouse event handlers for desktop height adjustment (only for mobile-like behavior)
   const handleHandleMouseDown = (e: React.MouseEvent) => {
+    // On desktop, don't use height adjustment - use repositioning instead
+    if (!isMobile) return
+
     e.preventDefault()
     handleDragStart(e.clientY)
 
@@ -167,6 +175,83 @@ const Sheet = ({
     document.addEventListener('mousemove', handleMouseMove)
     document.addEventListener('mouseup', handleMouseUp)
   }
+
+  // Draggable sheet positioning handlers (desktop only)
+  const handleSheetDragMouseDown = (e: React.MouseEvent) => {
+    // Only enable on desktop
+    if (isMobile) return
+
+    // Only trigger if clicking on the handle itself
+    const target = e.target as HTMLElement
+    if (!target.closest('.sheet-handle')) return
+
+    e.preventDefault()
+    e.stopPropagation()
+
+    const rect = sheetRef.current?.getBoundingClientRect()
+    if (!rect) return
+
+    const startMouseX = e.clientX
+    const startMouseY = e.clientY
+    let hasMoved = false
+
+    setIsDragging(true)
+    dragStartPos.current = {
+      x: startMouseX,
+      y: startMouseY,
+      sheetX: position?.x ?? rect.left,
+      sheetY: position?.y ?? rect.top
+    }
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      if (!dragStartPos.current) return
+
+      const deltaX = moveEvent.clientX - dragStartPos.current.x
+      const deltaY = moveEvent.clientY - dragStartPos.current.y
+
+      // Mark as moved if dragged more than 5px (to distinguish from clicks)
+      if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+        hasMoved = true
+      }
+
+      const newX = dragStartPos.current.sheetX + deltaX
+      const newY = dragStartPos.current.sheetY + deltaY
+
+      // Constrain to viewport with padding
+      const padding = 20
+      const maxX = window.innerWidth - (rect?.width ?? 600) - padding
+      const maxY = window.innerHeight - (rect?.height ?? 400) - padding
+
+      setPosition({
+        x: Math.max(padding, Math.min(newX, maxX)),
+        y: Math.max(padding, Math.min(newY, maxY))
+      })
+    }
+
+    const handleMouseUp = () => {
+      setIsDragging(false)
+      dragStartPos.current = null
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+
+      // If the user didn't actually drag (just clicked), don't prevent default behavior
+      // This allows the height adjustment to work
+      if (!hasMoved) {
+        // Reset position state if it was just a click
+        return
+      }
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+  }
+
+  // Reset position when sheet opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      setPosition(null)
+    }
+  }, [isOpen])
 
   useEffect(() => {
     if (externalHeight === undefined) {
@@ -203,14 +288,20 @@ const Sheet = ({
       )}
       <div
         ref={sheetRef}
-        className={`sheet sheet-${height} ${isMobile ? 'sheet-mobile' : ''} ${keyboardVisible ? 'keyboard-visible' : ''}`}
+        className={`sheet sheet-${height} ${isMobile ? 'sheet-mobile' : ''} ${keyboardVisible ? 'keyboard-visible' : ''} ${isDragging ? 'sheet-dragging' : ''} ${position ? 'sheet-positioned' : ''}`}
         style={{
           ['--peek-height' as string]: `${peekHeight}vh`,
           ['--half-height' as string]: `${halfHeight}vh`,
-          ['--viewport-height' as string]: viewportHeight ? `${viewportHeight}px` : '100vh'
+          ['--viewport-height' as string]: viewportHeight ? `${viewportHeight}px` : '100vh',
+          ...(position && !isMobile ? {
+            left: `${position.x}px`,
+            top: `${position.y}px`,
+            transform: 'none'
+          } : {})
         }}
         role="dialog"
         aria-modal="true"
+        onMouseDown={handleSheetDragMouseDown}
       >
         <div
           className="sheet-handle"

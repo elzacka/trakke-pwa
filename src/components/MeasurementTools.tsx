@@ -69,6 +69,9 @@ const MeasurementTools = ({
       showBackdrop={false}
     >
       <div className="measurement-tools">
+        <button className="measurement-close-button" onClick={onClose} aria-label="Lukk måleverktøy">
+          <span className="material-symbols-outlined">close</span>
+        </button>
         <div className="measurement-content">
         {!mode ? (
           <div className="measurement-mode-selector">

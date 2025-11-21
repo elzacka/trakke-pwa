@@ -2,10 +2,43 @@
 /* Measurement Tools - Bottom Sheet */
 
 .measurement-tools {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+}
+
+.measurement-close-button {
+  position: absolute;
+  top: -8px;
+  right: 4px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.measurement-close-button:hover {
+  background: var(--trk-gray-50, #f9fafb);
+}
+
+.measurement-close-button:active {
+  background: var(--trk-gray-100, #f3f4f6);
+  transform: scale(0.95);
+}
+
+.measurement-close-button .material-symbols-outlined {
+  font-size: 20px;
+  color: var(--trk-gray-600, #4b5563);
 }
 
 .measurement-content {
@@ -20,20 +53,20 @@
 .measurement-mode-selector {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-sm);
 }
 
 .measurement-instruction {
   margin: 0;
   font-size: 14px;
-  color: var(--trk-gray-600, #4b5563);
+  color: var(--trk-text-soft);
   text-align: center;
 }
 
 .measurement-mode-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: var(--space-sm);
 }
 
 .measurement-mode-button {
@@ -41,22 +74,22 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 20px;
-  background: var(--trk-surface, white);
-  border: 2px solid var(--trk-gray-300, #d1d5db);
-  border-radius: 12px;
+  gap: var(--button-gap);
+  padding: var(--button-padding-md);
+  background: var(--trk-surface);
+  border: 1px solid var(--trk-border);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
-  color: var(--trk-gray-700, #374151);
-  transition: all 0.2s ease;
+  color: var(--trk-text);
+  transition: var(--transition-base);
 }
 
 .measurement-mode-button:hover {
-  background: var(--trk-gray-50, #f9fafb);
-  border-color: var(--trk-brand, #22c55e);
-  color: var(--trk-gray-900, #111827);
+  background: var(--trk-bg);
+  border-color: var(--trk-brand);
+  color: var(--trk-text);
 }
 
 .measurement-mode-button:active {
@@ -65,96 +98,94 @@
 }
 
 .measurement-mode-button .material-symbols-outlined {
-  font-size: 32px;
-  color: var(--trk-brand, #22c55e);
+  font-size: 28px;
+  color: var(--trk-brand);
 }
 
 /* Measurement Info */
 .measurement-info {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: var(--space-sm);
 }
 
 .measurement-stats {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  background: var(--trk-gray-50, #f9fafb);
-  border-radius: 12px;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  background: var(--trk-bg);
+  border-radius: var(--radius-md);
 }
 
 .measurement-stat {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .stat-label {
-  color: var(--trk-gray-600, #4b5563);
+  color: var(--trk-text-soft);
 }
 
 .stat-value {
   font-weight: 600;
-  color: var(--trk-gray-900, #111827);
+  color: var(--trk-text);
 }
 
 .measurement-result {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 12px;
-  border-top: 1px solid var(--trk-gray-200, #e5e7eb);
-  font-size: 16px;
+  padding-top: var(--space-xs);
+  border-top: 1px solid var(--trk-border);
+  font-size: 14px;
 }
 
 .result-label {
   font-weight: 500;
-  color: var(--trk-gray-700, #374151);
+  color: var(--trk-text);
 }
 
 .result-value {
   font-weight: 700;
-  font-size: 18px;
-  color: var(--trk-brand, #22c55e);
+  font-size: 16px;
+  color: var(--trk-brand);
 }
 
 /* Actions */
 .measurement-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-sm);
 }
 
 .measurement-action-button {
   flex: 1;
-  min-width: 100px;
+  min-width: 90px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 10px 16px;
-  border: 2px solid var(--trk-gray-300, #d1d5db);
-  border-radius: 10px;
-  background: var(--trk-surface, white);
-  font-size: 14px;
+  gap: var(--button-gap);
+  padding: var(--button-padding-sm);
+  border: 1px solid var(--trk-border);
+  border-radius: var(--radius-md);
+  background: var(--trk-surface);
+  font-size: 13px;
   font-weight: 500;
-  color: var(--trk-gray-700, #374151);
+  color: var(--trk-text-muted);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: var(--transition-base);
 }
 
 .measurement-action-button:hover:not(:disabled) {
-  background: var(--trk-gray-50, #f9fafb);
-  border-color: var(--trk-gray-400, #9ca3af);
-  color: var(--trk-gray-900, #111827);
+  background: var(--trk-bg);
+  border-color: var(--trk-text-soft);
+  color: var(--trk-text);
 }
 
 .measurement-action-button:active:not(:disabled) {
-  background: var(--trk-gray-100, #f3f4f6);
   transform: translateY(1px);
 }
 
@@ -169,17 +200,7 @@
 
 /* Mobile optimizations */
 @media (max-width: 768px) {
-  .measurement-mode-button {
-    padding: 16px;
-    font-size: 14px;
-  }
-
   .measurement-mode-button .material-symbols-outlined {
-    font-size: 28px;
-  }
-
-  .measurement-action-button {
-    font-size: 13px;
-    padding: 9px 14px;
+    font-size: 24px;
   }
 }

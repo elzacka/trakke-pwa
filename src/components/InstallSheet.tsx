@@ -29,15 +29,14 @@ const InstallSheet = ({ isOpen, onClose, onInstall, canInstall, platform }: Inst
       isOpen={isOpen}
       onClose={onClose}
       peekHeight={20}
-      halfHeight={40}
-      initialHeight="peek"
+      halfHeight={50}
+      initialHeight="half"
     >
       <div className="install-sheet">
         <div className="install-sheet-content">
           <div className="install-benefits">
             <p>Offline-tilgang</p>
             <p>Raskere lasting</p>
-            <p>Ingen sporing</p>
           </div>
 
           {canInstall && !isIOS && (
@@ -52,7 +51,7 @@ const InstallSheet = ({ isOpen, onClose, onInstall, canInstall, platform }: Inst
 
           {isIOS && (
             <div className="install-instructions-ios">
-              <p>Trykk Del → Legg til på Hjem-skjerm</p>
+              <p>Trykk ... → Del → Legg til på Hjem-skjerm → Åpne som nettapp</p>
             </div>
           )}
         </div>

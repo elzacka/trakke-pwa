@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Sheet from './Sheet'
-import { poiService, type POI, type ShelterPOI, type CavePOI, type ObservationTowerPOI, type WarMemorialPOI, type WildernessShelterPOI } from '../services/poiService'
+import { poiService, type POI, type ShelterPOI, type CavePOI, type ObservationTowerPOI, type WarMemorialPOI, type WildernessShelterPOI, type KulturminnerPOI } from '../services/poiService'
 import '../styles/POIDetailsSheet.css'
 
 interface POIDetailsSheetProps {
@@ -15,12 +15,13 @@ const POIDetailsSheet = ({ isOpen, onClose, poi }: POIDetailsSheetProps) => {
   if (!poi) return null
 
   // Map POI type to category
-  const categoryMap: Record<string, 'shelters' | 'caves' | 'observation_towers' | 'war_memorials' | 'wilderness_shelters'> = {
+  const categoryMap: Record<string, 'shelters' | 'caves' | 'observation_towers' | 'war_memorials' | 'wilderness_shelters' | 'kulturminner'> = {
     'shelter': 'shelters',
     'cave': 'caves',
     'observation_tower': 'observation_towers',
     'war_memorial': 'war_memorials',
-    'wilderness_shelter': 'wilderness_shelters'
+    'wilderness_shelter': 'wilderness_shelters',
+    'kulturminner': 'kulturminner'
   }
   const category = categoryMap[poi.type] || 'shelters'
   const categoryConfig = poiService.getCategoryConfig(category)
@@ -303,6 +304,79 @@ const POIDetailsSheet = ({ isOpen, onClose, poi }: POIDetailsSheetProps) => {
     )
   }
 
+  const renderKulturminnerDetails = (kulturminne: KulturminnerPOI) => {
+    const handleCopyCoordinates = () => {
+      const [lon, lat] = kulturminne.coordinates
+      const coords = `${lat.toFixed(6)}, ${lon.toFixed(6)}`
+      navigator.clipboard.writeText(coords)
+      if ('vibrate' in navigator) {
+        navigator.vibrate(10)
+      }
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+
+    return (
+      <>
+        <div className="poi-details-info">
+          <div className="poi-details-info-item">
+            <div className="poi-details-info-label">Navn</div>
+            <div className="poi-details-info-value">{kulturminne.name}</div>
+          </div>
+          {kulturminne.description && (
+            <div className="poi-details-info-item">
+              <div className="poi-details-info-label">Beskrivelse</div>
+              <div className="poi-details-info-value">{kulturminne.description}</div>
+            </div>
+          )}
+          {kulturminne.municipality && (
+            <div className="poi-details-info-item">
+              <div className="poi-details-info-label">Kommune</div>
+              <div className="poi-details-info-value">{kulturminne.municipality}</div>
+            </div>
+          )}
+          {kulturminne.county && (
+            <div className="poi-details-info-item">
+              <div className="poi-details-info-label">Fylke</div>
+              <div className="poi-details-info-value">{kulturminne.county}</div>
+            </div>
+          )}
+          {kulturminne.created_by && (
+            <div className="poi-details-info-item">
+              <div className="poi-details-info-label">Opprettet av</div>
+              <div className="poi-details-info-value">{kulturminne.created_by}</div>
+            </div>
+          )}
+          {kulturminne.link && (
+            <div className="poi-details-info-item">
+              <div className="poi-details-info-label">Lenke</div>
+              <div className="poi-details-info-value">
+                <a href={kulturminne.link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--trk-brand)', textDecoration: 'underline' }}>
+                  Kulturminnesøk
+                </a>
+              </div>
+            </div>
+          )}
+          <div className="poi-details-info-item poi-details-info-item-with-button">
+            <div className="poi-details-info-label">Koordinater</div>
+            <div className="poi-details-info-value">
+              {kulturminne.coordinates[1].toFixed(5)}°N, {kulturminne.coordinates[0].toFixed(5)}°E
+            </div>
+            <button
+              className={`poi-details-copy-button ${copied ? 'copied' : ''}`}
+              onClick={handleCopyCoordinates}
+              aria-label="Kopier koordinater"
+            >
+              <span className="material-symbols-outlined">
+                {copied ? 'check' : 'content_copy'}
+              </span>
+            </button>
+          </div>
+        </div>
+      </>
+    )
+  }
+
   return (
     <Sheet
       isOpen={isOpen}
@@ -318,6 +392,7 @@ const POIDetailsSheet = ({ isOpen, onClose, poi }: POIDetailsSheetProps) => {
           {poi.type === 'observation_tower' && renderObservationTowerDetails(poi as ObservationTowerPOI)}
           {poi.type === 'war_memorial' && renderWarMemorialDetails(poi as WarMemorialPOI)}
           {poi.type === 'wilderness_shelter' && renderWildernessShelterDetails(poi as WildernessShelterPOI)}
+          {poi.type === 'kulturminner' && renderKulturminnerDetails(poi as KulturminnerPOI)}
         </div>
       </div>
     </Sheet>

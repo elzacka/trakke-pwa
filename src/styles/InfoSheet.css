@@ -77,6 +77,20 @@
   gap: 4px;
 }
 
+/* Subsection headers (Kart, Vær, Kategorier) */
+.info-subsection-header {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--trk-text);
+  margin: 16px 0 12px 0;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.info-subsection-header:first-child {
+  margin-top: 0;
+}
+
 .info-section h3 {
   font-size: 13px;
   font-weight: 600;
@@ -147,6 +161,12 @@
   .info-section-content {
     padding: 8px 12px 12px 12px;
     gap: 8px;
+  }
+
+  .info-subsection-header {
+    font-size: 13px;
+    margin: 14px 0 10px 0;
+    padding-bottom: 3px;
   }
 
   .info-section h3 {

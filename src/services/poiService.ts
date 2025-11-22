@@ -49,9 +49,21 @@ export interface WildernessShelterPOI {
   coordinates: [number, number] // [lon, lat]
 }
 
-export type POI = ShelterPOI | CavePOI | ObservationTowerPOI | WarMemorialPOI | WildernessShelterPOI
+export interface KulturminnerPOI {
+  id: string
+  type: 'kulturminner'
+  name: string
+  description?: string
+  municipality?: string
+  county?: string
+  created_by?: string
+  link?: string
+  coordinates: [number, number] // [lon, lat]
+}
 
-export type POICategory = 'shelters' | 'caves' | 'observation_towers' | 'war_memorials' | 'wilderness_shelters'
+export type POI = ShelterPOI | CavePOI | ObservationTowerPOI | WarMemorialPOI | WildernessShelterPOI | KulturminnerPOI
+
+export type POICategory = 'shelters' | 'caves' | 'observation_towers' | 'war_memorials' | 'wilderness_shelters' | 'kulturminner'
 
 // Overpass API response types
 interface OverpassElement {
@@ -79,12 +91,14 @@ interface CategoryConfig {
   name: string
   icon: string
   color: string
-  dataSource: 'wfs' | 'overpass' // WFS for government data, Overpass for OSM data
+  dataSource: 'wfs' | 'overpass' | 'geojson-api' // WFS for government data, Overpass for OSM data, GeoJSON API for Riksantikvaren
   // WFS-specific (for shelters)
   wfsUrl?: string
   layerName?: string
   // Overpass-specific (for new categories)
   overpassQuery?: string
+  // GeoJSON API-specific (for kulturminner)
+  apiUrl?: string
 }
 
 const CATEGORIES: Record<POICategory, CategoryConfig> = {
@@ -134,6 +148,15 @@ const CATEGORIES: Record<POICategory, CategoryConfig> = {
     dataSource: 'overpass',
     // Query for outdoor shelters: basic huts, weather shelters, rock shelters, lavvu (from T1)
     overpassQuery: `[out:json][timeout:25];(node["amenity"="shelter"]["shelter_type"="basic_hut"]({{bbox}});way["amenity"="shelter"]["shelter_type"="basic_hut"]({{bbox}});node["amenity"="shelter"]["shelter_type"="weather_shelter"]({{bbox}});way["amenity"="shelter"]["shelter_type"="weather_shelter"]({{bbox}});node["amenity"="shelter"]["shelter_type"="rock_shelter"]({{bbox}});way["amenity"="shelter"]["shelter_type"="rock_shelter"]({{bbox}});node["amenity"="shelter"]["shelter_type"="lavvu"]({{bbox}});way["amenity"="shelter"]["shelter_type"="lavvu"]({{bbox}});node["amenity"="shelter"][!"shelter_type"]({{bbox}});way["amenity"="shelter"][!"shelter_type"]({{bbox}}););out body;>;out skel qt;`
+  },
+
+  kulturminner: {
+    id: 'kulturminner',
+    name: 'Kulturminner',
+    icon: 'severdighet', // Geonorge Severdighet icon
+    color: '#8b7355', // Warm brown (cultural heritage theme)
+    dataSource: 'geojson-api',
+    apiUrl: 'https://api.ra.no/brukerminner/collections/brukerminner/items'
   }
 }
 
@@ -457,6 +480,50 @@ class POIService {
   }
 
   /**
+   * Parse GeoJSON FeatureCollection response (e.g., from Riksantikvaren API)
+   */
+  private parseGeoJSONFeatures(data: any, category: POICategory): POI[] {
+    if (!data || data.type !== 'FeatureCollection' || !Array.isArray(data.features)) {
+      devError(`[POIService] Invalid GeoJSON response for ${category}`)
+      return []
+    }
+
+    const pois: POI[] = []
+    const seenIds = new Set<string>()
+
+    for (const feature of data.features) {
+      if (!feature.geometry || feature.geometry.type !== 'Point') {
+        continue // Skip non-point features
+      }
+
+      const coordinates = feature.geometry.coordinates as [number, number]
+      const props = feature.properties || {}
+
+      if (category === 'kulturminner') {
+        const poi: KulturminnerPOI = {
+          id: feature.id || `kulturminner-${Date.now()}-${Math.random()}`,
+          type: 'kulturminner',
+          name: props.tittel || 'Ukjent kulturminne',
+          description: props.beskrivelse,
+          municipality: props.kommune,
+          county: props.fylke,
+          created_by: props.opprettet_av,
+          link: props.linkkulturminnesok,
+          coordinates
+        }
+
+        if (!seenIds.has(poi.id)) {
+          seenIds.add(poi.id)
+          pois.push(poi)
+        }
+      }
+    }
+
+    devLog(`[POIService] Parsed ${pois.length} unique POIs for ${category}`)
+    return pois
+  }
+
+  /**
    * Fetch POIs from Overpass API with viewport-aware caching
    * Privacy: German-based EU service, no tracking, public OSM data only
    * External API: See PRIVACY_BY_DESIGN.md#external-api-registry
@@ -639,6 +706,99 @@ class POIService {
     return fetchPromise
   }
 
+  /**
+   * Fetch POIs from Riksantikvaren GeoJSON API (OGC API-Features)
+   * Privacy: Norwegian government service (api.ra.no), no tracking, public data only
+   * External API: See PRIVACY_BY_DESIGN.md#external-api-registry
+   */
+  async fetchFromGeoJSONAPI(
+    category: POICategory,
+    bounds: BoundsRect,
+    zoom: number
+  ): Promise<POI[]> {
+    const cacheKey = this.getCacheKey(category, bounds, zoom)
+
+    // Check cache first
+    if (this.cache.has(cacheKey)) {
+      const cached = this.cache.get(cacheKey)!
+      if (!this.isCacheStale(cached.timestamp)) {
+        devLog(`[POIService] Cache hit: ${cacheKey} (${cached.pois.length} POIs)`)
+        return cached.pois
+      }
+      devLog(`[POIService] Cache stale: ${cacheKey}`)
+      this.cache.delete(cacheKey)
+    }
+
+    // Check if already loading
+    if (this.loading.has(cacheKey)) {
+      devLog(`[POIService] Already loading: ${cacheKey}`)
+      return this.loading.get(cacheKey) as Promise<POI[]>
+    }
+
+    const config = CATEGORIES[category]
+    if (!config.apiUrl) {
+      throw new Error(`No API URL for category: ${category}`)
+    }
+
+    // Build OGC API-Features URL with bbox parameter (west,south,east,north)
+    const bboxString = `${bounds.west},${bounds.south},${bounds.east},${bounds.north}`
+    const url = `${config.apiUrl}?f=json&bbox=${bboxString}&limit=1000`
+
+    devLog(`[POIService] Fetching ${category} from GeoJSON API: ${cacheKey}`)
+    devLog(`[POIService] URL:`, url)
+
+    const fetchPromise = fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/geo+json',
+        'User-Agent': 'Tråkke PWA/0.1.0 (Norwegian outdoor navigation app, contact: hei@tazk.no)'
+      },
+      mode: 'cors',
+      credentials: 'omit'
+    })
+      .then(async response => {
+        devLog(`[POIService] GeoJSON API response status: ${response.status} ${response.statusText}`)
+
+        if (!response.ok) {
+          const errorText = await response.text().catch(() => 'Unable to read error response')
+          devError(`[POIService] GeoJSON API error response:`, errorText)
+          throw new Error(`GeoJSON API request failed: ${response.status} ${response.statusText}`)
+        }
+
+        return response.json()
+      })
+      .then(data => {
+        devLog(`[POIService] GeoJSON API response data:`, {
+          type: data.type,
+          featureCount: data.features?.length || 0,
+          numberMatched: data.numberMatched,
+          numberReturned: data.numberReturned
+        })
+
+        const pois = this.parseGeoJSONFeatures(data, category)
+        devLog(`[POIService] Parsed ${pois.length} POIs for ${cacheKey}`)
+
+        // Cache results
+        this.cache.set(cacheKey, {
+          pois,
+          bounds,
+          zoom,
+          timestamp: Date.now()
+        })
+
+        this.loading.delete(cacheKey)
+        return pois
+      })
+      .catch(error => {
+        devError(`[POIService] Failed to fetch ${category}:`, error)
+        this.loading.delete(cacheKey)
+        throw new Error(`Failed to fetch ${category} POIs: ${error.message}`)
+      })
+
+    this.loading.set(cacheKey, fetchPromise)
+    return fetchPromise
+  }
+
   // Get POIs for a category with viewport bounds and zoom
   async getPOIs(category: POICategory, bounds: { north: number; south: number; east: number; west: number }, zoom: number): Promise<POI[]> {
     const config = CATEGORIES[category]
@@ -652,8 +812,12 @@ class POIService {
         return []
 
       case 'overpass':
-        // Overpass API for OSM data (caves, towers, memorials)
+        // Overpass API for OSM data (caves, towers, memorials, shelters)
         return this.fetchFromOverpass(category, bounds, zoom)
+
+      case 'geojson-api':
+        // GeoJSON API for Riksantikvaren data (kulturminner)
+        return this.fetchFromGeoJSONAPI(category, bounds, zoom)
 
       default:
         devError(`Unknown data source for ${category}`)

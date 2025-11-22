@@ -52,11 +52,14 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
 
               {expandedSections.has('datakilder') && (
                 <div className="info-section-content">
+                  {/* Kart Section */}
+                  <h3 className="info-subsection-header">Kart</h3>
+
                   <section className="info-section">
-                    <h3>Kartverket</h3>
+                    <h4>Kartverket</h4>
                     <ul className="info-list">
                       <li>
-                        Topografiske kart. {' '}
+                        Data: Topografiske kart. {' '}
                         <a
                           href="https://kartkatalog.geonorge.no/metadata/topografisk-norgeskart-wmts--cache/8f381180-1a47-4453-bee7-9a3d64843efa"
                           target="_blank"
@@ -66,7 +69,7 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
                         </a>
                       </li>
                       <li>
-                        Stedsnavn for søkefunksjon. {' '}
+                        Data: Stedsnavn (søkefunksjon). {' '}
                         <a
                           href="https://kartkatalog.geonorge.no/metadata/soeketjeneste-for-stedsnavn/d12de000-1a23-46b3-9192-3a1a98b2c994"
                           target="_blank"
@@ -76,7 +79,7 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
                         </a>
                       </li>
                       <li>
-                        Adresser for søkefunksjon. {' '}
+                        Data: Adresser (søkefunksjon). {' '}
                         <a
                           href="https://kartkatalog.geonorge.no/metadata/44eeffdc-6069-4000-a49b-2d6bfc59ac61"
                           target="_blank"
@@ -86,52 +89,166 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
                         </a>
                       </li>
                       <li>
-                        Høydedata for høydeprofiler. {' '}
+                        Data: Høydedata (høydeprofiler). {' '}
                         <a
-                          href="https://hoydedata.no/LaserInnsyn2/"
+                          href="https://kartkatalog.geonorge.no/metadata/71ad2bf9-06e8-469f-9ffa-296182274154"
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          Høydedata API (DTM 10m).
+                          REST API (WGS84 DTM 10m).
+                        </a>
+                      </li>
+                      <li>
+                        Lisens: {' '}
+                        <a
+                          href="https://data.norge.no/nlod/no/2.0"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Norsk lisens for offentlige data (NLOD)</a> iht. {' '}
+                        <a
+                          href="https://creativecommons.org/licenses/by/4.0/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Creative Commons BY 4.0.
+                        </a>
+                      </li>
+                    </ul>
+                  </section>
+
+                  {/* Vær Section */}
+                  <h3 className="info-subsection-header">Vær</h3>
+
+                  <section className="info-section">
+                    <h4>MET Norway</h4>
+                    <ul className="info-list">
+                      <li>
+                        Data: Værvarsling for Norge. {' '}
+                        <a
+                          href="https://api.met.no/weatherapi/locationforecast/2.0/documentation"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Locationforecast 2.0 API.
+                        </a>
+                      </li>
+                      <li>
+                        Lisens: {' '}
+                        <a
+                          href="https://data.norge.no/nlod/no/2.0"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Norsk lisens for offentlige data (NLOD)</a> iht. {' '}
+                        <a
+                          href="https://creativecommons.org/licenses/by/4.0/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Creative Commons BY 4.0.
+                        </a>
+                      </li>
+                    </ul>
+                  </section>
+
+                  {/* Kategorier Section */}
+                  <h3 className="info-subsection-header">Kategorier</h3>
+
+                  <section className="info-section">
+                    <h4>Direktoratet for samfunnssikkerhet og beredskap</h4>
+                    <ul className="info-list">
+                      <li>
+                        Data: Offentlige tilfluktsrom. {' '}
+                        <a
+                          href="https://kartkatalog.geonorge.no/metadata/tilfluktsrom-offentlige-wfs/06da6e96-544c-467d-8329-5ca25a11328b"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          WFS-tjeneste.
+                        </a>
+                      </li>
+<li>
+                        Lisens: {' '}
+                        <a
+                          href="https://data.norge.no/nlod/no/2.0"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Norsk lisens for offentlige data (NLOD)</a> iht. {' '}
+                        <a
+                          href="https://creativecommons.org/licenses/by/4.0/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Creative Commons BY 4.0.
                         </a>
                       </li>
                     </ul>
                   </section>
 
                   <section className="info-section">
-                    <h3>MET Norway</h3>
-                    <p>
-                      Værvarsling for Norge. {' '}
-                      <a
-                        href="https://api.met.no/weatherapi/locationforecast/2.0/documentation"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Locationforecast 2.0 API.
-                      </a>
-                      {' '}
-                      <a
-                        href="https://creativecommons.org/licenses/by/4.0/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        CC BY 4.0 lisens.
-                      </a>
-                    </p>
+                    <h4>OpenStreetMap</h4>
+                    <ul className="info-list">
+                      <li>
+                        Data: Kategorier (POI) som ikke er oppgitt andre steder her. {' '}
+                        <a
+                          href="https://wiki.openstreetmap.org/wiki/Overpass_API"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Overpass API.
+                        </a>
+                      </li>
+                      <li>
+                        Merknad: Dataene er lagt inn av brukere av OpenStreetMap (OSM), og er ikke kvalitetssikret på noen måte av OSM.
+                      </li>
+                      <li>
+                        Kreditering/lisens: © OpenStreetMap-bidragsyterne iht. {' '}
+                        <a
+                          href="https://opendatacommons.org/licenses/odbl/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Open Database License (ODbL).
+                        </a>
+                      </li>
+                    </ul>
                   </section>
 
                   <section className="info-section">
-                    <h3>Direktoratet for samfunnssikkerhet og beredskap</h3>
-                    <p>
-                      Offentlige tilfluktsrom i Norge. {' '}
-                      <a
-                        href="https://kartkatalog.geonorge.no/metadata/tilfluktsrom-offentlige-wfs/06da6e96-544c-467d-8329-5ca25a11328b"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        WMS-tjeneste.
-                      </a>
-                    </p>
+                    <h4>Riksantikvaren</h4>
+                    <ul className="info-list">
+                      <li>
+                        Data: Kulturminner (brukerminner). {' '}
+                        <a
+                          href="https://kartkatalog.geonorge.no/metadata/bb9d0ad5-aaac-48bb-9a4f-29e99d0bd32a"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          OGC API-Features.
+                        </a>
+                      </li>
+                      <li>
+                        Merknad: Dataene er lagt inn av brukere av kulturminnesok.no, og er ikke kvalitetssikret på noen måte av Riksantikvaren.
+                      </li>
+                      <li>
+                        Lisens: {' '}
+                        <a
+                          href="https://data.norge.no/nlod/no/2.0"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Norsk lisens for offentlige data (NLOD)</a> iht. {' '}
+                        <a
+                          href="https://creativecommons.org/licenses/by/4.0/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Creative Commons BY 4.0.
+                        </a>
+                      </li>
+                    </ul>
                   </section>
                 </div>
               )}

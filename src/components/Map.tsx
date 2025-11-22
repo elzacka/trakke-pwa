@@ -774,6 +774,7 @@ const Map = ({ zenMode }: MapProps) => {
               'caves', 'cave-icon',
               'observation_towers', 'tower-icon',
               'war_memorials', 'memorial-icon',
+              'kulturminner', 'kulturminner-icon',
               'tilfluktsrom-icon' // fallback
             ],
             'icon-size': 1,
@@ -872,6 +873,9 @@ const Map = ({ zenMode }: MapProps) => {
 
           const wildernessShelterImg = await loadSVGAsImage(`${baseUrl}icons/osm-carto/shelter.svg`, '#b45309')
           map.current.addImage('wilderness-shelter-icon', imageToMapIcon(wildernessShelterImg, size))
+
+          const kulturminnerImg = await loadSVGAsImage(`${baseUrl}icons/geonorge/severdighet.svg`, '#8b7355')
+          map.current.addImage('kulturminner-icon', imageToMapIcon(kulturminnerImg, size))
 
           devLog('[Map] All SVG icons loaded successfully')
         } catch (error) {

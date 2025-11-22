@@ -26,7 +26,7 @@ const CATEGORY_GROUPS: CategoryGroup[] = [
   {
     id: 'culture',
     name: 'Kultur',
-    categories: ['war_memorials']
+    categories: ['war_memorials', 'kulturminner']
   },
   {
     id: 'emergency',

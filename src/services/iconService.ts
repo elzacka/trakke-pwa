@@ -54,6 +54,12 @@ export const POI_ICONS: Record<POICategory, IconConfig> = {
     type: 'osm-carto',
     path: `${ICON_BASE_PATH}icons/osm-carto/shelter.svg`, // amenity=shelter (OSM-Carto)
     color: '#b45309' // Brown/orange
+  },
+
+  kulturminner: {
+    type: 'osm-carto',
+    path: `${ICON_BASE_PATH}icons/geonorge/severdighet.svg`, // Geonorge Severdighet symbol
+    color: '#8b7355' // Warm brown (cultural heritage theme)
   }
 }
 

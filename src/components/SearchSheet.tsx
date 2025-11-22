@@ -143,6 +143,9 @@ const SearchSheet = ({ isOpen, onClose, onResultSelect }: SearchSheetProps) => {
       halfHeight={40}
       initialHeight="half"
     >
+      <button className="sheet-close-button" onClick={handleClose} aria-label="Lukk søk">
+        <span className="material-symbols-outlined">close</span>
+      </button>
       <div className="search-sheet">
         <div className="search-sheet-input-container">
           <form onSubmit={(e) => e.preventDefault()}>

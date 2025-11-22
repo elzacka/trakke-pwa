@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import Sheet from './Sheet'
 import { measurementService } from '../services/measurementService'
-import '../styles/MeasurementTools.css'
+import '../styles/MeasurementToolsSheet.css'
 
 export type MeasurementMode = 'distance' | 'area' | null
 
-interface MeasurementToolsProps {
+interface MeasurementToolsSheetProps {
   isActive: boolean
   onClose: () => void
   mode: MeasurementMode
@@ -14,14 +14,14 @@ interface MeasurementToolsProps {
   onPointsChange: (points: Array<[number, number]>) => void
 }
 
-const MeasurementTools = ({
+const MeasurementToolsSheet = ({
   isActive,
   onClose,
   mode,
   onModeChange,
   points,
   onPointsChange
-}: MeasurementToolsProps) => {
+}: MeasurementToolsSheetProps) => {
   const [measurement, setMeasurement] = useState<string>('')
 
   // Calculate measurement whenever points change
@@ -68,10 +68,10 @@ const MeasurementTools = ({
       initialHeight="peek"
       showBackdrop={false}
     >
+      <button className="sheet-close-button" onClick={onClose} aria-label="Lukk måleverktøy">
+        <span className="material-symbols-outlined">close</span>
+      </button>
       <div className="measurement-tools">
-        <button className="measurement-close-button" onClick={onClose} aria-label="Lukk måleverktøy">
-          <span className="material-symbols-outlined">close</span>
-        </button>
         <div className="measurement-content">
         {!mode ? (
           <div className="measurement-mode-selector">
@@ -155,4 +155,4 @@ const MeasurementTools = ({
   )
 }
 
-export default MeasurementTools
+export default MeasurementToolsSheet

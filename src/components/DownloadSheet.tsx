@@ -235,6 +235,9 @@ const DownloadSheet = ({
       halfHeight={40}
       initialHeight={viewMode === 'list' ? 'peek' : 'half'}
     >
+      <button className="sheet-close-button" onClick={handleClose} aria-label="Lukk offline kart">
+        <span className="material-symbols-outlined">close</span>
+      </button>
       <div className="download-sheet">
         <div className="download-sheet-content">
           {viewMode === 'downloading' ? (

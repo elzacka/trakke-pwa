@@ -825,6 +825,9 @@ const RouteSheet = ({
       halfHeight={50}
       initialHeight="half"
     >
+      <button className="sheet-close-button" onClick={onClose} aria-label="Lukk ruter og punkter">
+        <span className="material-symbols-outlined">close</span>
+      </button>
       {viewMode === 'list' && renderListView()}
       {viewMode === 'detail' && selectedRoute && renderRouteDetail(selectedRoute)}
       {viewMode === 'detail' && selectedProject && renderProjectDetail(selectedProject)}

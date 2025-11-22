@@ -1,45 +1,15 @@
 @import './design-tokens.css';
-/* Measurement Tools - Bottom Sheet */
+/* MeasurementToolsSheet - Bottom Sheet */
 
 .measurement-tools {
   position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
-  overflow: hidden;
+  overflow: visible;
 }
 
-.measurement-close-button {
-  position: absolute;
-  top: -8px;
-  right: 4px;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  z-index: 10;
-  transition: all 0.2s ease;
-}
-
-.measurement-close-button:hover {
-  background: var(--trk-gray-50, #f9fafb);
-}
-
-.measurement-close-button:active {
-  background: var(--trk-gray-100, #f3f4f6);
-  transform: scale(0.95);
-}
-
-.measurement-close-button .material-symbols-outlined {
-  font-size: 20px;
-  color: var(--trk-gray-600, #4b5563);
-}
+/* Close button styling inherited from .sheet-close-button in Sheet.css */
 
 .measurement-content {
   display: flex;

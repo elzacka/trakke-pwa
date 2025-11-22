@@ -385,6 +385,9 @@ const POIDetailsSheet = ({ isOpen, onClose, poi }: POIDetailsSheetProps) => {
       halfHeight={50}
       initialHeight="half"
     >
+      <button className="sheet-close-button" onClick={onClose} aria-label="Lukk detaljer">
+        <span className="material-symbols-outlined">close</span>
+      </button>
       <div className="poi-details-sheet">
         <div className="poi-details-content">
           {poi.type === 'shelter' && renderShelterDetails(poi as ShelterPOI)}

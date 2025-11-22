@@ -50,6 +50,9 @@ const MapPreferencesSheet = ({ isOpen, onClose, onPreferencesChange }: MapPrefer
       halfHeight={45}
       initialHeight="half"
     >
+      <button className="sheet-close-button" onClick={onClose} aria-label="Lukk innstillinger">
+        <span className="material-symbols-outlined">close</span>
+      </button>
       <div className="map-preferences-sheet">
         <div className="map-preferences-content">
           <div className="preferences-list">

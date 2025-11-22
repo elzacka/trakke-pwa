@@ -78,16 +78,12 @@ const WaypointDetailsSheet = ({
       halfHeight={50}
       initialHeight="half"
     >
+      <button className="sheet-close-button" onClick={handleCancel} aria-label="Lukk punktdetaljer">
+        <span className="material-symbols-outlined">close</span>
+      </button>
       <div className="waypoint-details-sheet">
         <div className="waypoint-details-header">
           <h2>{isEditing ? 'Rediger punkt' : 'Nytt punkt'}</h2>
-          <button
-            className="waypoint-details-close"
-            onClick={handleCancel}
-            aria-label="Lukk"
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
         </div>
 
         <div className="waypoint-details-content">

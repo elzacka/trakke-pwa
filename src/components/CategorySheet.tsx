@@ -82,6 +82,9 @@ const CategorySheet = ({ isOpen, onClose, onCategorySelect }: CategorySheetProps
       halfHeight={45}
       initialHeight="peek"
     >
+      <button className="sheet-close-button" onClick={onClose} aria-label="Lukk kategorier">
+        <span className="material-symbols-outlined">close</span>
+      </button>
       <div className="category-sheet">
         <div className="category-sheet-content">
           <div className="category-menu">

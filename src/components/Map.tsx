@@ -18,7 +18,7 @@ import RouteDetailsSheet from './RouteDetailsSheet'
 import MapPreferencesSheet from './MapPreferencesSheet'
 import WeatherWidget from './WeatherWidget'
 import WeatherSheet from './WeatherSheet'
-import MeasurementTools, { type MeasurementMode } from './MeasurementTools'
+import MeasurementToolsSheet, { type MeasurementMode } from './MeasurementToolsSheet'
 import { useAutoHide } from '../hooks/useAutoHide'
 import { useViewportPOIs } from '../hooks/useViewportPOIs'
 import { useInstallPrompt } from '../hooks/useInstallPrompt'
@@ -2423,7 +2423,7 @@ const Map = ({ zenMode }: MapProps) => {
           )}
 
           {/* Measurement Tools */}
-          <MeasurementTools
+          <MeasurementToolsSheet
             isActive={measurementActive}
             onClose={handleMeasurementClose}
             mode={measurementMode}

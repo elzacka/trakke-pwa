@@ -32,6 +32,9 @@ const InstallSheet = ({ isOpen, onClose, onInstall, canInstall, platform }: Inst
       halfHeight={50}
       initialHeight="half"
     >
+      <button className="sheet-close-button" onClick={onClose} aria-label="Lukk installer">
+        <span className="material-symbols-outlined">close</span>
+      </button>
       <div className="install-sheet">
         <div className="install-sheet-content">
           <div className="install-benefits">

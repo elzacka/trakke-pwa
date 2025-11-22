@@ -80,6 +80,9 @@ const WeatherSheet = ({ isOpen, onClose, lat, lon }: WeatherSheetProps) => {
 
   return (
     <Sheet isOpen={isOpen} onClose={onClose} peekHeight={40} halfHeight={50} initialHeight="half">
+      <button className="sheet-close-button" onClick={onClose} aria-label="Lukk vær">
+        <span className="material-symbols-outlined">close</span>
+      </button>
       <div className="weather-sheet">
         <div className="weather-sheet-content">
           {loading && (

@@ -301,16 +301,28 @@ isSelectingArea: boolean     // Two clicks to select download area
 
 ### Adding a New Sheet
 
-1. Create component extending Sheet:
+1. Create component extending Sheet with standardized close button:
 ```typescript
 import Sheet from './Sheet'
 
 const MySheet = ({ isOpen, onClose }: MySheetProps) => (
   <Sheet isOpen={isOpen} onClose={onClose} peekHeight={40} halfHeight={70}>
-    {/* content */}
+    <button className="sheet-close-button" onClick={onClose} aria-label="Lukk">
+      <span className="material-symbols-outlined">close</span>
+    </button>
+    <div className="my-sheet-content">
+      {/* Your content here */}
+    </div>
   </Sheet>
 )
 ```
+
+**IMPORTANT - Close Button Pattern**:
+- The close button MUST be a direct child of the `<Sheet>` component (first element after opening Sheet tag)
+- Use the standardized `sheet-close-button` class (defined in Sheet.css)
+- This positions the button in the handle bar area at the top-right (top: 12px, right: 16px)
+- The button uses transparent background, simple "X" icon (24px), opacity hover effects
+- Never nest the close button inside your content divs - it must be a sibling to your content
 
 2. Add state to Map.tsx:
 ```typescript

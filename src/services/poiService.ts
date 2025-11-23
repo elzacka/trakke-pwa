@@ -92,6 +92,7 @@ interface CategoryConfig {
   icon: string
   color: string
   dataSource: 'wfs' | 'overpass' | 'geojson-api' // WFS for government data, Overpass for OSM data, GeoJSON API for Riksantikvaren
+  minZoom: number // Minimum zoom level to show this category
   // WFS-specific (for shelters)
   wfsUrl?: string
   layerName?: string
@@ -108,6 +109,7 @@ const CATEGORIES: Record<POICategory, CategoryConfig> = {
     icon: 'custom-t-marker', // Custom T marker
     color: '#fbbf24', // Yellow
     dataSource: 'wfs',
+    minZoom: 10, // Urban features, show at higher zoom
     wfsUrl: 'https://ogc.dsb.no/wfs.ashx',
     layerName: 'layer_340'
   },
@@ -118,6 +120,7 @@ const CATEGORIES: Record<POICategory, CategoryConfig> = {
     icon: 'terrain', // Material Symbol
     color: '#8b4513', // Saddle brown
     dataSource: 'overpass',
+    minZoom: 10, // Small natural features, show at higher zoom
     overpassQuery: `[out:json][timeout:25];(node["natural"="cave_entrance"]({{bbox}}););out body;>;out skel qt;`
   },
 
@@ -127,6 +130,7 @@ const CATEGORIES: Record<POICategory, CategoryConfig> = {
     icon: 'castle', // Material Symbol
     color: '#4a5568', // Gray
     dataSource: 'overpass',
+    minZoom: 9, // Landmarks, show at medium zoom
     overpassQuery: `[out:json][timeout:25];(node["man_made"="tower"]["tower:type"="observation"]({{bbox}});way["man_made"="tower"]["tower:type"="observation"]({{bbox}}););out body;>;out skel qt;`
   },
 
@@ -136,6 +140,7 @@ const CATEGORIES: Record<POICategory, CategoryConfig> = {
     icon: 'monument', // Material Symbol
     color: '#6b7280', // Dark gray
     dataSource: 'overpass',
+    minZoom: 9, // Historical sites, show at medium zoom
     // Query for historical military sites: forts, bunkers (military=bunker OR historic=bunker), battlefields (from T1)
     overpassQuery: `[out:json][timeout:25];(node["historic"="fort"]({{bbox}});way["historic"="fort"]({{bbox}});node["military"="bunker"]({{bbox}});way["military"="bunker"]({{bbox}});node["historic"="bunker"]({{bbox}});way["historic"="bunker"]({{bbox}});node["historic"="battlefield"]({{bbox}}););out body;>;out skel qt;`
   },
@@ -146,6 +151,7 @@ const CATEGORIES: Record<POICategory, CategoryConfig> = {
     icon: 'cottage', // Material Symbol
     color: '#b45309', // Brown/orange (from T1)
     dataSource: 'overpass',
+    minZoom: 10, // Small wilderness features, show at higher zoom
     // Query for outdoor shelters: basic huts, weather shelters, rock shelters, lavvu (from T1)
     overpassQuery: `[out:json][timeout:25];(node["amenity"="shelter"]["shelter_type"="basic_hut"]({{bbox}});way["amenity"="shelter"]["shelter_type"="basic_hut"]({{bbox}});node["amenity"="shelter"]["shelter_type"="weather_shelter"]({{bbox}});way["amenity"="shelter"]["shelter_type"="weather_shelter"]({{bbox}});node["amenity"="shelter"]["shelter_type"="rock_shelter"]({{bbox}});way["amenity"="shelter"]["shelter_type"="rock_shelter"]({{bbox}});node["amenity"="shelter"]["shelter_type"="lavvu"]({{bbox}});way["amenity"="shelter"]["shelter_type"="lavvu"]({{bbox}});node["amenity"="shelter"][!"shelter_type"]({{bbox}});way["amenity"="shelter"][!"shelter_type"]({{bbox}}););out body;>;out skel qt;`
   },
@@ -156,6 +162,7 @@ const CATEGORIES: Record<POICategory, CategoryConfig> = {
     icon: 'severdighet', // Geonorge Severdighet icon
     color: '#8b7355', // Warm brown (cultural heritage theme)
     dataSource: 'geojson-api',
+    minZoom: 6, // Significant cultural heritage sites, show at very low zoom for maximum discoverability on mobile
     apiUrl: 'https://api.ra.no/brukerminner/collections/brukerminner/items'
   }
 }
@@ -758,6 +765,10 @@ class POIService {
     })
       .then(async response => {
         devLog(`[POIService] GeoJSON API response status: ${response.status} ${response.statusText}`)
+        devLog(`[POIService] Response headers:`, {
+          contentType: response.headers.get('content-type'),
+          cors: response.headers.get('access-control-allow-origin')
+        })
 
         if (!response.ok) {
           const errorText = await response.text().catch(() => 'Unable to read error response')
@@ -791,6 +802,12 @@ class POIService {
       })
       .catch(error => {
         devError(`[POIService] Failed to fetch ${category}:`, error)
+        devError(`[POIService] Error type: ${error.name}`)
+        devError(`[POIService] Error message: ${error.message}`)
+        if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+          devError(`[POIService] Network error - possible CORS issue or network connectivity problem`)
+          devError(`[POIService] Ensure ${config.apiUrl} is accessible and CORS-enabled`)
+        }
         this.loading.delete(cacheKey)
         throw new Error(`Failed to fetch ${category} POIs: ${error.message}`)
       })

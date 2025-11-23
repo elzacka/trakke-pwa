@@ -97,13 +97,22 @@ export const useViewportPOIs = ({
     }
 
     const zoom = map.getZoom()
-    devLog(`[useViewportPOIs] Current zoom: ${zoom}, minZoom: ${minZoom}, active categories:`, Array.from(activeCategories))
+    devLog(`[useViewportPOIs] Current zoom: ${zoom}, global minZoom: ${minZoom}, active categories:`, Array.from(activeCategories))
+    devLog(`[useViewportPOIs] Platform: ${navigator.userAgent}`)
 
-    // Don't show POIs below minimum zoom level
-    if (zoom < minZoom) {
-      devLog(`[useViewportPOIs] Zoom ${zoom} < minZoom ${minZoom}, hiding POIs`)
-      setVisiblePOIs(new Map())
-      return
+    // Filter categories by their individual minimum zoom levels
+    const categoriesAtThisZoom = Array.from(activeCategories).filter(category => {
+      const config = poiService.getCategoryConfig(category)
+      const isVisible = zoom >= config.minZoom
+      if (category === 'kulturminner') {
+        devLog(`[useViewportPOIs] Kulturminner zoom check: zoom=${zoom}, minZoom=${config.minZoom}, visible=${isVisible}`)
+      }
+      return isVisible
+    })
+
+    devLog(`[useViewportPOIs] Categories visible at zoom ${zoom}:`, categoriesAtThisZoom)
+    if (activeCategories.has('kulturminner') && !categoriesAtThisZoom.includes('kulturminner')) {
+      devLog(`[useViewportPOIs] WARNING: Kulturminner is active but filtered out by zoom level`)
     }
 
     const bounds = getBoundsWithBuffer(map.getBounds())
@@ -126,12 +135,6 @@ export const useViewportPOIs = ({
     previousBoundsRef.current = bounds
     previousZoomRef.current = zoom
 
-    if (activeCategories.size === 0) {
-      devLog('[useViewportPOIs] No active categories')
-      setVisiblePOIs(new Map())
-      return
-    }
-
     devLog(`[useViewportPOIs] Fetching POIs for bounds:`, bounds)
     setIsLoading(true)
     setError(null)
@@ -140,23 +143,33 @@ export const useViewportPOIs = ({
     try {
       const newVisiblePOIs = new Map<POICategory, POI[]>()
 
-      // Fetch POIs for each active category in parallel
-      const fetchPromises = Array.from(activeCategories).map(async (category) => {
-        try {
-          const pois = await poiService.getPOIs(category, bounds, zoom)
-          return { category, pois, error: null }
-        } catch (err) {
-          devError(`Failed to fetch POIs for category ${category}:`, err)
-          // Preserve cached POIs on error (e.g., 429 rate limiting) instead of clearing
-          const cachedPOIs = latestPOIsRef.current.get(category) || []
-          return { category, pois: cachedPOIs, error: err }
+      // Fetch POIs for each category visible at this zoom level in parallel
+      if (categoriesAtThisZoom.length > 0) {
+        const fetchPromises = categoriesAtThisZoom.map(async (category) => {
+          try {
+            const pois = await poiService.getPOIs(category, bounds, zoom)
+            return { category, pois, error: null }
+          } catch (err) {
+            devError(`Failed to fetch POIs for category ${category}:`, err)
+            // Preserve cached POIs on error (e.g., 429 rate limiting) instead of clearing
+            const cachedPOIs = latestPOIsRef.current.get(category) || []
+            return { category, pois: cachedPOIs, error: err }
+          }
+        })
+
+        const results = await Promise.all(fetchPromises)
+
+        // Set POIs for categories that were fetched
+        results.forEach(({ category, pois }) => {
+          newVisiblePOIs.set(category, pois)
+        })
+      }
+
+      // Ensure all active categories are in the map, even if empty (below minZoom)
+      activeCategories.forEach(category => {
+        if (!newVisiblePOIs.has(category)) {
+          newVisiblePOIs.set(category, [])
         }
-      })
-
-      const results = await Promise.all(fetchPromises)
-
-      results.forEach(({ category, pois }) => {
-        newVisiblePOIs.set(category, pois)
       })
 
       if (mountedRef.current) {

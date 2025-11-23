@@ -323,22 +323,10 @@ const POIDetailsSheet = ({ isOpen, onClose, poi }: POIDetailsSheetProps) => {
             <div className="poi-details-info-label">Navn</div>
             <div className="poi-details-info-value">{kulturminne.name}</div>
           </div>
-          {kulturminne.description && (
-            <div className="poi-details-info-item">
-              <div className="poi-details-info-label">Beskrivelse</div>
-              <div className="poi-details-info-value">{kulturminne.description}</div>
-            </div>
-          )}
           {kulturminne.municipality && (
             <div className="poi-details-info-item">
               <div className="poi-details-info-label">Kommune</div>
               <div className="poi-details-info-value">{kulturminne.municipality}</div>
-            </div>
-          )}
-          {kulturminne.county && (
-            <div className="poi-details-info-item">
-              <div className="poi-details-info-label">Fylke</div>
-              <div className="poi-details-info-value">{kulturminne.county}</div>
             </div>
           )}
           {kulturminne.created_by && (
@@ -372,6 +360,12 @@ const POIDetailsSheet = ({ isOpen, onClose, poi }: POIDetailsSheetProps) => {
               </span>
             </button>
           </div>
+          {kulturminne.description && (
+            <div className="poi-details-info-item kulturminner-description">
+              <div className="poi-details-info-label">Beskrivelse</div>
+              <div className="poi-details-info-value">{kulturminne.description}</div>
+            </div>
+          )}
         </div>
       </>
     )

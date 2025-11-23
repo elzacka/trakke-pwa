@@ -96,6 +96,11 @@
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
 }
 
+/* Kulturminner description - left-aligned text for long descriptions */
+.kulturminner-description .poi-details-info-value {
+  text-align: left;
+}
+
 /* Mobile adjustments */
 @media (max-width: 768px) {
   .poi-details-content {

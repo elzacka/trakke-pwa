@@ -940,6 +940,21 @@ const Map = ({ zenMode }: MapProps) => {
             height: size,
             data: wildernessShelterCtx.getImageData(0, 0, size, size).data
           })
+
+          // Fallback: kulturminner icon (warm brown circle)
+          const kulturminnerCanvas = document.createElement('canvas')
+          kulturminnerCanvas.width = size
+          kulturminnerCanvas.height = size
+          const kulturminnerCtx = kulturminnerCanvas.getContext('2d')!
+          kulturminnerCtx.fillStyle = '#8b7355'
+          kulturminnerCtx.beginPath()
+          kulturminnerCtx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2)
+          kulturminnerCtx.fill()
+          map.current.addImage('kulturminner-icon', {
+            width: size,
+            height: size,
+            data: kulturminnerCtx.getImageData(0, 0, size, size).data
+          })
         }
 
         poiLayersInitialized.current = true

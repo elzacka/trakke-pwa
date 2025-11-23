@@ -805,10 +805,11 @@ const Map = ({ zenMode }: MapProps) => {
             'icon-size': 1,
             'icon-allow-overlap': true
           }
+          // No paint section needed - backgrounds are baked into icon images
         })
 
         // Helper function to load SVG and convert to Image
-        const loadSVGAsImage = async (path: string, color: string): Promise<HTMLImageElement> => {
+        const loadSVGAsImage = async (path: string): Promise<HTMLImageElement> => {
           devLog('[Map] Loading SVG icon from:', path)
           const response = await fetch(path)
           if (!response.ok) {
@@ -816,10 +817,10 @@ const Map = ({ zenMode }: MapProps) => {
           }
           const svgText = await response.text()
 
-          // Recolor SVG to match category color
-          const coloredSVG = svgText.replace(/fill="[^"]*"/g, `fill="${color}"`)
+          // Always recolor to black for consistency
+          const blackSVG = svgText.replace(/fill="[^"]*"/g, 'fill="#000000"')
 
-          const blob = new Blob([coloredSVG], { type: 'image/svg+xml' })
+          const blob = new Blob([blackSVG], { type: 'image/svg+xml' })
           const url = URL.createObjectURL(blob)
 
           return new Promise((resolve, reject) => {
@@ -838,15 +839,42 @@ const Map = ({ zenMode }: MapProps) => {
           })
         }
 
-        // Helper function to convert Image to canvas ImageData
-        const imageToMapIcon = (img: HTMLImageElement, size: number) => {
+        // Helper function to create POI icon with background (matching CategorySheet design)
+        const createPOIIcon = (img: HTMLImageElement, size: number, bgColor: string) => {
           const canvas = document.createElement('canvas')
           canvas.width = size
           canvas.height = size
           const ctx = canvas.getContext('2d')!
 
-          // Draw image centered and scaled
-          ctx.drawImage(img, 0, 0, size, size)
+          // Draw rounded rectangle background
+          const borderRadius = 3
+          const borderWidth = 1
+          const innerSize = size - borderWidth * 2
+
+          ctx.fillStyle = bgColor
+          ctx.strokeStyle = '#111827' // Black border
+          ctx.lineWidth = borderWidth
+
+          // Rounded rectangle path
+          ctx.beginPath()
+          ctx.moveTo(borderRadius, 0)
+          ctx.lineTo(size - borderRadius, 0)
+          ctx.quadraticCurveTo(size, 0, size, borderRadius)
+          ctx.lineTo(size, size - borderRadius)
+          ctx.quadraticCurveTo(size, size, size - borderRadius, size)
+          ctx.lineTo(borderRadius, size)
+          ctx.quadraticCurveTo(0, size, 0, size - borderRadius)
+          ctx.lineTo(0, borderRadius)
+          ctx.quadraticCurveTo(0, 0, borderRadius, 0)
+          ctx.closePath()
+
+          ctx.fill()
+          ctx.stroke()
+
+          // Draw icon centered and scaled (80% of inner size for padding)
+          const iconSize = innerSize * 0.8
+          const iconOffset = (size - iconSize) / 2
+          ctx.drawImage(img, iconOffset, iconOffset, iconSize, iconSize)
 
           return {
             width: size,
@@ -855,23 +883,40 @@ const Map = ({ zenMode }: MapProps) => {
           }
         }
 
-        // Create custom shelter icon (T marker) as canvas
+        // Create custom shelter icon (T marker) with rounded corners (matching CategorySheet design)
         const size = 24
         const canvas = document.createElement('canvas')
         canvas.width = size
         canvas.height = size
         const ctx = canvas.getContext('2d')!
 
-        // Draw yellow square with black border
-        ctx.fillStyle = '#fbbf24'
-        ctx.fillRect(2, 2, size - 4, size - 4)
-        ctx.strokeStyle = '#111827'
-        ctx.lineWidth = 2
-        ctx.strokeRect(2, 2, size - 4, size - 4)
+        // Draw yellow rounded rectangle with black border
+        const borderRadius = 3
+        const borderWidth = 1
+
+        ctx.fillStyle = '#fbbf24' // Yellow
+        ctx.strokeStyle = '#111827' // Black
+        ctx.lineWidth = borderWidth
+
+        // Rounded rectangle path
+        ctx.beginPath()
+        ctx.moveTo(borderRadius, 0)
+        ctx.lineTo(size - borderRadius, 0)
+        ctx.quadraticCurveTo(size, 0, size, borderRadius)
+        ctx.lineTo(size, size - borderRadius)
+        ctx.quadraticCurveTo(size, size, size - borderRadius, size)
+        ctx.lineTo(borderRadius, size)
+        ctx.quadraticCurveTo(0, size, 0, size - borderRadius)
+        ctx.lineTo(0, borderRadius)
+        ctx.quadraticCurveTo(0, 0, borderRadius, 0)
+        ctx.closePath()
+
+        ctx.fill()
+        ctx.stroke()
 
         // Draw T letter
         ctx.fillStyle = '#111827'
-        ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+        ctx.font = '400 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
         ctx.fillText('T', size / 2, size / 2)
@@ -882,25 +927,26 @@ const Map = ({ zenMode }: MapProps) => {
           data: ctx.getImageData(0, 0, size, size).data
         })
 
-        // Load SVG icons for all POI categories from OSM-Carto
+        // Load SVG icons for all POI categories with uniform white backgrounds and black symbols
         try {
           const baseUrl = import.meta.env.BASE_URL
           devLog('[Map] BASE_URL:', baseUrl)
 
-          const caveImg = await loadSVGAsImage(`${baseUrl}icons/osm-carto/cave.svg`, '#8b4513')
-          map.current.addImage('cave-icon', imageToMapIcon(caveImg, size))
+          // All icons use white background (#ffffff) with black symbols
+          const caveImg = await loadSVGAsImage(`${baseUrl}icons/osm-carto/cave.svg`)
+          map.current.addImage('cave-icon', createPOIIcon(caveImg, size, '#ffffff'))
 
-          const towerImg = await loadSVGAsImage(`${baseUrl}icons/osm-carto/tower_observation.svg`, '#4a5568')
-          map.current.addImage('tower-icon', imageToMapIcon(towerImg, size))
+          const towerImg = await loadSVGAsImage(`${baseUrl}icons/osm-carto/tower_observation.svg`)
+          map.current.addImage('tower-icon', createPOIIcon(towerImg, size, '#ffffff'))
 
-          const memorialImg = await loadSVGAsImage(`${baseUrl}icons/osm-carto/fort.svg`, '#6b7280')
-          map.current.addImage('memorial-icon', imageToMapIcon(memorialImg, size))
+          const memorialImg = await loadSVGAsImage(`${baseUrl}icons/osm-carto/fort.svg`)
+          map.current.addImage('memorial-icon', createPOIIcon(memorialImg, size, '#ffffff'))
 
-          const wildernessShelterImg = await loadSVGAsImage(`${baseUrl}icons/osm-carto/shelter.svg`, '#b45309')
-          map.current.addImage('wilderness-shelter-icon', imageToMapIcon(wildernessShelterImg, size))
+          const wildernessShelterImg = await loadSVGAsImage(`${baseUrl}icons/osm-carto/shelter.svg`)
+          map.current.addImage('wilderness-shelter-icon', createPOIIcon(wildernessShelterImg, size, '#ffffff'))
 
-          const kulturminnerImg = await loadSVGAsImage(`${baseUrl}icons/geonorge/severdighet.svg`, '#8b7355')
-          map.current.addImage('kulturminner-icon', imageToMapIcon(kulturminnerImg, size))
+          const kulturminnerImg = await loadSVGAsImage(`${baseUrl}icons/geonorge/severdighet.svg`)
+          map.current.addImage('kulturminner-icon', createPOIIcon(kulturminnerImg, size, '#ffffff'))
 
           devLog('[Map] All SVG icons loaded successfully')
         } catch (error) {

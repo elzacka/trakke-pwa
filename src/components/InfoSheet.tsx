@@ -356,7 +356,7 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
                             <li>Klikk på markør for å se detaljer</li>
                           </ul>
 
-                          <h4>Legg til og lagre egne steder</h4>
+                          <h4>Legg til egne steder</h4>
                           <ul className="info-list">
                             <li>Åpne <strong>Ruter og punkter</strong> fra menyen</li>
                             <li>Trykk <strong>Legg til punkt</strong></li>
@@ -425,6 +425,7 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
                               <li><strong>Shift + skyv</strong> - Zoom til område</li>
                               <li><strong>Ctrl + skyv</strong> - Vipp og roter kart</li>
                               <li><strong>Dobbeltklikk</strong> - Zoom til punkt</li>
+			      <li><strong>Ctrl + klikk</strong> - Kopier koordinater</li>
                               
                             </ul>
                           </section>

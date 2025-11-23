@@ -120,18 +120,24 @@ const CategorySheet = ({ isOpen, onClose, onCategorySelect }: CategorySheetProps
                         >
                           <div className="category-option-icon">
                             {iconConfig.type === 'custom' && categoryId === 'shelters' ? (
-                              // Custom T-marker for Tilfluktsrom
+                              // Custom T-marker for Tilfluktsrom (yellow background)
                               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <rect x="0.5" y="0.5" width="19" height="19" rx="2.5" fill="#fbbf24" stroke="#111827" strokeWidth="1"/>
                                 <text x="10" y="10" fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" fontSize="12" fontWeight="400" fill="#111827" textAnchor="middle" dominantBaseline="central">T</text>
                               </svg>
                             ) : (iconConfig.type === 'osmic' || iconConfig.type === 'osm-carto') && iconConfig.path ? (
-                              // Osmic or OSM-Carto SVG icon
-                              <img
-                                src={iconConfig.path}
-                                alt={category.name}
-                                style={{ width: '20px', height: '20px', filter: `brightness(0) saturate(100%)`, opacity: 0.8 }}
-                              />
+                              // All other icons: white background with black border and black symbol
+                              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="0.5" y="0.5" width="19" height="19" rx="2.5" fill="#ffffff" stroke="#111827" strokeWidth="1"/>
+                                <image
+                                  href={iconConfig.path}
+                                  x="3"
+                                  y="3"
+                                  width="14"
+                                  height="14"
+                                  style={{ filter: 'brightness(0) saturate(100%)' }}
+                                />
+                              </svg>
                             ) : (
                               // Material Symbol fallback
                               <span className="material-symbols-outlined" style={{ color: category.color }}>{category.icon}</span>

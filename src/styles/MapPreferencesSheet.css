@@ -122,8 +122,8 @@
 
 .base-layer-selector {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
 }
 
 .base-layer-option {
@@ -131,12 +131,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 14px 12px;
+  gap: 6px;
+  padding: 10px 6px;
   background: var(--trk-surface);
   border: 2px solid var(--trk-border);
   border-radius: var(--radius-md);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--trk-text);
   cursor: pointer;
@@ -159,7 +159,7 @@
 }
 
 .base-layer-option .material-symbols-outlined {
-  font-size: 24px;
+  font-size: 22px;
 }
 
 /* Coordinate Format Selector */

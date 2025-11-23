@@ -283,9 +283,12 @@ See [DEPENDENCIES.md](DEPENDENCIES.md) for complete dependency list with exact v
   - Min/max/average elevation statistics
   - Interactive Chart.js visualization
   - 7-day IndexedDB caching
+- **Satellite imagery layer** - Norge i bilder orthophoto WMTS (25cm resolution, zoom 0-19)
+  - Selectable from Innstillinger (Settings) alongside Topographic and Grayscale
+  - Full offline download support
+  - Deprecated service but publicly accessible (opencache.statkart.no)
 
 **In Development:**
-- **Satellite imagery layer** - Investigating Kartverket WMTS satellite/orthophoto availability (request sent to Kartverket)
 - Weather integration (MET Norway - privacy review complete, proxy deployment pending)
 - Route planning with trail snapping
 - Photo geotagging for waypoints

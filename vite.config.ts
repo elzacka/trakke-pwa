@@ -15,7 +15,7 @@ function injectCSP(): Plugin {
             tag: 'meta',
             attrs: {
               'http-equiv': 'Content-Security-Policy',
-              'content': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://cache.kartverket.no; font-src 'self'; connect-src 'self' https://cache.kartverket.no https://ws.geonorge.no https://ogc.dsb.no https://overpass-api.de https://api.met.no https://api.ra.no; worker-src 'self' blob:; manifest-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self';"
+              'content': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://cache.kartverket.no https://opencache.statkart.no; font-src 'self'; connect-src 'self' https://cache.kartverket.no https://ws.geonorge.no https://opencache.statkart.no https://ogc.dsb.no https://overpass-api.de https://api.met.no https://api.ra.no; worker-src 'self' blob:; manifest-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self';"
             },
             injectTo: 'head'
           }
@@ -125,13 +125,28 @@ export default defineConfig({
         globIgnores: ['**/MaterialSymbolsOutlined.woff2'],
         runtimeCaching: [
           {
-            // Kartverket WMTS tiles - Only external resource (GDPR compliant - Norwegian government)
+            // Kartverket WMTS tiles (topo & grayscale)
             urlPattern: /^https:\/\/cache\.kartverket\.no\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'kartverket-tiles',
               expiration: {
                 maxEntries: 25000, // Increased to support large offline downloads (up to MAX_TILES limit)
+                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            // Norge i bilder WMTS tiles (satellite)
+            urlPattern: /^https:\/\/opencache\.statkart\.no\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'norge-i-bilder-tiles',
+              expiration: {
+                maxEntries: 25000, // Same as kartverket-tiles for consistency
                 maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
               },
               cacheableResponse: {

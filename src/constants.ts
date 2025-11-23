@@ -14,6 +14,10 @@ export const MAP_CONFIG = {
   TILE_URL_TOPO: 'https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png',
   TILE_URL_GRAYSCALE: 'https://cache.kartverket.no/v1/wmts/1.0.0/topograatone/default/webmercator/{z}/{y}/{x}.png',
 
+  // Norge i bilder satellite imagery (WMTS - offline capable)
+  // 25cm resolution, zoom levels 0-19
+  TILE_URL_SATELLITE: 'https://opencache.statkart.no/gatekeeper/gk/gk.open_nib_web_mercator_wmts_v2?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=Nibcache_web_mercator_v2&STYLE=default&FORMAT=image/jpgpng&tileMatrixSet=default028mm&tileMatrix={z}&tileRow={y}&tileCol={x}',
+
   // Legacy tile URL (deprecated - use TILE_URL_TOPO)
   TILE_URL: 'https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png',
 
@@ -22,7 +26,7 @@ export const MAP_CONFIG = {
 } as const
 
 // Base Layer Types
-export type BaseLayerType = 'topo' | 'grayscale'
+export type BaseLayerType = 'topo' | 'grayscale' | 'satellite'
 
 // UI Timing
 export const TIMING = {

@@ -186,6 +186,21 @@ const MapPreferencesSheet = ({ isOpen, onClose, onPreferencesChange }: MapPrefer
                   <span className="material-symbols-outlined">filter_b_and_w</span>
                   <span>Gråtone</span>
                 </button>
+                <button
+                  className={`base-layer-option ${preferences.baseLayer === 'satellite' ? 'active' : ''}`}
+                  onClick={() => {
+                    const newPreferences = {
+                      ...preferences,
+                      baseLayer: 'satellite' as BaseLayerType
+                    }
+                    setPreferences(newPreferences)
+                    mapPreferencesService.savePreferences(newPreferences)
+                    onPreferencesChange(newPreferences)
+                  }}
+                >
+                  <span className="material-symbols-outlined">satellite_alt</span>
+                  <span>Satellitt</span>
+                </button>
               </div>
             </div>
 

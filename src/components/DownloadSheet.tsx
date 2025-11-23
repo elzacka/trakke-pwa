@@ -296,6 +296,13 @@ const DownloadSheet = ({
                     <span className="material-symbols-outlined">filter_b_and_w</span>
                     <span>Gråtone</span>
                   </button>
+                  <button
+                    className={`base-layer-option ${baseLayer === 'satellite' ? 'active' : ''}`}
+                    onClick={() => setBaseLayer('satellite')}
+                  >
+                    <span className="material-symbols-outlined">satellite_alt</span>
+                    <span>Satellitt</span>
+                  </button>
                 </div>
               </div>
 

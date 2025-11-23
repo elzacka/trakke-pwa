@@ -72,6 +72,16 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
                         </a>
                       </li>
                       <li>
+                        Data: Satellittkart. {' '}
+                        <a
+                          href="https://kartkatalog.geonorge.no/metadata/norge-i-bilder-wmts-mercator/d639038c-a75b-446a-ad0c-16301cabfd21"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          WMTS-tjeneste.
+                        </a>
+                      </li>
+                      <li>
                         Data: Stedsnavn (søkefunksjon). {' '}
                         <a
                           href="https://kartkatalog.geonorge.no/metadata/soeketjeneste-for-stedsnavn/d12de000-1a23-46b3-9192-3a1a98b2c994"
@@ -115,7 +125,7 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
                           rel="noopener noreferrer"
                         >
                           Creative Commons BY 4.0.
-                        </a>
+                        </a> Unntak: Satellittdata (åpne data, men ikke til kommersielt bruk).
                       </li>
                     </ul>
                   </section>
@@ -335,7 +345,7 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
                             <li>Klikk på søkeresultat for å sentrere kartet på dette stedet</li>
                           </ul>
 
-                          <h4>Se kategorier på kartet og detaljer om disse</h4>
+                          <h4>Se kategorier på kartet</h4>
                           <ul className="info-list">
                             <li>Åpne <strong>Kategorier</strong> fra menyen</li>
                             <li>Velg <strong>Kulturminner</strong> eller andre kategorier</li>
@@ -343,7 +353,7 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
                             <li>Klikk på markør for å se detaljer</li>
                           </ul>
 
-                          <h4>Legge til og lagre egne steder</h4>
+                          <h4>Legg til og lagre egne steder</h4>
                           <ul className="info-list">
                             <li>Åpne <strong>Ruter og punkter</strong> fra menyen</li>
                             <li>Trykk <strong>Legg til punkt</strong></li>
@@ -351,7 +361,7 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
                             <li>{isMobile ? 'Trykk og hold' : 'Høyreklikk'} på punktmarkøren for å gi navn og kategori</li>
                           </ul>
 
-                          <h4>Måle avstand og areal</h4>
+                          <h4>Mål avstand og areal</h4>
                           <ul className="info-list">
                             <li>Åpne <strong>Måleverktøy</strong> fra menyen</li>
                             <li>Velg <strong>Avstand</strong> eller <strong>Areal</strong></li>
@@ -360,11 +370,12 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
                             <li>Bruk <strong>Nullstill</strong> for å starte på nytt</li>
                           </ul>
 
-                          <h4>Laste ned kart for offline bruk</h4>
+                          <h4>Last ned kart for offline bruk</h4>
                           <ul className="info-list">
-                            <li>Åpne <strong>Offline kart</strong> fra menyen</li>
-                            <li>Klikk to ganger på kartet for å velge område</li>
-                            <li>Velg zoom-nivå (høyere nivå = mer detaljer, større nedlasting)</li>
+                            <li>Gå til området du vil laste ned</li>
+			    <li>Velg <strong>Offline kart</strong> fra menyen</li>
+			    <li>Velg zoom-nivå (høyere nivå = mer detaljer, større nedlasting)</li>
+                            <li>Dra i <strong>hjørnene på firkanten</strong> for å endre område</li>
                             <li>Trykk <strong>Last ned</strong> og vent til ferdig</li>
                             <li>Kartområdet er lagret, klart til bruk <strong>selv om du ikke har dekning</strong></li>
                           </ul>
@@ -411,7 +422,7 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
                               <li><strong>Shift + skyv</strong> - Zoom til område</li>
                               <li><strong>Ctrl + skyv</strong> - Vipp og roter kart</li>
                               <li><strong>Dobbeltklikk</strong> - Zoom til punkt</li>
-                              <li><strong>Ctrl + klikk</strong> - Kopier koordinater fra kart</li>
+                              
                             </ul>
                           </section>
                         </div>

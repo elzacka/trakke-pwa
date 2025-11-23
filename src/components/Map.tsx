@@ -213,6 +213,13 @@ const Map = ({ zenMode }: MapProps) => {
             tiles: [MAP_CONFIG.TILE_URL_GRAYSCALE],
             tileSize: 256,
             attribution: zenMode ? '' : MAP_CONFIG.ATTRIBUTION
+          },
+          'norge-i-bilder-satellite': {
+            type: 'raster',
+            tiles: [MAP_CONFIG.TILE_URL_SATELLITE],
+            tileSize: 256,
+            maxzoom: 19, // Norge i bilder supports zoom 0-19 with 25cm resolution
+            attribution: zenMode ? '' : '©Kartverket | Norge i bilder'
           }
         },
         layers: [
@@ -227,13 +234,24 @@ const Map = ({ zenMode }: MapProps) => {
             minzoom: 0,
             maxzoom: 22
           },
-          // Topo layer (top - visible by default)
+          // Topo layer (middle - visible by default)
           {
             id: 'kartverket-topo-layer',
             type: 'raster',
             source: 'kartverket-topo',
             layout: {
               visibility: baseLayer === 'topo' ? 'visible' : 'none'
+            },
+            minzoom: 0,
+            maxzoom: 22
+          },
+          // Satellite layer (top - hidden by default)
+          {
+            id: 'norge-i-bilder-satellite-layer',
+            type: 'raster',
+            source: 'norge-i-bilder-satellite',
+            layout: {
+              visibility: baseLayer === 'satellite' ? 'visible' : 'none'
             },
             minzoom: 0,
             maxzoom: 22
@@ -516,12 +534,19 @@ const Map = ({ zenMode }: MapProps) => {
     if (!map.current) return
 
     try {
+      // Hide all layers first
+      map.current.setLayoutProperty('kartverket-topo-layer', 'visibility', 'none')
+      map.current.setLayoutProperty('kartverket-grayscale-layer', 'visibility', 'none')
+      map.current.setLayoutProperty('norge-i-bilder-satellite-layer', 'visibility', 'none')
+
+      // Show selected layer
       if (baseLayer === 'grayscale') {
-        map.current.setLayoutProperty('kartverket-topo-layer', 'visibility', 'none')
         map.current.setLayoutProperty('kartverket-grayscale-layer', 'visibility', 'visible')
         devLog('Switched to grayscale base layer')
+      } else if (baseLayer === 'satellite') {
+        map.current.setLayoutProperty('norge-i-bilder-satellite-layer', 'visibility', 'visible')
+        devLog('Switched to satellite base layer')
       } else {
-        map.current.setLayoutProperty('kartverket-grayscale-layer', 'visibility', 'none')
         map.current.setLayoutProperty('kartverket-topo-layer', 'visibility', 'visible')
         devLog('Switched to topographic base layer')
       }

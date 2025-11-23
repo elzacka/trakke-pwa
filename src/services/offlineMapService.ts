@@ -40,9 +40,14 @@ class OfflineMapService {
    * Get tile URL template for a specific base layer
    */
   private getTileUrlTemplate(baseLayer: BaseLayerType): string {
-    return baseLayer === 'grayscale'
-      ? MAP_CONFIG.TILE_URL_GRAYSCALE
-      : MAP_CONFIG.TILE_URL_TOPO
+    switch (baseLayer) {
+      case 'grayscale':
+        return MAP_CONFIG.TILE_URL_GRAYSCALE
+      case 'satellite':
+        return MAP_CONFIG.TILE_URL_SATELLITE
+      default:
+        return MAP_CONFIG.TILE_URL_TOPO
+    }
   }
 
   /**

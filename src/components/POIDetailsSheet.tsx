@@ -329,12 +329,6 @@ const POIDetailsSheet = ({ isOpen, onClose, poi }: POIDetailsSheetProps) => {
               <div className="poi-details-info-value">{kulturminne.municipality}</div>
             </div>
           )}
-          {kulturminne.created_by && (
-            <div className="poi-details-info-item">
-              <div className="poi-details-info-label">Opprettet av</div>
-              <div className="poi-details-info-value">{kulturminne.created_by}</div>
-            </div>
-          )}
           {kulturminne.link && (
             <div className="poi-details-info-item">
               <div className="poi-details-info-label">Lenke</div>

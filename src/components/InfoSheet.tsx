@@ -118,14 +118,17 @@ const InfoSheet = ({ isOpen, onClose }: InfoSheetProps) => {
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          Norsk lisens for offentlige data (NLOD)</a> iht. {' '}
+                          Norsk lisens for offentlige data (NLOD)
+                        </a>
+                        {' '}iht.{' '}
                         <a
                           href="https://creativecommons.org/licenses/by/4.0/"
                           target="_blank"
                           rel="noopener noreferrer"
                         >
                           Creative Commons BY 4.0.
-                        </a> Unntak: Satellittdata (åpne data, men ikke til kommersielt bruk).
+                        </a>
+                        {' '}Unntak: Satellittdata (åpne data, men ikke til kommersielt bruk).
                       </li>
                     </ul>
                   </section>

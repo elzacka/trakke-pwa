@@ -331,7 +331,7 @@ const POIDetailsSheet = ({ isOpen, onClose, poi }: POIDetailsSheetProps) => {
           )}
           {kulturminne.link && (
             <div className="poi-details-info-item">
-              <div className="poi-details-info-label">Lenke</div>
+              <div className="poi-details-info-label">Lenke og bilde</div>
               <div className="poi-details-info-value">
                 <a href={kulturminne.link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--trk-brand)', textDecoration: 'underline' }}>
                   Kulturminnesøk
@@ -355,10 +355,14 @@ const POIDetailsSheet = ({ isOpen, onClose, poi }: POIDetailsSheetProps) => {
             </button>
           </div>
           {kulturminne.description && (
-            <div className="poi-details-info-item kulturminner-description">
-              <div className="poi-details-info-label">Beskrivelse</div>
-              <div className="poi-details-info-value">{kulturminne.description}</div>
-            </div>
+            <>
+              <div className="kulturminner-description-header">
+                <div className="poi-details-info-label">Beskrivelse</div>
+              </div>
+              <div className="kulturminner-description-text">
+                {kulturminne.description}
+              </div>
+            </>
           )}
         </div>
       </>

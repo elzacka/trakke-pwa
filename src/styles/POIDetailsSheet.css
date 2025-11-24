@@ -96,9 +96,32 @@
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
 }
 
-/* Kulturminner description - left-aligned text for long descriptions */
-.kulturminner-description .poi-details-info-value {
+/* Kulturminner description - full-width layout with header above text */
+.kulturminner-description-header {
+  padding: 10px 12px 4px 12px;
+  background: transparent;
+}
+
+.kulturminner-description-header .poi-details-info-label {
   text-align: left;
+  font-size: 14px;
+  color: var(--trk-text-soft);
+}
+
+.kulturminner-description-text {
+  padding: 4px 12px 10px 12px;
+  font-size: 14px;
+  font-weight: 400; /* Normal font weight instead of bold (500) */
+  color: var(--trk-text);
+  text-align: left;
+  white-space: pre-wrap; /* Preserve line breaks from source data */
+  background: transparent;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.kulturminner-description-text:hover {
+  background: rgba(0, 0, 0, 0.03);
 }
 
 /* Mobile adjustments */
@@ -122,5 +145,13 @@
 
   .poi-details-copy-button .material-symbols-outlined {
     font-size: 18px;
+  }
+
+  .kulturminner-description-header .poi-details-info-label {
+    font-size: 13px;
+  }
+
+  .kulturminner-description-text {
+    font-size: 13px;
   }
 }

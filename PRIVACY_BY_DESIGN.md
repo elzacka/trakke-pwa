@@ -109,6 +109,7 @@ const dbService = {
 | `opencache.statkart.no` | Norge i bilder WMTS | Kartverket | Norway 🇳🇴 | Satellite/orthophoto imagery (WMTS - offline capable) | ✅ | 25cm resolution orthophotos, zoom 0-19. Service deprecated but publicly accessible with no replacement. CC BY 4.0. Attribution: ©Kartverket \| Norge i bilder |
 | `api.met.no` | Locationforecast 2.0 | MET Norway | Norway 🇳🇴 | Weather forecasts | ⚠️ | Norwegian Meteorological Institute, **logs user IP addresses** in Oslo datacenter. CC BY 4.0 license. Direct API calls (no proxy). |
 | `badetemperaturer.yr.no` | Bathing Temp API | Yr (MET/NRK) | Norway 🇳🇴 | Bathing/swimming water temperatures | ⏸️ | Yr service by MET Norway/NRK. **Requires API key** (obtain via email to support@yr.no). Feature implemented but disabled until API key configured. |
+| `*.supabase.co` | Personal POI Database | Supabase (User-hosted) | Sweden 🇸🇪 (EU) | User-defined POI categories (Tråkke spesial) | ✅ | **Optional feature** - User provides own Supabase project URL and anon key. Recommended: EU region (eu-north-1, Stockholm). Read-only access, no tracking, user controls data. Disabled by default. |
 
 **Privacy guarantees for all approved services:**
 - No user tracking or analytics
@@ -151,7 +152,7 @@ Implemented via vite.config.ts custom plugin (production builds only):
                style-src 'self' 'unsafe-inline';
                img-src 'self' data: blob: https://cache.kartverket.no https://opencache.statkart.no;
                font-src 'self';
-               connect-src 'self' https://cache.kartverket.no https://ws.geonorge.no https://opencache.statkart.no https://ogc.dsb.no https://overpass-api.de https://api.met.no https://api.ra.no;
+               connect-src 'self' https://cache.kartverket.no https://ws.geonorge.no https://opencache.statkart.no https://ogc.dsb.no https://overpass-api.de https://api.met.no https://api.ra.no https://*.supabase.co;
                worker-src 'self';">
 ```
 

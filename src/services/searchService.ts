@@ -4,7 +4,9 @@
 // - Addresses: Adresseregister © Kartverket
 
 import { levenshteinDistance } from '../utils/levenshtein'
-import { devError } from '../constants'
+import { devError, devLog } from '../constants'
+import proj4 from 'proj4'
+import * as mgrs from 'mgrs'
 
 export interface SearchResult {
   id: string
@@ -190,9 +192,16 @@ class SearchService {
 
   /**
    * Search for place names using Kartverket's name API with smart fuzzy matching
+   * Also handles coordinate input for direct navigation
    */
   async searchPlaces(query: string, limit: number = 5): Promise<SearchResult[]> {
     if (!query || query.length < 2) return []
+
+    // Check if query is coordinates first
+    const coordResult = this.parseCoordinates(query.trim())
+    if (coordResult) {
+      return [coordResult]
+    }
 
     try {
       // Fetch many more results for better autocomplete/fuzzy matching
@@ -324,31 +333,231 @@ class SearchService {
 
   /**
    * Parse coordinates from query string
-   * Supports formats: "lat,lon", "lat lon", "UTM"
+   * Supports formats: DD, DMS, DDM, UTM, MGRS
    */
   parseCoordinates(query: string): SearchResult | null {
     const cleaned = query.trim()
 
-    // Try decimal degrees: "59.9139,10.7522" or "59.9139 10.7522"
-    const decimalMatch = cleaned.match(/^(-?\d+\.?\d*)[,\s]+(-?\d+\.?\d*)$/)
-    if (decimalMatch) {
-      const lat = parseFloat(decimalMatch[1])
-      const lon = parseFloat(decimalMatch[2])
+    // Try each format in order of specificity
+    const result =
+      this.parseDecimalDegrees(cleaned) ||
+      this.parseDMS(cleaned) ||
+      this.parseDDM(cleaned) ||
+      this.parseUTM(cleaned) ||
+      this.parseMGRS(cleaned)
 
-      // Validate coordinates (Norway bounds approximately)
-      if (lat >= 57 && lat <= 72 && lon >= 4 && lon <= 32) {
-        return {
-          id: `coord-${lat}-${lon}`,
-          name: `${lat.toFixed(5)}, ${lon.toFixed(5)}`,
-          type: 'coordinates',
-          coordinates: [lon, lat],
-          displayName: `${lat.toFixed(5)}, ${lon.toFixed(5)}`,
-          subtext: 'Koordinater'
-        }
+    if (result) {
+      devLog('[SearchService] Parsed coordinates:', result)
+    }
+
+    return result
+  }
+
+  /**
+   * Parse Decimal Degrees (DD) format
+   * Examples: "59.9139, 10.7522", "59.9139 10.7522", "N59.9139 E10.7522"
+   */
+  private parseDecimalDegrees(query: string): SearchResult | null {
+    // Pattern with direction letters: N59.9139 E10.7522 or 59.9139N 10.7522E
+    const dirPattern = /^([NS])?(-?\d+\.?\d*)[°]?([NS])?\s*[,\s]\s*([EWØ])?(-?\d+\.?\d*)[°]?([EWØ])?$/i
+    const dirMatch = query.match(dirPattern)
+
+    if (dirMatch) {
+      let lat = parseFloat(dirMatch[2])
+      let lon = parseFloat(dirMatch[5])
+
+      // Apply direction
+      const latDir = (dirMatch[1] || dirMatch[3] || '').toUpperCase()
+      const lonDir = (dirMatch[4] || dirMatch[6] || '').toUpperCase()
+
+      if (latDir === 'S') lat = -lat
+      if (lonDir === 'W') lon = -lon
+      // Ø is Norwegian for East, so no change needed
+
+      return this.createCoordinateResult(lon, lat, 'DD')
+    }
+
+    // Simple pattern: "59.9139, 10.7522" or "59.9139 10.7522"
+    const simplePattern = /^(-?\d+\.?\d*)\s*[,\s]\s*(-?\d+\.?\d*)$/
+    const simpleMatch = query.match(simplePattern)
+
+    if (simpleMatch) {
+      const first = parseFloat(simpleMatch[1])
+      const second = parseFloat(simpleMatch[2])
+
+      // Determine which is lat/lon based on Norwegian bounds
+      // Norway: lat ~57-72, lon ~4-32
+      let lat: number, lon: number
+
+      if (first >= 57 && first <= 72 && second >= 4 && second <= 32) {
+        // First is lat, second is lon (most common: lat, lon)
+        lat = first
+        lon = second
+      } else if (second >= 57 && second <= 72 && first >= 4 && first <= 32) {
+        // First is lon, second is lat (lon, lat format)
+        lon = first
+        lat = second
+      } else {
+        // Outside Norway bounds, assume lat, lon
+        lat = first
+        lon = second
+      }
+
+      return this.createCoordinateResult(lon, lat, 'DD')
+    }
+
+    return null
+  }
+
+  /**
+   * Parse Degrees Minutes Seconds (DMS) format
+   * Examples: "59°54'50.0"N, 10°45'7.9"E", "59°54'50"N 10°45'8"E"
+   */
+  private parseDMS(query: string): SearchResult | null {
+    // Pattern: 59°54'50.0"N, 10°45'7.9"E
+    const dmsPattern = /(\d+)[°]\s*(\d+)['\u2032]\s*(\d+\.?\d*)["\u2033]?\s*([NS])\s*[,\s]\s*(\d+)[°]\s*(\d+)['\u2032]\s*(\d+\.?\d*)["\u2033]?\s*([EWØ])/i
+    const match = query.match(dmsPattern)
+
+    if (match) {
+      const latDeg = parseInt(match[1])
+      const latMin = parseInt(match[2])
+      const latSec = parseFloat(match[3])
+      const latDir = match[4].toUpperCase()
+
+      const lonDeg = parseInt(match[5])
+      const lonMin = parseInt(match[6])
+      const lonSec = parseFloat(match[7])
+      const lonDir = match[8].toUpperCase()
+
+      let lat = latDeg + latMin / 60 + latSec / 3600
+      let lon = lonDeg + lonMin / 60 + lonSec / 3600
+
+      if (latDir === 'S') lat = -lat
+      if (lonDir === 'W') lon = -lon
+
+      return this.createCoordinateResult(lon, lat, 'DMS')
+    }
+
+    return null
+  }
+
+  /**
+   * Parse Degrees Decimal Minutes (DDM) format
+   * Examples: "59°54.833'N, 10°45.132'E"
+   */
+  private parseDDM(query: string): SearchResult | null {
+    // Pattern: 59°54.833'N, 10°45.132'E
+    const ddmPattern = /(\d+)[°]\s*(\d+\.?\d*)['\u2032]\s*([NS])\s*[,\s]\s*(\d+)[°]\s*(\d+\.?\d*)['\u2032]\s*([EWØ])/i
+    const match = query.match(ddmPattern)
+
+    if (match) {
+      const latDeg = parseInt(match[1])
+      const latMin = parseFloat(match[2])
+      const latDir = match[3].toUpperCase()
+
+      const lonDeg = parseInt(match[4])
+      const lonMin = parseFloat(match[5])
+      const lonDir = match[6].toUpperCase()
+
+      let lat = latDeg + latMin / 60
+      let lon = lonDeg + lonMin / 60
+
+      if (latDir === 'S') lat = -lat
+      if (lonDir === 'W') lon = -lon
+
+      return this.createCoordinateResult(lon, lat, 'DDM')
+    }
+
+    return null
+  }
+
+  /**
+   * Parse UTM format
+   * Examples: "32V 597423 6643460", "32V597423 6643460", "32 V 597423 6643460"
+   */
+  private parseUTM(query: string): SearchResult | null {
+    // Pattern: zone + band + easting + northing
+    // Flexible spacing: "32V 597423 6643460" or "32 V 597423 6643460"
+    const utmPattern = /^(\d{1,2})\s*([C-X])\s+(\d{5,7})\s*[EØ]?\s+(\d{6,8})\s*N?$/i
+    const match = query.match(utmPattern)
+
+    if (match) {
+      const zone = parseInt(match[1])
+      const band = match[2].toUpperCase()
+      const easting = parseFloat(match[3])
+      const northing = parseFloat(match[4])
+
+      // Validate zone (1-60) and band (C-X, excluding I and O)
+      if (zone < 1 || zone > 60) return null
+      if (!/[C-HJ-NP-X]/.test(band)) return null
+
+      try {
+        // Determine hemisphere from band
+        const hemisphere = band >= 'N' ? '+north' : '+south'
+        const utmProj = `+proj=utm +zone=${zone} ${hemisphere} +datum=WGS84 +units=m +no_defs`
+
+        const [lon, lat] = proj4(utmProj, 'EPSG:4326', [easting, northing])
+
+        return this.createCoordinateResult(lon, lat, 'UTM')
+      } catch (error) {
+        devError('[SearchService] UTM parse error:', error)
+        return null
       }
     }
 
     return null
+  }
+
+  /**
+   * Parse MGRS format
+   * Examples: "32VNM9742371394", "32V NM 97423 71394"
+   */
+  private parseMGRS(query: string): SearchResult | null {
+    // Remove spaces for MGRS parsing
+    const cleanedMgrs = query.replace(/\s+/g, '').toUpperCase()
+
+    // MGRS pattern: zone(1-2 digits) + band(1 letter) + square(2 letters) + coordinates(even digits)
+    const mgrsPattern = /^(\d{1,2})([C-X])([A-HJ-NP-Z]{2})(\d{2,10})$/
+    const match = cleanedMgrs.match(mgrsPattern)
+
+    if (match) {
+      const coords = match[4]
+      // Coordinates must be even (split into easting/northing)
+      if (coords.length % 2 !== 0) return null
+
+      try {
+        const [lon, lat] = mgrs.toPoint(cleanedMgrs)
+        return this.createCoordinateResult(lon, lat, 'MGRS')
+      } catch (error) {
+        devError('[SearchService] MGRS parse error:', error)
+        return null
+      }
+    }
+
+    return null
+  }
+
+  /**
+   * Create a SearchResult for parsed coordinates
+   */
+  private createCoordinateResult(lon: number, lat: number, format: string): SearchResult | null {
+    // Validate coordinates are reasonable (world bounds, with focus on Norway)
+    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+      return null
+    }
+
+    // Check if within extended Norway bounds (generous for edge cases)
+    const inNorway = lat >= 55 && lat <= 75 && lon >= 2 && lon <= 35
+    const locationHint = inNorway ? '' : ' (utenfor Norge)'
+
+    return {
+      id: `coord-${lat.toFixed(6)}-${lon.toFixed(6)}`,
+      name: `${lat.toFixed(6)}, ${lon.toFixed(6)}`,
+      type: 'coordinates',
+      coordinates: [lon, lat],
+      displayName: `${lat.toFixed(6)}°N, ${lon.toFixed(6)}°E`,
+      subtext: `Koordinater (${format})${locationHint}`
+    }
   }
 
   /**

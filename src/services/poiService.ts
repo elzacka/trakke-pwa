@@ -61,9 +61,27 @@ export interface KulturminnerPOI {
   coordinates: [number, number] // [lon, lat]
 }
 
-export type POI = ShelterPOI | CavePOI | ObservationTowerPOI | WarMemorialPOI | WildernessShelterPOI | KulturminnerPOI
+export interface SupabasePOI {
+  id: string
+  type: 'supabase'
+  categorySlug: string        // Category identifier: supabase:hengekoyeplasser
+  name: string
+  description?: string        // Supports line breaks
+  municipality?: string
+  place?: string
+  externalUrl?: string
+  imageUrl?: string
+  tags?: Record<string, string>
+  coordinates: [number, number] // [lon, lat]
+}
+
+export type POI = ShelterPOI | CavePOI | ObservationTowerPOI | WarMemorialPOI | WildernessShelterPOI | KulturminnerPOI | SupabasePOI
 
 export type POICategory = 'shelters' | 'caves' | 'observation_towers' | 'war_memorials' | 'wilderness_shelters' | 'kulturminner'
+
+// Supabase category uses string format: 'supabase:slug'
+export type SupabaseCategoryId = `supabase:${string}`
+export type AnyCategoryId = POICategory | SupabaseCategoryId
 
 // Overpass API response types
 interface OverpassElement {

@@ -28,7 +28,7 @@ import { validateName } from '../utils/validation'
 import type { SearchResult } from '../services/searchService'
 import type { Route, Waypoint } from '../services/routeService'
 import { routeService } from '../services/routeService'
-import { poiService, type POICategory, type POI } from '../services/poiService'
+import { poiService, type POICategory, type POI, type AnyCategoryId } from '../services/poiService'
 import { mapPreferencesService, type MapPreferences } from '../services/mapPreferencesService'
 import '../styles/Map.css'
 
@@ -70,7 +70,7 @@ const Map = ({ zenMode }: MapProps) => {
   const { canInstall, isInstalled, platform, promptInstall } = useInstallPrompt()
 
   // POI/Category state
-  const [activeCategories, setActiveCategories] = useState<Set<POICategory>>(new Set())
+  const [activeCategories, setActiveCategories] = useState<Set<AnyCategoryId>>(new Set())
   // Track if POI layers have been added to map
   const poiLayersInitialized = useRef(false)
   const [selectedPOI, setSelectedPOI] = useState<POI | null>(null)
@@ -800,7 +800,8 @@ const Map = ({ zenMode }: MapProps) => {
               'observation_towers', 'tower-icon',
               'war_memorials', 'memorial-icon',
               'kulturminner', 'kulturminner-icon',
-              'tilfluktsrom-icon' // fallback
+              // Fallback for all other categories (including supabase:*)
+              'supabase-icon'
             ],
             'icon-size': 1,
             'icon-allow-overlap': true
@@ -948,7 +949,22 @@ const Map = ({ zenMode }: MapProps) => {
           const kulturminnerImg = await loadSVGAsImage(`${baseUrl}icons/geonorge/severdighet.svg`)
           map.current.addImage('kulturminner-icon', createPOIIcon(kulturminnerImg, size, '#ffffff'))
 
-          devLog('[Map] All SVG icons loaded successfully')
+          // Supabase/custom POI icon (green circle for dynamic categories)
+          const supabaseCanvas = document.createElement('canvas')
+          supabaseCanvas.width = size
+          supabaseCanvas.height = size
+          const supabaseCtx = supabaseCanvas.getContext('2d')!
+          supabaseCtx.fillStyle = '#22c55e' // Green (matches default Supabase category color)
+          supabaseCtx.beginPath()
+          supabaseCtx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2)
+          supabaseCtx.fill()
+          map.current.addImage('supabase-icon', {
+            width: size,
+            height: size,
+            data: supabaseCtx.getImageData(0, 0, size, size).data
+          })
+
+          devLog('[Map] All SVG icons loaded successfully (including supabase-icon)')
         } catch (error) {
           devError('[Map] Failed to load SVG icons, using fallback circles:', error)
 
@@ -1026,6 +1042,21 @@ const Map = ({ zenMode }: MapProps) => {
             height: size,
             data: kulturminnerCtx.getImageData(0, 0, size, size).data
           })
+
+          // Fallback: Supabase/custom POI icon (green circle matching brand color)
+          const supabaseCanvas = document.createElement('canvas')
+          supabaseCanvas.width = size
+          supabaseCanvas.height = size
+          const supabaseCtx = supabaseCanvas.getContext('2d')!
+          supabaseCtx.fillStyle = '#22c55e' // Green (matches hengekøyeplasser default)
+          supabaseCtx.beginPath()
+          supabaseCtx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2)
+          supabaseCtx.fill()
+          map.current.addImage('supabase-icon', {
+            width: size,
+            height: size,
+            data: supabaseCtx.getImageData(0, 0, size, size).data
+          })
         }
 
         poiLayersInitialized.current = true
@@ -1094,6 +1125,9 @@ const Map = ({ zenMode }: MapProps) => {
         features: features
       })
       devLog(`[Map] Updated POI source with ${features.length} features (clustering enabled)`)
+      if (features.length > 0) {
+        devLog(`[Map] First feature:`, features[0])
+      }
     }
   }, [visiblePOIs, activeCategories])
 
@@ -2054,7 +2088,7 @@ const Map = ({ zenMode }: MapProps) => {
     setCategorySheetOpen(true)
   }
 
-  const handleCategorySelect = (category: POICategory) => {
+  const handleCategorySelect = (category: AnyCategoryId) => {
     if (!map.current) return
 
     // Toggle category - markers will be managed by useEffect watching visiblePOIs

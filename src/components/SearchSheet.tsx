@@ -179,7 +179,10 @@ const SearchSheet = ({ isOpen, onClose, onResultSelect }: SearchSheetProps) => {
           </form>
           <div className="search-sheet-hint">
             <span className="hint-text">
-              Trykk <span className="material-symbols-outlined hint-home-icon">home</span> for å inkludere adresser
+              {query.length === 0
+                ? 'Søk steder, adresser eller koordinater (DD, DMS, UTM, MGRS)'
+                : <>Trykk <span className="material-symbols-outlined hint-home-icon">home</span> for å inkludere adresser</>
+              }
             </span>
           </div>
         </div>

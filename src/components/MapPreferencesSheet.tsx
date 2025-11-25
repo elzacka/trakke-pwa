@@ -232,6 +232,7 @@ const MapPreferencesSheet = ({ isOpen, onClose, onPreferencesChange }: MapPrefer
                 })}
               </div>
             </div>
+
           </div>
 
           <div className="preferences-actions">

@@ -100,6 +100,18 @@ export function getIconConfig(category: POICategory): IconConfig {
 }
 
 /**
+ * Get icon configuration for a dynamic/Supabase category
+ * Uses Material Symbol for the icon
+ */
+export function getDynamicIconConfig(iconName: string, color?: string): IconConfig {
+  return {
+    type: 'material-symbol',
+    symbol: iconName || 'location_on',
+    color: color || '#4a5568' // Default gray
+  }
+}
+
+/**
  * Load SVG icon from path and return as string
  * Used for converting SVG to canvas for map markers
  */

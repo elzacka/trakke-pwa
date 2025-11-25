@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Sheet from './Sheet'
-import { poiService, type POI, type ShelterPOI, type CavePOI, type ObservationTowerPOI, type WarMemorialPOI, type WildernessShelterPOI, type KulturminnerPOI } from '../services/poiService'
+import { poiService, type POI, type ShelterPOI, type CavePOI, type ObservationTowerPOI, type WarMemorialPOI, type WildernessShelterPOI, type KulturminnerPOI, type SupabasePOI } from '../services/poiService'
 import '../styles/POIDetailsSheet.css'
 
 interface POIDetailsSheetProps {
@@ -369,6 +369,77 @@ const POIDetailsSheet = ({ isOpen, onClose, poi }: POIDetailsSheetProps) => {
     )
   }
 
+  const renderSupabaseDetails = (supabasePoi: SupabasePOI) => {
+    const handleCopyCoordinates = () => {
+      const [lon, lat] = supabasePoi.coordinates
+      const coords = `${lat.toFixed(6)}, ${lon.toFixed(6)}`
+      navigator.clipboard.writeText(coords)
+      if ('vibrate' in navigator) {
+        navigator.vibrate(10)
+      }
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+
+    return (
+      <>
+        <div className="poi-details-info">
+          <div className="poi-details-info-item">
+            <div className="poi-details-info-label">Navn</div>
+            <div className="poi-details-info-value">{supabasePoi.name}</div>
+          </div>
+          {supabasePoi.place && (
+            <div className="poi-details-info-item">
+              <div className="poi-details-info-label">Sted</div>
+              <div className="poi-details-info-value">{supabasePoi.place}</div>
+            </div>
+          )}
+          {supabasePoi.municipality && (
+            <div className="poi-details-info-item">
+              <div className="poi-details-info-label">Kommune</div>
+              <div className="poi-details-info-value">{supabasePoi.municipality}</div>
+            </div>
+          )}
+          {supabasePoi.externalUrl && (
+            <div className="poi-details-info-item">
+              <div className="poi-details-info-label">Lenke</div>
+              <div className="poi-details-info-value">
+                <a href={supabasePoi.externalUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--trk-brand)', textDecoration: 'underline' }}>
+                  Åpne
+                </a>
+              </div>
+            </div>
+          )}
+          <div className="poi-details-info-item poi-details-info-item-with-button">
+            <div className="poi-details-info-label">Koordinater</div>
+            <div className="poi-details-info-value">
+              {supabasePoi.coordinates[1].toFixed(5)}°N, {supabasePoi.coordinates[0].toFixed(5)}°E
+            </div>
+            <button
+              className={`poi-details-copy-button ${copied ? 'copied' : ''}`}
+              onClick={handleCopyCoordinates}
+              aria-label="Kopier koordinater"
+            >
+              <span className="material-symbols-outlined">
+                {copied ? 'check' : 'content_copy'}
+              </span>
+            </button>
+          </div>
+          {supabasePoi.description && (
+            <>
+              <div className="kulturminner-description-header">
+                <div className="poi-details-info-label">Beskrivelse</div>
+              </div>
+              <div className="kulturminner-description-text" style={{ whiteSpace: 'pre-line' }}>
+                {supabasePoi.description}
+              </div>
+            </>
+          )}
+        </div>
+      </>
+    )
+  }
+
   return (
     <Sheet
       isOpen={isOpen}
@@ -388,6 +459,7 @@ const POIDetailsSheet = ({ isOpen, onClose, poi }: POIDetailsSheetProps) => {
           {poi.type === 'war_memorial' && renderWarMemorialDetails(poi as WarMemorialPOI)}
           {poi.type === 'wilderness_shelter' && renderWildernessShelterDetails(poi as WildernessShelterPOI)}
           {poi.type === 'kulturminner' && renderKulturminnerDetails(poi as KulturminnerPOI)}
+          {poi.type === 'supabase' && renderSupabaseDetails(poi as SupabasePOI)}
         </div>
       </div>
     </Sheet>

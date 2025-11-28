@@ -3,6 +3,7 @@
 
 import { CACHE_CONFIG } from '../config/timings'
 import { devLog, devError } from '../constants'
+import { supabaseService } from './supabaseService'
 
 export interface ShelterPOI {
   id: string
@@ -835,29 +836,49 @@ class POIService {
   }
 
   // Get POIs for a category with viewport bounds and zoom
+  // Also fetches Supabase POIs with matching source_category and merges them
   async getPOIs(category: POICategory, bounds: { north: number; south: number; east: number; west: number }, zoom: number): Promise<POI[]> {
     const config = CATEGORIES[category]
+
+    // Fetch POIs from the primary data source
+    let primaryPOIs: POI[] = []
 
     switch (config.dataSource) {
       case 'wfs':
         // WFS for government data (shelters)
         if (category === 'shelters') {
-          return this.fetchShelters(bounds, zoom)
+          primaryPOIs = await this.fetchShelters(bounds, zoom)
         }
-        return []
+        break
 
       case 'overpass':
         // Overpass API for OSM data (caves, towers, memorials, shelters)
-        return this.fetchFromOverpass(category, bounds, zoom)
+        primaryPOIs = await this.fetchFromOverpass(category, bounds, zoom)
+        break
 
       case 'geojson-api':
         // GeoJSON API for Riksantikvaren data (kulturminner)
-        return this.fetchFromGeoJSONAPI(category, bounds, zoom)
+        primaryPOIs = await this.fetchFromGeoJSONAPI(category, bounds, zoom)
+        break
 
       default:
         devError(`Unknown data source for ${category}`)
-        return []
     }
+
+    // Also fetch Supabase POIs with this source_category (admin-added POIs)
+    try {
+      const supabasePOIs = await supabaseService.getPOIsBySourceCategory(bounds, zoom, category)
+      if (supabasePOIs.length > 0) {
+        devLog(`[POIService] Merging ${supabasePOIs.length} Supabase POIs with source_category=${category}`)
+        // Merge Supabase POIs with primary POIs
+        return [...primaryPOIs, ...supabasePOIs]
+      }
+    } catch (error) {
+      // Don't fail if Supabase fetch fails - just return primary POIs
+      devError(`[POIService] Failed to fetch Supabase POIs for ${category}:`, error)
+    }
+
+    return primaryPOIs
   }
 
   // Clear all cache entries (useful for debugging or forced refresh)

@@ -1,16 +1,66 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Sheet from './Sheet'
 import { poiService, type POI, type ShelterPOI, type CavePOI, type ObservationTowerPOI, type WarMemorialPOI, type WildernessShelterPOI, type KulturminnerPOI, type SupabasePOI } from '../services/poiService'
+import { adminAuthService } from '../services/adminAuthService'
+import { supabaseService } from '../services/supabaseService'
+import { devLog } from '../constants'
 import '../styles/POIDetailsSheet.css'
 
 interface POIDetailsSheetProps {
   isOpen: boolean
   onClose: () => void
   poi: POI | null
+  onEdit?: (poi: POI) => void  // Called when edit is requested
+  onDelete?: () => void  // Called when deletion is successful
 }
 
-const POIDetailsSheet = ({ isOpen, onClose, poi }: POIDetailsSheetProps) => {
+const POIDetailsSheet = ({ isOpen, onClose, poi, onEdit, onDelete }: POIDetailsSheetProps) => {
   const [copied, setCopied] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+
+  // Check admin status when sheet opens
+  useEffect(() => {
+    if (isOpen) {
+      setIsAdmin(adminAuthService.isAdmin())
+      setShowDeleteConfirm(false)
+      setDeleteError(null)
+    }
+  }, [isOpen])
+
+  // Handle delete
+  const handleDelete = async () => {
+    if (!poi || poi.type !== 'supabase') return
+
+    const token = adminAuthService.getAccessToken()
+    if (!token) {
+      setDeleteError('Du må være logget inn som admin')
+      return
+    }
+
+    setIsDeleting(true)
+    setDeleteError(null)
+
+    // Extract UUID from POI id (remove 'supabase-' prefix)
+    const poiId = poi.id.replace('supabase-', '')
+
+    const result = await supabaseService.deletePOI(poiId, token)
+
+    setIsDeleting(false)
+
+    if (result.success) {
+      devLog('[POIDetails] POI deleted successfully')
+      onClose()
+      onDelete?.()
+    } else {
+      setDeleteError(result.error || 'Kunne ikke slette')
+    }
+  }
+
+  // Check if this POI can be edited/deleted (only Supabase POIs)
+  const canEditDelete = poi?.type === 'supabase' && isAdmin
 
   if (!poi) return null
 
@@ -460,6 +510,69 @@ const POIDetailsSheet = ({ isOpen, onClose, poi }: POIDetailsSheetProps) => {
           {poi.type === 'wilderness_shelter' && renderWildernessShelterDetails(poi as WildernessShelterPOI)}
           {poi.type === 'kulturminner' && renderKulturminnerDetails(poi as KulturminnerPOI)}
           {poi.type === 'supabase' && renderSupabaseDetails(poi as SupabasePOI)}
+
+          {/* Admin actions for Supabase POIs */}
+          {canEditDelete && (
+            <div className="poi-admin-actions">
+              {showDeleteConfirm ? (
+                <div className="poi-delete-confirm">
+                  <p>Er du sikker på at du vil slette dette stedet?</p>
+                  {deleteError && (
+                    <div className="poi-delete-error">
+                      <span className="material-symbols-outlined">error</span>
+                      {deleteError}
+                    </div>
+                  )}
+                  <div className="poi-delete-confirm-buttons">
+                    <button
+                      className="poi-admin-button poi-cancel-button"
+                      onClick={() => setShowDeleteConfirm(false)}
+                      disabled={isDeleting}
+                    >
+                      Avbryt
+                    </button>
+                    <button
+                      className="poi-admin-button poi-delete-button"
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                    >
+                      {isDeleting ? (
+                        <>
+                          <span className="material-symbols-outlined spinning">progress_activity</span>
+                          Sletter...
+                        </>
+                      ) : (
+                        <>
+                          <span className="material-symbols-outlined">delete</span>
+                          Slett
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="poi-admin-buttons">
+                  <button
+                    className="poi-admin-button poi-edit-button"
+                    onClick={() => {
+                      onClose()
+                      onEdit?.(poi)
+                    }}
+                  >
+                    <span className="material-symbols-outlined">edit</span>
+                    Rediger
+                  </button>
+                  <button
+                    className="poi-admin-button poi-delete-button"
+                    onClick={() => setShowDeleteConfirm(true)}
+                  >
+                    <span className="material-symbols-outlined">delete</span>
+                    Slett
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </Sheet>

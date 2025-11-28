@@ -19,6 +19,8 @@ import MapPreferencesSheet from './MapPreferencesSheet'
 import WeatherWidget from './WeatherWidget'
 import WeatherSheet from './WeatherSheet'
 import MeasurementToolsSheet, { type MeasurementMode } from './MeasurementToolsSheet'
+import AdminSheet from './AdminSheet'
+import AdminPOISheet from './AdminPOISheet'
 import { useAutoHide } from '../hooks/useAutoHide'
 import { useViewportPOIs } from '../hooks/useViewportPOIs'
 import { useInstallPrompt } from '../hooks/useInstallPrompt'
@@ -65,6 +67,11 @@ const Map = ({ zenMode }: MapProps) => {
   const [fabMenuOpen, setFabMenuOpen] = useState(false)
   const [mapPreferencesSheetOpen, setMapPreferencesSheetOpen] = useState(false)
   const [weatherSheetOpen, setWeatherSheetOpen] = useState(false)
+  const [adminSheetOpen, setAdminSheetOpen] = useState(false)
+  const [adminPOISheetOpen, setAdminPOISheetOpen] = useState(false)
+  const [isPlacingAdminPOI, setIsPlacingAdminPOI] = useState(false)
+  const [adminPOICoords, setAdminPOICoords] = useState<[number, number] | null>(null)
+  const adminPOIMarker = useRef<maplibregl.Marker | null>(null)
 
   // PWA Installation
   const { canInstall, isInstalled, platform, promptInstall } = useInstallPrompt()
@@ -74,6 +81,7 @@ const Map = ({ zenMode }: MapProps) => {
   // Track if POI layers have been added to map
   const poiLayersInitialized = useRef(false)
   const [selectedPOI, setSelectedPOI] = useState<POI | null>(null)
+  const [editingPOI, setEditingPOI] = useState<POI | null>(null)  // POI being edited in AdminPOISheet
 
   // Use viewport-based POI loading hook
   const { visiblePOIs, isLoading: poisLoading } = useViewportPOIs({
@@ -138,6 +146,7 @@ const Map = ({ zenMode }: MapProps) => {
     isSelectingArea: false,
     measurementActive: false,
     measurementMode: null as MeasurementMode,
+    isPlacingAdminPOI: false,
     isMobile: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   })
 
@@ -161,6 +170,7 @@ const Map = ({ zenMode }: MapProps) => {
     clickStateRef.current.isSelectingArea = isSelectingArea
     clickStateRef.current.measurementActive = measurementActive
     clickStateRef.current.measurementMode = measurementMode
+    clickStateRef.current.isPlacingAdminPOI = isPlacingAdminPOI
 
     keyboardStateRef.current.searchSheetOpen = searchSheetOpen
     keyboardStateRef.current.routeSheetOpen = routeSheetOpen
@@ -177,6 +187,7 @@ const Map = ({ zenMode }: MapProps) => {
     isSelectingArea,
     measurementActive,
     measurementMode,
+    isPlacingAdminPOI,
     searchSheetOpen,
     routeSheetOpen,
     downloadSheetOpen,
@@ -1563,7 +1574,7 @@ const Map = ({ zenMode }: MapProps) => {
   // Handle map clicks when selecting area, drawing routes, or placing waypoints
   const handleMapClick = async (e: maplibregl.MapMouseEvent) => {
     // Use ref values to avoid stale closures
-    const { isPlacingWaypoint, isDrawingRoute, isSelectingArea, measurementActive, measurementMode, isMobile } = clickStateRef.current
+    const { isPlacingWaypoint, isDrawingRoute, isSelectingArea, measurementActive, measurementMode, isPlacingAdminPOI, isMobile } = clickStateRef.current
 
     const mouseEvent = e.originalEvent as MouseEvent
 
@@ -1690,6 +1701,39 @@ const Map = ({ zenMode }: MapProps) => {
       })
 
       setIsPlacingWaypoint(false)
+      return
+    }
+
+    // Admin POI placement mode
+    if (isPlacingAdminPOI) {
+      devLog('[Admin POI] Placing POI at:', [e.lngLat.lng, e.lngLat.lat])
+
+      // Remove any existing admin POI marker
+      if (adminPOIMarker.current) {
+        adminPOIMarker.current.remove()
+        adminPOIMarker.current = null
+      }
+
+      // Create admin POI marker element
+      const el = document.createElement('div')
+      el.className = 'admin-poi-marker'
+      el.innerHTML = '<span class="material-symbols-outlined">add_location</span>'
+
+      // Create marker
+      const marker = new maplibregl.Marker({
+        element: el,
+        anchor: 'bottom'
+      })
+        .setLngLat([e.lngLat.lng, e.lngLat.lat])
+        .addTo(map.current!)
+
+      // Store marker and coordinates
+      adminPOIMarker.current = marker
+      setAdminPOICoords([e.lngLat.lng, e.lngLat.lat])
+
+      // Exit placement mode and open form
+      setIsPlacingAdminPOI(false)
+      setAdminPOISheetOpen(true)
       return
     }
 
@@ -2478,10 +2522,11 @@ const Map = ({ zenMode }: MapProps) => {
             onMapPreferencesClick={handleMapPreferencesClick}
             onMeasurementClick={handleMeasurementClick}
             onWeatherClick={handleWeatherClick}
+            onAdminClick={() => setAdminSheetOpen(true)}
             onInstallClick={() => setInstallSheetOpen(true)}
             showInstall={!isInstalled && (canInstall || platform === 'ios')}
             visible={controlsVisible}
-            sheetsOpen={searchSheetOpen || infoSheetOpen || downloadSheetOpen || routeSheetOpen || categorySheetOpen || poiDetailsSheetOpen || installSheetOpen || mapPreferencesSheetOpen || weatherSheetOpen}
+            sheetsOpen={searchSheetOpen || infoSheetOpen || downloadSheetOpen || routeSheetOpen || categorySheetOpen || poiDetailsSheetOpen || installSheetOpen || mapPreferencesSheetOpen || weatherSheetOpen || adminSheetOpen}
             menuOpen={fabMenuOpen}
             onMenuOpenChange={setFabMenuOpen}
           />
@@ -2535,6 +2580,25 @@ const Map = ({ zenMode }: MapProps) => {
               <button
                 className="drawing-banner-close"
                 onClick={() => setIsPlacingWaypoint(false)}
+                aria-label="Avbryt"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+          )}
+
+          {/* Admin POI placement banner */}
+          {isPlacingAdminPOI && (
+            <div className="drawing-banner admin-poi-banner">
+              <div className="drawing-banner-content">
+                <span className="material-symbols-outlined">add_location</span>
+                <div className="drawing-banner-text">
+                  <strong>Velg posisjon for nytt sted</strong>
+                </div>
+              </div>
+              <button
+                className="drawing-banner-close"
+                onClick={() => setIsPlacingAdminPOI(false)}
                 aria-label="Avbryt"
               >
                 <span className="material-symbols-outlined">close</span>
@@ -2669,6 +2733,18 @@ const Map = ({ zenMode }: MapProps) => {
               setSelectedPOI(null)
             }}
             poi={selectedPOI}
+            onEdit={(poi) => {
+              // Open AdminPOISheet with the POI for editing
+              if (poi.type === 'supabase') {
+                setEditingPOI(poi)
+                setAdminPOICoords(poi.coordinates)
+                setAdminPOISheetOpen(true)
+              }
+            }}
+            onDelete={() => {
+              // Refresh POI data after successful delete
+              setDataChangeTrigger(prev => prev + 1)
+            }}
           />
           <WaypointDetailsSheet
             isOpen={waypointDetailsSheetOpen}
@@ -2726,6 +2802,50 @@ const Map = ({ zenMode }: MapProps) => {
             onClose={() => setWeatherSheetOpen(false)}
             lat={userLocation?.coords.latitude || MAP_CONFIG.DEFAULT_CENTER[1]}
             lon={userLocation?.coords.longitude || MAP_CONFIG.DEFAULT_CENTER[0]}
+          />
+
+          <AdminSheet
+            isOpen={adminSheetOpen}
+            onClose={() => setAdminSheetOpen(false)}
+            onAddPOI={() => {
+              setAdminSheetOpen(false)
+              setIsPlacingAdminPOI(true)
+            }}
+            onAddCategory={() => {
+              // TODO: Implement category creation sheet
+              devLog('[Admin] Add Category clicked')
+            }}
+          />
+
+          <AdminPOISheet
+            isOpen={adminPOISheetOpen}
+            onClose={() => {
+              setAdminPOISheetOpen(false)
+              setEditingPOI(null)
+              // Clean up marker if cancelled
+              if (adminPOIMarker.current) {
+                adminPOIMarker.current.remove()
+                adminPOIMarker.current = null
+              }
+              setAdminPOICoords(null)
+            }}
+            coordinates={adminPOICoords}
+            editPoi={editingPOI}
+            onSuccess={() => {
+              // Refresh POI data after successful save
+              setDataChangeTrigger(prev => prev + 1)
+              setEditingPOI(null)
+              // Clean up marker
+              if (adminPOIMarker.current) {
+                adminPOIMarker.current.remove()
+                adminPOIMarker.current = null
+              }
+              setAdminPOICoords(null)
+            }}
+            onStartPlacement={() => {
+              setAdminPOISheetOpen(false)
+              setIsPlacingAdminPOI(true)
+            }}
           />
 
           {/* Weather widget - show when user has location and preference enabled */}

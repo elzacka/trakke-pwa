@@ -1,0 +1,319 @@
+/* Admin Sheet Styles */
+
+.admin-sheet {
+  padding: 0 16px 24px;
+}
+
+.admin-sheet h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 20px 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--trk-text-primary, #1a1a1a);
+}
+
+.admin-sheet h2 .material-symbols-outlined {
+  font-size: 1.5rem;
+  color: var(--trk-primary, #2d5a27);
+}
+
+/* Not Configured State */
+.admin-not-configured {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  background: var(--trk-surface-warning, #fef3cd);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.admin-not-configured .material-symbols-outlined {
+  font-size: 2rem;
+  color: var(--trk-warning, #856404);
+}
+
+.admin-not-configured p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--trk-warning-dark, #533f03);
+  line-height: 1.5;
+}
+
+/* Login Form */
+.admin-login {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-login-description {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--trk-text-secondary, #666);
+  line-height: 1.5;
+}
+
+.admin-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-login-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-login-form label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--trk-text-primary, #1a1a1a);
+}
+
+.admin-login-form input[type="email"] {
+  padding: 12px 14px;
+  font-size: 1rem;
+  border: 1px solid var(--trk-border, #ddd);
+  border-radius: 8px;
+  background: var(--trk-surface, #fff);
+  color: var(--trk-text-primary, #1a1a1a);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.admin-login-form input[type="email"]:focus {
+  outline: none;
+  border-color: var(--trk-primary, #2d5a27);
+  box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.1);
+}
+
+.admin-login-form input[type="email"]::placeholder {
+  color: var(--trk-text-muted, #999);
+}
+
+.admin-login-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #fff;
+  background: var(--trk-primary, #2d5a27);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+
+.admin-login-button:hover:not(:disabled) {
+  background: var(--trk-primary-dark, #1e3d1a);
+}
+
+.admin-login-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-login-button .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
+/* Magic Link Sent State */
+.magic-link-sent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  background: var(--trk-surface-success, #d4edda);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.magic-link-sent .material-symbols-outlined {
+  font-size: 3rem;
+  color: var(--trk-success, #155724);
+}
+
+.magic-link-sent p {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--trk-success-dark, #0d3d15);
+}
+
+.magic-link-sent .magic-link-hint {
+  font-size: 0.875rem;
+  color: var(--trk-text-secondary, #666);
+}
+
+.admin-secondary-button {
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--trk-text-secondary, #666);
+  background: var(--trk-surface, #fff);
+  border: 1px solid var(--trk-border, #ddd);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.admin-secondary-button:hover {
+  background: var(--trk-surface-hover, #f5f5f5);
+  border-color: var(--trk-border-dark, #ccc);
+}
+
+/* Admin Actions (Logged In) */
+.admin-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--trk-surface-success, #d4edda);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: var(--trk-success-dark, #0d3d15);
+}
+
+.admin-user-info .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
+.admin-action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-action-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--trk-text-primary, #1a1a1a);
+  background: var(--trk-surface, #fff);
+  border: 1px solid var(--trk-border, #ddd);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  text-align: left;
+}
+
+.admin-action-button:hover {
+  background: var(--trk-surface-hover, #f5f5f5);
+  border-color: var(--trk-primary, #2d5a27);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.admin-action-button .material-symbols-outlined {
+  font-size: 1.5rem;
+  color: var(--trk-primary, #2d5a27);
+}
+
+.admin-signout-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--trk-text-secondary, #666);
+  background: transparent;
+  border: 1px solid var(--trk-border, #ddd);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  margin-top: 8px;
+}
+
+.admin-signout-button:hover:not(:disabled) {
+  background: var(--trk-surface-hover, #f5f5f5);
+  color: var(--trk-error, #dc3545);
+}
+
+.admin-signout-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-signout-button .material-symbols-outlined {
+  font-size: 1.125rem;
+}
+
+/* Message Toast */
+.admin-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  margin-top: 16px;
+}
+
+.admin-message .material-symbols-outlined {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.admin-message-success {
+  background: var(--trk-surface-success, #d4edda);
+  color: var(--trk-success-dark, #0d3d15);
+}
+
+.admin-message-error {
+  background: var(--trk-surface-error, #f8d7da);
+  color: var(--trk-error-dark, #721c24);
+}
+
+/* Spinning animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .admin-sheet h2 {
+    color: var(--trk-text-primary-dark, #f5f5f5);
+  }
+
+  .admin-login-form input[type="email"] {
+    background: var(--trk-surface-dark, #2a2a2a);
+    border-color: var(--trk-border-dark, #444);
+    color: var(--trk-text-primary-dark, #f5f5f5);
+  }
+
+  .admin-action-button {
+    background: var(--trk-surface-dark, #2a2a2a);
+    border-color: var(--trk-border-dark, #444);
+    color: var(--trk-text-primary-dark, #f5f5f5);
+  }
+
+  .admin-action-button:hover {
+    background: var(--trk-surface-hover-dark, #3a3a3a);
+  }
+}

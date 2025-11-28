@@ -430,6 +430,105 @@ class SupabaseService {
   }
 
   /**
+   * Fetch POIs by source_category (for built-in category integration)
+   * Returns Supabase POIs that have source_category set to a built-in category
+   */
+  async getPOIsBySourceCategory(
+    bounds: BoundsRect,
+    zoom: number,
+    sourceCategory: string
+  ): Promise<SupabasePOI[]> {
+    if (!this.isEnabled()) {
+      return []
+    }
+
+    const cacheKey = `supabase-source-${sourceCategory}-${bounds.north.toFixed(4)},${bounds.south.toFixed(4)},${bounds.east.toFixed(4)},${bounds.west.toFixed(4)}-z${Math.floor(zoom)}`
+
+    // Check cache
+    if (this.poiCache.has(cacheKey)) {
+      const cached = this.poiCache.get(cacheKey)!
+      if (!this.isCacheStale(cached.timestamp)) {
+        devLog(`[SupabaseService] Source category POI cache hit: ${cacheKey}`)
+        return cached.pois
+      }
+      this.poiCache.delete(cacheKey)
+    }
+
+    // Return existing loading promise
+    if (this.loading.has(cacheKey)) {
+      return this.loading.get(cacheKey)!
+    }
+
+    const config = this.getConfig()
+    if (!config) return []
+
+    devLog(`[SupabaseService] Fetching POIs by source_category: ${sourceCategory}`)
+
+    // Build query URL - filter by source_category column
+    let url = `${config.projectUrl}/rest/v1/pois?select=id,category_id,name,description,municipality,place,external_url,image_url,tags,longitude,latitude,source_category,categories(slug,icon)`
+
+    // Add bounding box filter
+    url += `&longitude=gte.${bounds.west}&longitude=lte.${bounds.east}`
+    url += `&latitude=gte.${bounds.south}&latitude=lte.${bounds.north}`
+
+    // Filter by source_category
+    url += `&source_category=eq.${sourceCategory}`
+
+    const fetchPromise = fetch(url, {
+      method: 'GET',
+      headers: {
+        'apikey': config.anonKey,
+        'Authorization': `Bearer ${config.anonKey}`,
+        'Accept': 'application/json'
+      },
+      mode: 'cors',
+      credentials: 'omit'
+    })
+      .then(async response => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch POIs by source_category: ${response.status}`)
+        }
+        return response.json()
+      })
+      .then((data: any[]) => {
+        const pois: SupabasePOI[] = data.map(row => ({
+          id: `supabase-${row.id}`,
+          type: 'supabase' as const,
+          categoryId: row.category_id,
+          categorySlug: row.categories?.slug || 'unknown',
+          name: row.name,
+          description: row.description || undefined,
+          municipality: row.municipality || undefined,
+          place: row.place || undefined,
+          externalUrl: row.external_url || undefined,
+          imageUrl: row.image_url || undefined,
+          tags: row.tags || undefined,
+          coordinates: [row.longitude, row.latitude] as [number, number]
+        }))
+
+        // Cache results
+        this.poiCache.set(cacheKey, {
+          pois,
+          bounds,
+          zoom,
+          timestamp: Date.now()
+        })
+
+        devLog(`[SupabaseService] Fetched ${pois.length} POIs with source_category=${sourceCategory}`)
+        this.loading.delete(cacheKey)
+        return pois
+      })
+      .catch(error => {
+        devError(`[SupabaseService] Failed to fetch POIs by source_category:`, error)
+        this.loading.delete(cacheKey)
+        return [] // Return empty array instead of throwing for source_category queries
+      })
+
+    this.loading.set(cacheKey, fetchPromise)
+    return fetchPromise
+  }
+
+  /**
    * Get cached POI count for a category
    */
   getCachedCount(categorySlug: string): number {
@@ -448,6 +547,388 @@ class SupabaseService {
     }
 
     return total
+  }
+
+  // =====================================================
+  // Admin CRUD Operations (Requires Auth)
+  // =====================================================
+
+  /**
+   * Create a new POI
+   * Requires authenticated admin session
+   */
+  async createPOI(
+    poi: {
+      name: string
+      categoryId: string
+      coordinates: [number, number]  // [lon, lat]
+      description?: string
+      municipality?: string
+      place?: string
+      externalUrl?: string
+      imageUrl?: string
+      tags?: Record<string, string>
+      sourceCategory?: string  // For adding to built-in categories
+    },
+    accessToken: string
+  ): Promise<{ success: boolean; error?: string; poi?: SupabasePOI }> {
+    const config = this.getConfig()
+    if (!config) {
+      return { success: false, error: 'Supabase ikke konfigurert' }
+    }
+
+    try {
+      const response = await fetch(`${config.projectUrl}/rest/v1/pois`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': config.anonKey,
+          'Authorization': `Bearer ${accessToken}`,
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify({
+          name: poi.name,
+          category_id: poi.categoryId,
+          longitude: poi.coordinates[0],
+          latitude: poi.coordinates[1],
+          description: poi.description || null,
+          municipality: poi.municipality || null,
+          place: poi.place || null,
+          external_url: poi.externalUrl || null,
+          image_url: poi.imageUrl || null,
+          tags: poi.tags || null,
+          source_category: poi.sourceCategory || null
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}))
+        if (response.status === 401 || response.status === 403) {
+          return { success: false, error: 'Ikke autorisert. Logg inn som admin.' }
+        }
+        return { success: false, error: error.message || `Feil ${response.status}` }
+      }
+
+      const [data] = await response.json()
+
+      // Clear cache to force refresh
+      this.clearCache()
+
+      const newPoi: SupabasePOI = {
+        id: `supabase-${data.id}`,
+        type: 'supabase',
+        categoryId: data.category_id,
+        categorySlug: 'unknown',  // Will be populated on next fetch
+        name: data.name,
+        description: data.description || undefined,
+        municipality: data.municipality || undefined,
+        place: data.place || undefined,
+        externalUrl: data.external_url || undefined,
+        imageUrl: data.image_url || undefined,
+        tags: data.tags || undefined,
+        coordinates: [data.longitude, data.latitude]
+      }
+
+      devLog('[SupabaseService] POI created:', newPoi.name)
+      return { success: true, poi: newPoi }
+
+    } catch (error) {
+      devError('[SupabaseService] Failed to create POI:', error)
+      return { success: false, error: 'Nettverksfeil ved oppretting av POI' }
+    }
+  }
+
+  /**
+   * Update an existing POI
+   */
+  async updatePOI(
+    id: string,  // Raw UUID without 'supabase-' prefix
+    updates: {
+      name?: string
+      categoryId?: string
+      coordinates?: [number, number]
+      description?: string
+      municipality?: string
+      place?: string
+      externalUrl?: string
+      imageUrl?: string
+      tags?: Record<string, string>
+      sourceCategory?: string
+    },
+    accessToken: string
+  ): Promise<{ success: boolean; error?: string }> {
+    const config = this.getConfig()
+    if (!config) {
+      return { success: false, error: 'Supabase ikke konfigurert' }
+    }
+
+    try {
+      const body: Record<string, unknown> = {}
+      if (updates.name !== undefined) body.name = updates.name
+      if (updates.categoryId !== undefined) body.category_id = updates.categoryId
+      if (updates.coordinates !== undefined) {
+        body.longitude = updates.coordinates[0]
+        body.latitude = updates.coordinates[1]
+      }
+      if (updates.description !== undefined) body.description = updates.description || null
+      if (updates.municipality !== undefined) body.municipality = updates.municipality || null
+      if (updates.place !== undefined) body.place = updates.place || null
+      if (updates.externalUrl !== undefined) body.external_url = updates.externalUrl || null
+      if (updates.imageUrl !== undefined) body.image_url = updates.imageUrl || null
+      if (updates.tags !== undefined) body.tags = updates.tags || null
+      if (updates.sourceCategory !== undefined) body.source_category = updates.sourceCategory || null
+
+      const response = await fetch(`${config.projectUrl}/rest/v1/pois?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': config.anonKey,
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify(body)
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}))
+        if (response.status === 401 || response.status === 403) {
+          return { success: false, error: 'Ikke autorisert' }
+        }
+        return { success: false, error: error.message || `Feil ${response.status}` }
+      }
+
+      // Clear cache
+      this.clearCache()
+
+      devLog('[SupabaseService] POI updated:', id)
+      return { success: true }
+
+    } catch (error) {
+      devError('[SupabaseService] Failed to update POI:', error)
+      return { success: false, error: 'Nettverksfeil ved oppdatering' }
+    }
+  }
+
+  /**
+   * Delete a POI
+   */
+  async deletePOI(
+    id: string,  // Raw UUID without 'supabase-' prefix
+    accessToken: string
+  ): Promise<{ success: boolean; error?: string }> {
+    const config = this.getConfig()
+    if (!config) {
+      return { success: false, error: 'Supabase ikke konfigurert' }
+    }
+
+    try {
+      const response = await fetch(`${config.projectUrl}/rest/v1/pois?id=eq.${id}`, {
+        method: 'DELETE',
+        headers: {
+          'apikey': config.anonKey,
+          'Authorization': `Bearer ${accessToken}`
+        }
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}))
+        if (response.status === 401 || response.status === 403) {
+          return { success: false, error: 'Ikke autorisert' }
+        }
+        return { success: false, error: error.message || `Feil ${response.status}` }
+      }
+
+      // Clear cache
+      this.clearCache()
+
+      devLog('[SupabaseService] POI deleted:', id)
+      return { success: true }
+
+    } catch (error) {
+      devError('[SupabaseService] Failed to delete POI:', error)
+      return { success: false, error: 'Nettverksfeil ved sletting' }
+    }
+  }
+
+  // =====================================================
+  // Category CRUD Operations (Admin Only)
+  // =====================================================
+
+  /**
+   * Create a new category
+   */
+  async createCategory(
+    category: {
+      name: string
+      slug: string
+      description?: string
+      icon: string
+      color?: string
+      minZoom?: number
+      sortOrder?: number
+    },
+    accessToken: string
+  ): Promise<{ success: boolean; error?: string; category?: SupabaseCategory }> {
+    const config = this.getConfig()
+    if (!config) {
+      return { success: false, error: 'Supabase ikke konfigurert' }
+    }
+
+    try {
+      const response = await fetch(`${config.projectUrl}/rest/v1/categories`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': config.anonKey,
+          'Authorization': `Bearer ${accessToken}`,
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify({
+          name: category.name,
+          slug: category.slug,
+          description: category.description || null,
+          icon: category.icon,
+          color: category.color || '#22c55e',
+          min_zoom: category.minZoom ?? 10,
+          sort_order: category.sortOrder ?? 0
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}))
+        if (response.status === 401 || response.status === 403) {
+          return { success: false, error: 'Ikke autorisert' }
+        }
+        if (response.status === 409 || error.code === '23505') {
+          return { success: false, error: 'Kategori med dette navnet eller slug finnes allerede' }
+        }
+        return { success: false, error: error.message || `Feil ${response.status}` }
+      }
+
+      const [data] = await response.json()
+
+      // Clear category cache
+      this.categoryCache = null
+
+      const newCategory: SupabaseCategory = {
+        id: data.id,
+        name: data.name,
+        slug: data.slug,
+        description: data.description || undefined,
+        icon: data.icon,
+        color: data.color || undefined,
+        minZoom: data.min_zoom ?? 10,
+        sortOrder: data.sort_order ?? 0
+      }
+
+      devLog('[SupabaseService] Category created:', newCategory.name)
+      return { success: true, category: newCategory }
+
+    } catch (error) {
+      devError('[SupabaseService] Failed to create category:', error)
+      return { success: false, error: 'Nettverksfeil ved oppretting av kategori' }
+    }
+  }
+
+  /**
+   * Update an existing category
+   */
+  async updateCategory(
+    id: string,
+    updates: {
+      name?: string
+      slug?: string
+      description?: string
+      icon?: string
+      color?: string
+      minZoom?: number
+      sortOrder?: number
+    },
+    accessToken: string
+  ): Promise<{ success: boolean; error?: string }> {
+    const config = this.getConfig()
+    if (!config) {
+      return { success: false, error: 'Supabase ikke konfigurert' }
+    }
+
+    try {
+      const body: Record<string, unknown> = {}
+      if (updates.name !== undefined) body.name = updates.name
+      if (updates.slug !== undefined) body.slug = updates.slug
+      if (updates.description !== undefined) body.description = updates.description || null
+      if (updates.icon !== undefined) body.icon = updates.icon
+      if (updates.color !== undefined) body.color = updates.color
+      if (updates.minZoom !== undefined) body.min_zoom = updates.minZoom
+      if (updates.sortOrder !== undefined) body.sort_order = updates.sortOrder
+
+      const response = await fetch(`${config.projectUrl}/rest/v1/categories?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': config.anonKey,
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify(body)
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}))
+        if (response.status === 401 || response.status === 403) {
+          return { success: false, error: 'Ikke autorisert' }
+        }
+        return { success: false, error: error.message || `Feil ${response.status}` }
+      }
+
+      // Clear category cache
+      this.categoryCache = null
+
+      devLog('[SupabaseService] Category updated:', id)
+      return { success: true }
+
+    } catch (error) {
+      devError('[SupabaseService] Failed to update category:', error)
+      return { success: false, error: 'Nettverksfeil ved oppdatering' }
+    }
+  }
+
+  /**
+   * Delete a category (also deletes all POIs in that category)
+   */
+  async deleteCategory(
+    id: string,
+    accessToken: string
+  ): Promise<{ success: boolean; error?: string }> {
+    const config = this.getConfig()
+    if (!config) {
+      return { success: false, error: 'Supabase ikke konfigurert' }
+    }
+
+    try {
+      const response = await fetch(`${config.projectUrl}/rest/v1/categories?id=eq.${id}`, {
+        method: 'DELETE',
+        headers: {
+          'apikey': config.anonKey,
+          'Authorization': `Bearer ${accessToken}`
+        }
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}))
+        if (response.status === 401 || response.status === 403) {
+          return { success: false, error: 'Ikke autorisert' }
+        }
+        return { success: false, error: error.message || `Feil ${response.status}` }
+      }
+
+      // Clear all caches
+      this.clearCache()
+
+      devLog('[SupabaseService] Category deleted:', id)
+      return { success: true }
+
+    } catch (error) {
+      devError('[SupabaseService] Failed to delete category:', error)
+      return { success: false, error: 'Nettverksfeil ved sletting' }
+    }
   }
 }
 

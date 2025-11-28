@@ -11,6 +11,7 @@ interface FABMenuProps {
   onMapPreferencesClick: () => void
   onMeasurementClick: () => void
   onWeatherClick: () => void
+  onAdminClick: () => void
   onInstallClick?: () => void
   showInstall?: boolean
   visible?: boolean
@@ -29,6 +30,7 @@ const FABMenu = ({
   onMapPreferencesClick,
   onMeasurementClick,
   onWeatherClick,
+  onAdminClick,
   onInstallClick,
   showInstall = false,
   menuOpen,
@@ -183,6 +185,15 @@ const FABMenu = ({
           >
             <span className="material-symbols-outlined">info</span>
             <span className="fab-menu-label">Info</span>
+          </button>
+          <button
+            className="fab-menu-item"
+            onClick={() => handleMenuItemClick(onAdminClick)}
+            aria-label="Admin"
+            role="menuitem"
+          >
+            <span className="material-symbols-outlined">admin_panel_settings</span>
+            <span className="fab-menu-label">Admin</span>
           </button>
 
           {/* Special: Install PWA (conditional) */}

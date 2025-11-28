@@ -94,6 +94,43 @@
   }
 }
 
+/* Admin POI marker (used during placement) */
+.admin-poi-marker {
+  position: relative !important;
+  width: 40px !important;
+  height: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+.admin-poi-marker .material-symbols-outlined {
+  font-size: 40px !important;
+  color: var(--trk-primary, #2d5a27) !important;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4)) !important;
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 40 !important;
+  animation: adminPOIPulse 1.5s ease-in-out infinite !important;
+  display: block !important;
+}
+
+@keyframes adminPOIPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.8;
+  }
+}
+
+/* Admin POI placement banner styling */
+.admin-poi-banner {
+  background: var(--trk-primary, #2d5a27) !important;
+}
+
 /* POI marker */
 .poi-marker {
   display: flex;

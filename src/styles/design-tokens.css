@@ -1,6 +1,8 @@
 /**
- * Design Tokens - Tråkke PWA
- * Centralized design system for consistent UI across all components
+ * Design Tokens - Tråkke PWA (App-specific extensions)
+ *
+ * This file extends the base design system tokens with app-specific values.
+ * Base tokens are imported from ./tokens/tokens.css
  *
  * DESIGN PRINCIPLES:
  * 1. Minimalist approach - No decorative icons/emojis unless explicitly requested by user
@@ -39,8 +41,8 @@
  */
 
 :root {
-  /* ===== SPACING SCALE ===== */
-  /* 8px base unit for consistent spacing */
+  /* ===== APP-SPECIFIC SPACING ===== */
+  /* Additional semantic spacing aliases */
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 12px;
@@ -50,108 +52,42 @@
   --space-3xl: 48px;
   --space-4xl: 64px;
 
-  /* ===== BORDER RADIUS ===== */
-  /* Mobile-first: larger radius for better touch UX */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --radius-full: 9999px;
+  /* ===== SAFE AREA INSETS (legacy aliases) ===== */
+  /* These use env() directly for backwards compatibility */
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
 
-  /* ===== TOUCH TARGETS ===== */
-  /* Minimum touch target size for accessibility (WCAG 2.1 Level AAA) */
-  --touch-target-min: 44px;
-  --touch-target-comfortable: 48px;
+  /* ===== LEGACY TOUCH TARGET ALIASES ===== */
+  --touch-target-min: var(--trk-touch-min);
+  --touch-target-comfortable: var(--trk-touch-comfortable);
 
-  /* ===== TYPOGRAPHY SCALE ===== */
-  /* rem-based for better accessibility */
-  --text-xs: 0.75rem;    /* 12px */
-  --text-sm: 0.875rem;   /* 14px */
-  --text-base: 1rem;     /* 16px */
-  --text-lg: 1.125rem;   /* 18px */
-  --text-xl: 1.25rem;    /* 20px */
-  --text-2xl: 1.5rem;    /* 24px */
-  --text-3xl: 2rem;      /* 32px */
+  /* ===== TYPOGRAPHY SCALE (legacy aliases) ===== */
+  --text-xs: var(--trk-text-xs);
+  --text-sm: var(--trk-text-sm);
+  --text-base: var(--trk-text-lg);
+  --text-lg: var(--trk-text-xl);
+  --text-xl: var(--trk-text-2xl);
+  --text-2xl: var(--trk-text-3xl);
+  --text-3xl: var(--trk-text-5xl);
 
-  /* ===== BREAKPOINTS ===== */
-  /* Mobile-first approach */
-  --breakpoint-tablet: 1024px;  /* Tablets and up */
-  --breakpoint-desktop: 1280px; /* Desktop and up */
+  /* ===== BREAKPOINTS (legacy aliases) ===== */
+  --breakpoint-tablet: var(--breakpoint-xl);
+  --breakpoint-desktop: var(--breakpoint-2xl);
 
-  /* ===== Z-INDEX HIERARCHY ===== */
-  --z-base: 0;
-  --z-dropdown: 100;
-  --z-sticky: 200;
-  --z-overlay: 300;
-  --z-fab: 400;
-  --z-modal: 500;
-  --z-sheet: 600;
-  --z-tooltip: 700;
-  --z-notification: 800;
-
-  /* ===== COLORS ===== */
-  /* Nordisk ro Color System - Tråkke Design System */
-
-  /* Brand colors */
-  --trk-brand: #3e4533;        /* Primary brand green - Tråkke forest green */
-  --trk-brand-soft: #606756;   /* Softer variant for UI elements */
-  --trk-brand-tint: #e9ece6;   /* Light tint for backgrounds and surfaces */
-
-  /* Neutrals - warm, paper-like without blue cast */
-  --trk-bg: #fafaf7;              /* Main background */
-  --trk-surface: #ffffff;         /* Cards, panels, overlays */
-  --trk-surface-subtle: #f2f3f0;  /* Subtle background for elements */
-  --trk-border: #e4e5e1;          /* Standard borders */
-  --trk-border-strong: #c9ccc5;   /* Stronger borders for separation */
-
-  /* Text colors - three levels of hierarchy */
-  --trk-text: #1a1d1b;          /* Primary text (body, headings) */
-  --trk-text-muted: #4a4f47;    /* Secondary text (descriptions) */
-  --trk-text-soft: #7c8278;     /* Tertiary text (help text, labels) */
-
-  /* Functional colors - semantic usage */
-  --trk-blue: #1e6ce0;    /* GPS position, info, focus */
-  --trk-red: #d0443e;     /* Waypoints, warnings, destructive actions */
-  --trk-green: #2e9e5b;   /* Success, confirmations */
-
-  /* Overlays & depth */
-  --trk-overlay-strong: rgba(255, 255, 255, 0.85);  /* Strong overlay for panels */
-  --trk-overlay-soft: rgba(250, 250, 246, 0.6);     /* Soft overlay */
-  --trk-selection: rgba(62, 69, 51, 0.18);          /* Selected routes/areas */
-
-  /* Legacy aliases for backward compatibility (DEPRECATED - use trk-* tokens) */
+  /* ===== LEGACY COLOR ALIASES ===== */
+  /* For backward compatibility */
   --color-primary: var(--trk-brand);
   --color-white: var(--trk-surface);
-
-  /* ===== SHADOWS ===== */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-
-  /* Semantic shadow aliases */
-  --trk-shadow-soft: var(--shadow-md);  /* For notifications and subtle elevated elements */
-
-  /* ===== TRANSITIONS ===== */
-  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
-
-  /* ===== SAFE AREA INSETS ===== */
-  /* For notched devices (iPhone X+) */
-  --safe-area-inset-top: env(safe-area-inset-top);
-  --safe-area-inset-right: env(safe-area-inset-right);
-  --safe-area-inset-bottom: env(safe-area-inset-bottom);
-  --safe-area-inset-left: env(safe-area-inset-left);
 
   /* ===== SHEET/PANEL SPECIFIC ===== */
   --sheet-border-radius: var(--radius-lg);
   --sheet-padding-mobile: var(--space-lg);
   --sheet-padding-desktop: var(--space-xl);
-  --sheet-header-height: 56px;
-  --sheet-peek-height: 40vh;
-  --sheet-half-height: 70vh;
+  --sheet-header-height: var(--trk-sheet-header);
+  --sheet-peek-height: var(--trk-sheet-peek);
+  --sheet-half-height: var(--trk-sheet-half);
 
   /* Sheet Content Spacing - Consistent across all sheets */
   --sheet-content-padding-mobile: 16px;
@@ -226,11 +162,11 @@
 
 /* Touch target helper */
 .touch-target {
-  min-width: var(--touch-target-min);
-  min-height: var(--touch-target-min);
+  min-width: var(--trk-touch-min);
+  min-height: var(--trk-touch-min);
 }
 
 .touch-target-comfortable {
-  min-width: var(--touch-target-comfortable);
-  min-height: var(--touch-target-comfortable);
+  min-width: var(--trk-touch-comfortable);
+  min-height: var(--trk-touch-comfortable);
 }

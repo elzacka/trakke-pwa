@@ -7,7 +7,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--trk-backdrop);
   z-index: var(--z-overlay);
   backdrop-filter: blur(4px);
   animation: backdropFadeIn var(--transition-slow);
@@ -166,13 +166,14 @@
 
 /* Keyboard focus indicator for accessibility */
 .sheet-close-button:focus-visible {
-  outline: 2px solid var(--trk-brand);
+  outline: 2px solid var(--trk-blue);
   outline-offset: 2px;
+  box-shadow: var(--trk-shadow-focus);
 }
 
 .sheet-close-button .material-symbols-outlined {
   font-size: 24px;
-  color: var(--trk-gray-600, #4b5563);
+  color: var(--trk-text-soft);
 }
 
 /* Sheet handle for dragging */
@@ -238,8 +239,8 @@
   left: 0;
   right: 0;
   top: auto;
-  border-radius: 16px 16px 0 0;
-  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+  border-radius: var(--trk-sheet-radius) var(--trk-sheet-radius) 0 0;
+  box-shadow: var(--trk-shadow-sheet);
   max-height: calc(100svh - env(safe-area-inset-top));
   height: auto;
   transform-origin: bottom center;
@@ -265,7 +266,7 @@
   height: calc(100svh - env(safe-area-inset-top) - 40px);
   max-height: calc(100svh - env(safe-area-inset-top) - 40px);
   transform: translateY(0);
-  border-radius: 16px 16px 0 0;
+  border-radius: var(--trk-sheet-radius) var(--trk-sheet-radius) 0 0;
 }
 
 /* Closed state: hide below screen */

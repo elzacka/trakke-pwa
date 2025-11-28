@@ -1,0 +1,322 @@
+/**
+ * Tråkke Design System – Nordisk Ro
+ * CSS Design Tokens
+ *
+ * Imported from @trakke/design-system v2
+ * These tokens provide the foundation for all UI styling.
+ */
+
+:root {
+  /* ==========================================================================
+     COLORS
+     ========================================================================== */
+
+  /* Brand */
+  --trk-brand: #3e4533;
+  --trk-brand-soft: #606756;
+  --trk-brand-tint: #e9ece6;
+
+  /* Neutrals */
+  --trk-white: #ffffff;
+  --trk-bg: #fafaf7;
+  --trk-surface: #ffffff;
+  --trk-surface-subtle: #f2f3f0;
+  --trk-border: #e4e5e1;
+  --trk-border-strong: #c9ccc5;
+  --trk-black: #0a0b0a;
+
+  /* Text */
+  --trk-text: #1a1d1b;
+  --trk-text-muted: #4a4f47;
+  --trk-text-soft: #7c8278;
+  --trk-text-inverse: #ffffff;
+
+  /* Functional */
+  --trk-blue: #1e6ce0;
+  --trk-red: #d0443e;
+  --trk-green: #2e9e5b;
+  --trk-yellow: #d4a012;
+  --trk-shelter: #fbbf24;
+
+  /* Functional States */
+  --trk-blue-hover: #1a5ec4;
+  --trk-blue-active: #1550a8;
+  --trk-blue-light: #e8f1fc;
+  --trk-red-hover: #b93a35;
+  --trk-red-active: #a3332f;
+  --trk-red-light: #fdeaea;
+  --trk-green-hover: #278a4f;
+  --trk-green-active: #217644;
+  --trk-green-light: #e8f7ed;
+  --trk-yellow-hover: #b8890f;
+  --trk-yellow-active: #9c740d;
+  --trk-yellow-light: #fef9e8;
+
+  /* Overlays */
+  --trk-overlay-strong: rgba(255, 255, 255, 0.92);
+  --trk-overlay-soft: rgba(250, 250, 246, 0.6);
+  --trk-selection: rgba(62, 69, 51, 0.18);
+  --trk-backdrop: rgba(10, 11, 10, 0.5);
+  --trk-scrim: rgba(10, 11, 10, 0.3);
+
+  /* ==========================================================================
+     TYPOGRAPHY
+     ========================================================================== */
+
+  /* Font Families */
+  --trk-font-brand: 'Exo 2', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --trk-font-body: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --trk-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  --trk-font-icons: 'Material Symbols Outlined';
+
+  /* Font Sizes */
+  --trk-text-2xs: 0.625rem;
+  --trk-text-xs: 0.75rem;
+  --trk-text-sm: 0.8125rem;
+  --trk-text-md: 0.875rem;
+  --trk-text-base: 0.9375rem;
+  --trk-text-lg: 1rem;
+  --trk-text-xl: 1.125rem;
+  --trk-text-2xl: 1.25rem;
+  --trk-text-3xl: 1.5rem;
+  --trk-text-4xl: 1.75rem;
+  --trk-text-5xl: 2rem;
+  --trk-text-6xl: 2.5rem;
+
+  /* Font Weights */
+  --trk-font-light: 300;
+  --trk-font-normal: 400;
+  --trk-font-medium: 500;
+  --trk-font-semibold: 600;
+  --trk-font-bold: 700;
+
+  /* Line Heights */
+  --trk-leading-none: 1;
+  --trk-leading-tight: 1.2;
+  --trk-leading-snug: 1.35;
+  --trk-leading-normal: 1.5;
+  --trk-leading-relaxed: 1.625;
+  --trk-leading-loose: 1.75;
+
+  /* Letter Spacing */
+  --trk-tracking-tighter: -0.02em;
+  --trk-tracking-tight: -0.01em;
+  --trk-tracking-normal: 0;
+  --trk-tracking-wide: 0.02em;
+  --trk-tracking-wider: 0.04em;
+  --trk-tracking-widest: 0.08em;
+
+  /* ==========================================================================
+     SPACING
+     ========================================================================== */
+
+  --space-0: 0;
+  --space-px: 1px;
+  --space-0-5: 0.125rem;
+  --space-1: 0.25rem;
+  --space-1-5: 0.375rem;
+  --space-2: 0.5rem;
+  --space-2-5: 0.625rem;
+  --space-3: 0.75rem;
+  --space-3-5: 0.875rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-7: 1.75rem;
+  --space-8: 2rem;
+  --space-9: 2.25rem;
+  --space-10: 2.5rem;
+  --space-11: 2.75rem;
+  --space-12: 3rem;
+  --space-14: 3.5rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  /* Semantic Spacing */
+  --trk-space-xs: var(--space-1);
+  --trk-space-sm: var(--space-2);
+  --trk-space-md: var(--space-3);
+  --trk-space-lg: var(--space-4);
+  --trk-space-xl: var(--space-6);
+  --trk-space-2xl: var(--space-8);
+  --trk-space-3xl: var(--space-12);
+  --trk-space-4xl: var(--space-16);
+
+  /* Legacy gap tokens (for backwards compatibility) */
+  --gap-xl: 32px;
+  --gap-lg: 24px;
+  --gap-md: 16px;
+  --gap-sm: 10px;
+
+  /* Touch Targets */
+  --trk-touch-min: 44px;
+  --trk-touch-comfortable: 48px;
+  --trk-touch-large: 56px;
+  --trk-touch-compact: 36px;
+  --trk-fab-size: 56px;
+
+  /* Container Widths */
+  --trk-container-xs: 320px;
+  --trk-container-sm: 384px;
+  --trk-container-md: 448px;
+  --trk-container-lg: 512px;
+  --trk-container-xl: 576px;
+
+  /* Sheet Dimensions */
+  --trk-sheet-max-width: 600px;
+  --trk-sheet-peek: 40vh;
+  --trk-sheet-half: 70vh;
+  --trk-sheet-full: 95vh;
+  --trk-sheet-header: 56px;
+  --trk-sheet-radius: 20px;
+
+  /* ==========================================================================
+     BORDERS
+     ========================================================================== */
+
+  --radius-none: 0;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
+  --radius-full: 9999px;
+
+  --border-0: 0;
+  --border-1: 1px;
+  --border-2: 2px;
+  --border-3: 3px;
+  --border-4: 4px;
+
+  /* ==========================================================================
+     SHADOWS
+     ========================================================================== */
+
+  --shadow-none: none;
+  --shadow-xs: 0 1px 2px 0 rgba(10, 11, 10, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(10, 11, 10, 0.08), 0 1px 2px -1px rgba(10, 11, 10, 0.08);
+  --shadow-md: 0 4px 6px -1px rgba(10, 11, 10, 0.08), 0 2px 4px -2px rgba(10, 11, 10, 0.08);
+  --shadow-lg: 0 10px 15px -3px rgba(10, 11, 10, 0.08), 0 4px 6px -4px rgba(10, 11, 10, 0.08);
+  --shadow-xl: 0 20px 25px -5px rgba(10, 11, 10, 0.08), 0 8px 10px -6px rgba(10, 11, 10, 0.08);
+  --shadow-2xl: 0 25px 50px -12px rgba(10, 11, 10, 0.16);
+
+  /* Semantic Shadows */
+  --trk-shadow-button: 0 4px 12px rgba(62, 69, 51, 0.15);
+  --trk-shadow-button-pressed: 0 2px 4px rgba(62, 69, 51, 0.1);
+  --trk-shadow-fab: 0 8px 24px rgba(10, 11, 10, 0.2);
+  --trk-shadow-sheet: 0 -4px 20px rgba(10, 11, 10, 0.08);
+  --trk-shadow-toast: 0 12px 40px rgba(10, 11, 10, 0.12);
+  --trk-shadow-tooltip: 0 4px 12px rgba(10, 11, 10, 0.12);
+  --trk-shadow-marker: 0 2px 6px rgba(10, 11, 10, 0.3);
+  --trk-shadow-focus: 0 0 0 3px rgba(30, 108, 224, 0.4);
+  --trk-shadow-focus-error: 0 0 0 3px rgba(208, 68, 62, 0.4);
+  --trk-shadow-focus-success: 0 0 0 3px rgba(46, 158, 91, 0.4);
+
+  /* Legacy shadow (for backwards compatibility) */
+  --trk-shadow-soft: 0 12px 40px rgba(0, 0, 0, 0.06);
+
+  /* Inner Shadows */
+  --trk-shadow-inner-sm: inset 0 1px 2px rgba(10, 11, 10, 0.05);
+  --trk-shadow-inner-md: inset 0 2px 4px rgba(10, 11, 10, 0.05);
+  --trk-shadow-inner-pressed: inset 0 2px 4px rgba(10, 11, 10, 0.1);
+
+  /* ==========================================================================
+     TIMING & ANIMATIONS
+     ========================================================================== */
+
+  /* Durations */
+  --duration-0: 0ms;
+  --duration-75: 75ms;
+  --duration-100: 100ms;
+  --duration-150: 150ms;
+  --duration-200: 200ms;
+  --duration-300: 300ms;
+  --duration-500: 500ms;
+  --duration-700: 700ms;
+  --duration-1000: 1000ms;
+
+  /* Easings */
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* Semantic Transitions */
+  --transition-fast: 150ms cubic-bezier(0, 0, 0.2, 1);
+  --transition-base: 200ms cubic-bezier(0, 0, 0.2, 1);
+  --transition-slow: 300ms cubic-bezier(0, 0, 0.2, 1);
+  --transition-sheet: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 300ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* ==========================================================================
+     BREAKPOINTS
+     ========================================================================== */
+
+  --breakpoint-xs: 320px;
+  --breakpoint-sm: 480px;
+  --breakpoint-md: 640px;
+  --breakpoint-lg: 768px;
+  --breakpoint-xl: 1024px;
+  --breakpoint-2xl: 1280px;
+  --breakpoint-3xl: 1536px;
+
+  /* ==========================================================================
+     Z-INDEX
+     ========================================================================== */
+
+  --z-behind: -1;
+  --z-base: 0;
+  --z-elevated: 10;
+  --z-sticky: 100;
+  --z-dropdown: 200;
+  --z-overlay: 300;
+  --z-fab: 400;
+  --z-modal: 500;
+  --z-sheet: 600;
+  --z-popover: 700;
+  --z-toast: 800;
+  --z-max: 9999;
+
+  /* ==========================================================================
+     SAFE AREA INSETS
+     ========================================================================== */
+
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+}
+
+/* ==========================================================================
+   REDUCED MOTION
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0ms;
+    --transition-base: 0ms;
+    --transition-slow: 0ms;
+    --transition-sheet: 0ms;
+    --transition-bounce: 0ms;
+  }
+}
+
+/* ==========================================================================
+   HIGH CONTRAST
+   ========================================================================== */
+
+@media (prefers-contrast: high) {
+  :root {
+    --trk-border: #1a1d1b;
+    --trk-border-strong: #0a0b0a;
+    --trk-text-soft: #4a4f47;
+    --shadow-sm: none;
+    --shadow-md: 0 0 0 1px var(--trk-border);
+    --shadow-lg: 0 0 0 2px var(--trk-border);
+  }
+}

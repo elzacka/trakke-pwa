@@ -84,8 +84,9 @@
 }
 
 .toggle-switch:focus-visible {
-  outline: 2px solid var(--trk-brand);
+  outline: 2px solid var(--trk-blue);
   outline-offset: 2px;
+  box-shadow: var(--trk-shadow-focus);
 }
 
 .toggle-slider {

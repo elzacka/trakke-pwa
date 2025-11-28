@@ -206,20 +206,20 @@ Increment `DB_VERSION` to 4 in [dbService.ts](src/services/dbService.ts).
 **UI Layout:**
 ```
 ┌─────────────────────────────────────┐
-│  ⬆️  Til Preikestolen              │  Next waypoint name
+│  [UP]  Til Preikestolen              │  Next waypoint name
 │  1.2 km  •  15 min  •  NE (45°)    │  Distance, ETA, bearing
 ├─────────────────────────────────────┤
 │  Veipunkt 2 av 5                   │  Progress
 │  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │  Progress bar
 ├─────────────────────────────────────┤
-│  [Pause]  [Stopp]  [⚙️]            │  Actions
+│  [Pause]  [Stopp]  [[SETTINGS]]            │  Actions
 └─────────────────────────────────────┘
 ```
 
 **Compact Mode:**
 ```
 ┌─────────────────────────────────────┐
-│  ⬆️ 1.2 km  •  NE  •  [⋮]          │  Minimal info bar
+│  [UP] 1.2 km  •  NE  •  [...]          │  Minimal info bar
 └─────────────────────────────────────┘
 ```
 
@@ -642,13 +642,13 @@ async function saveNavigationTrack(session: NavigationSession) {
 ## Privacy Compliance
 
 ### GDPR Checklist
-- ✅ No personal data sent to external servers
-- ✅ Location data stored locally only (IndexedDB)
-- ✅ User controls when tracking starts/stops
-- ✅ Clear UI indicators when location is being tracked
-- ✅ Option to delete all navigation history
-- ✅ No cookies or external tracking
-- ✅ Complies with existing privacy architecture
+- [OK] No personal data sent to external servers
+- [OK] Location data stored locally only (IndexedDB)
+- [OK] User controls when tracking starts/stops
+- [OK] Clear UI indicators when location is being tracked
+- [OK] Option to delete all navigation history
+- [OK] No cookies or external tracking
+- [OK] Complies with existing privacy architecture
 
 ### User Consent
 - First-time navigation: Show explanation dialog

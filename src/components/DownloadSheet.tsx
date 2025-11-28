@@ -342,16 +342,15 @@ const DownloadSheet = ({
               </div>
 
               <div className="download-actions">
-                <button className="download-button cancel" onClick={handleCancel}>
-                  <span>Avbryt</span>
+                <button className="trk-btn trk-btn--md trk-btn--secondary" onClick={handleCancel}>
+                  Avbryt
                 </button>
                 <button
-                  className="download-button confirm"
+                  className="trk-btn trk-btn--md trk-btn--primary"
                   onClick={handleConfirmDownload}
                   disabled={!areaName.trim()}
                 >
-                  <span className="material-symbols-outlined">download</span>
-                  <span>Last ned</span>
+                  Last ned
                 </button>
               </div>
             </div>
@@ -385,17 +384,15 @@ const DownloadSheet = ({
                       </div>
                     ))}
                   </div>
-                  <button className="download-button primary" onClick={handleStartSelection}>
-                    <span className="material-symbols-outlined">add</span>
-                    <span>Last ned nytt område</span>
+                  <button className="trk-btn trk-btn--md trk-btn--primary trk-btn--full-width" onClick={handleStartSelection}>
+                    Last ned nytt område
                   </button>
                 </>
               ) : (
                 <div className="download-initial">
                   <p className="empty-message">Ingen nedlastede områder</p>
-                  <button className="download-button primary" onClick={handleStartSelection}>
-                    <span className="material-symbols-outlined">download</span>
-                    <span>Velg område</span>
+                  <button className="trk-btn trk-btn--md trk-btn--primary trk-btn--full-width" onClick={handleStartSelection}>
+                    Velg område
                   </button>
                 </div>
               )}

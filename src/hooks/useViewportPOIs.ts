@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import type { LngLatBounds } from 'maplibre-gl'
 import { poiService, type POI, type POICategory, type AnyCategoryId, type SupabasePOI } from '../services/poiService'
 import { supabaseService } from '../services/supabaseService'
@@ -66,6 +66,18 @@ export const useViewportPOIs = ({
   const isFetchingRef = useRef<boolean>(false)
   const latestPOIsRef = useRef<Map<AnyCategoryId, POI[]>>(new Map())
 
+  // Convert Set to stable string key for dependency tracking
+  // This prevents unnecessary re-renders when Set reference changes but contents are the same
+  const categoriesKey = useMemo(() => {
+    return Array.from(activeCategories).sort().join(',')
+  }, [activeCategories])
+
+  // Store activeCategories in a ref for use in callbacks
+  const activeCategoriesRef = useRef(activeCategories)
+  useEffect(() => {
+    activeCategoriesRef.current = activeCategories
+  }, [activeCategories])
+
   useEffect(() => {
     mountedRef.current = true
     return () => {
@@ -107,20 +119,22 @@ export const useViewportPOIs = ({
   }, [])
 
   // Fetch POIs for all active categories in the current viewport
+  // Uses ref for activeCategories to avoid dependency issues
   const fetchPOIsForViewport = useCallback(async () => {
     if (!map) {
       devLog('[useViewportPOIs] Map not initialized yet')
       return
     }
 
+    const currentActiveCategories = activeCategoriesRef.current
     const zoom = map.getZoom()
-    devLog(`[useViewportPOIs] Current zoom: ${zoom}, global minZoom: ${minZoom}, active categories:`, Array.from(activeCategories))
+    devLog(`[useViewportPOIs] Current zoom: ${zoom}, global minZoom: ${minZoom}, active categories:`, Array.from(currentActiveCategories))
 
     // Separate built-in and Supabase categories
     const builtInCategories: POICategory[] = []
     const supabaseCategories: `supabase:${string}`[] = []
 
-    activeCategories.forEach(category => {
+    currentActiveCategories.forEach(category => {
       if (isSupabaseCategory(category)) {
         supabaseCategories.push(category)
       } else {
@@ -211,7 +225,7 @@ export const useViewportPOIs = ({
       })
 
       // Ensure all active categories are in the map, even if empty (below minZoom)
-      activeCategories.forEach(category => {
+      currentActiveCategories.forEach(category => {
         if (!newVisiblePOIs.has(category)) {
           newVisiblePOIs.set(category, [])
         }
@@ -232,32 +246,35 @@ export const useViewportPOIs = ({
     } finally {
       isFetchingRef.current = false
     }
-  }, [map, activeCategories, minZoom, getBoundsWithBuffer, boundsChanged])
+  }, [map, minZoom, getBoundsWithBuffer, boundsChanged])
 
-  // Debounced viewport change handler
+  // Store fetchPOIsForViewport in a ref for stable event handlers
+  const fetchPOIsForViewportRef = useRef(fetchPOIsForViewport)
+  useEffect(() => {
+    fetchPOIsForViewportRef.current = fetchPOIsForViewport
+  }, [fetchPOIsForViewport])
+
+  // Debounced viewport change handler - uses ref to avoid recreation
   const handleViewportChange = useCallback(() => {
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current)
     }
 
     debounceTimeoutRef.current = window.setTimeout(() => {
-      fetchPOIsForViewport()
+      fetchPOIsForViewportRef.current()
     }, debounceDelay)
-  }, [fetchPOIsForViewport, debounceDelay])
+  }, [debounceDelay])
 
   // Force refresh (useful for error recovery)
   const forceRefresh = useCallback(() => {
     previousBoundsRef.current = null
     previousZoomRef.current = 0
-    fetchPOIsForViewport()
-  }, [fetchPOIsForViewport])
+    fetchPOIsForViewportRef.current()
+  }, [])
 
-  // Set up map event listeners
+  // Set up map event listeners - only depends on map
   useEffect(() => {
     if (!map) return
-
-    // Initial load
-    fetchPOIsForViewport()
 
     // Listen for viewport changes
     map.on('moveend', handleViewportChange)
@@ -269,17 +286,17 @@ export const useViewportPOIs = ({
         map.off('zoomend', handleViewportChange)
       }
     }
-  }, [map, handleViewportChange, fetchPOIsForViewport])
+  }, [map, handleViewportChange])
 
-  // Reload when active categories change
+  // Reload when active categories change (using stable key)
   useEffect(() => {
     if (!map) return
-    devLog('[useViewportPOIs] Active categories changed, fetching...', Array.from(activeCategories))
+    devLog('[useViewportPOIs] Active categories changed, fetching...', categoriesKey)
 
     // Reset bounds to force fetch on category change
     previousBoundsRef.current = null
-    fetchPOIsForViewport()
-  }, [activeCategories, map, fetchPOIsForViewport])
+    fetchPOIsForViewportRef.current()
+  }, [categoriesKey, map])
 
   return {
     visiblePOIs,

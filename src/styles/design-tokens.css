@@ -170,3 +170,15 @@
   min-width: var(--trk-touch-comfortable);
   min-height: var(--trk-touch-comfortable);
 }
+
+/* ===== ANIMATIONS ===== */
+
+/* Spin animation - used for loading spinners */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}

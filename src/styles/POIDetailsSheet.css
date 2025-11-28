@@ -5,6 +5,28 @@
   height: 100%;
 }
 
+/* Header section - title and subtitle like new design */
+.poi-details-header {
+  padding: 0 var(--space-4) var(--space-4) var(--space-4);
+  border-bottom: var(--border-1) solid var(--trk-border);
+  margin-bottom: var(--space-2);
+}
+
+.poi-details-title {
+  margin: 0;
+  font-size: var(--trk-text-2xl);
+  font-weight: var(--trk-font-semibold);
+  color: var(--trk-text);
+  line-height: var(--trk-leading-snug);
+}
+
+.poi-details-subtitle {
+  margin: var(--space-1) 0 0 0;
+  font-size: var(--trk-text-md);
+  font-weight: var(--trk-font-normal);
+  color: var(--trk-text-soft);
+}
+
 /* Content */
 .poi-details-content {
   flex: 1;
@@ -31,11 +53,11 @@
 .poi-details-info-item {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 12px;
-  padding: 10px 12px;
+  gap: var(--space-3);
+  padding: var(--space-2-5) var(--space-3);
   background: transparent;
-  border-radius: 8px;
-  transition: background 0.15s ease;
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
   align-items: center;
 }
 
@@ -49,13 +71,13 @@
 }
 
 .poi-details-info-label {
-  font-size: 14px;
+  font-size: var(--trk-text-md);
   color: var(--trk-text-soft);
 }
 
 .poi-details-info-value {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--trk-text-md);
+  font-weight: var(--trk-font-medium);
   color: var(--trk-text);
   text-align: right;
 }
@@ -70,7 +92,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   transition: background-color var(--transition-base);
   flex-shrink: 0;
   color: var(--trk-brand);
@@ -98,26 +120,26 @@
 
 /* Kulturminner description - full-width layout with header above text */
 .kulturminner-description-header {
-  padding: 10px 12px 4px 12px;
+  padding: var(--space-2-5) var(--space-3) var(--space-1) var(--space-3);
   background: transparent;
 }
 
 .kulturminner-description-header .poi-details-info-label {
   text-align: left;
-  font-size: 14px;
+  font-size: var(--trk-text-md);
   color: var(--trk-text-soft);
 }
 
 .kulturminner-description-text {
-  padding: 4px 12px 10px 12px;
-  font-size: 14px;
-  font-weight: 400; /* Normal font weight instead of bold (500) */
+  padding: var(--space-1) var(--space-3) var(--space-2-5) var(--space-3);
+  font-size: var(--trk-text-md);
+  font-weight: var(--trk-font-normal);
   color: var(--trk-text);
   text-align: left;
-  white-space: pre-wrap; /* Preserve line breaks from source data */
+  white-space: pre-wrap;
   background: transparent;
-  border-radius: 8px;
-  transition: background 0.15s ease;
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
 }
 
 .kulturminner-description-text:hover {
@@ -126,98 +148,44 @@
 
 /* Admin actions for Supabase POIs */
 .poi-admin-actions {
-  margin-top: 20px;
-  padding: 16px 12px;
-  border-top: 1px solid var(--trk-border, #e5e7eb);
+  margin-top: var(--space-5);
+  padding: var(--space-4) var(--space-3);
+  border-top: var(--border-1) solid var(--trk-border);
 }
 
 .poi-admin-buttons {
   display: flex;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
-.poi-admin-button {
+/* Flex helper for admin buttons to fill available space */
+.poi-admin-btn-flex {
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 16px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s;
-}
-
-.poi-edit-button {
-  color: var(--trk-primary, #2d5a27);
-  background: var(--trk-surface, #fff);
-  border: 1px solid var(--trk-primary, #2d5a27);
-}
-
-.poi-edit-button:hover {
-  background: rgba(45, 90, 39, 0.08);
-}
-
-.poi-delete-button {
-  color: #fff;
-  background: var(--trk-error, #dc2626);
-  border: 1px solid var(--trk-error, #dc2626);
-}
-
-.poi-delete-button:hover:not(:disabled) {
-  background: #b91c1c;
-  border-color: #b91c1c;
-}
-
-.poi-delete-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.poi-cancel-button {
-  color: var(--trk-text-secondary, #666);
-  background: var(--trk-surface, #fff);
-  border: 1px solid var(--trk-border, #ddd);
-}
-
-.poi-cancel-button:hover {
-  background: var(--trk-surface-hover, #f5f5f5);
-}
-
-.poi-admin-button .material-symbols-outlined {
-  font-size: 1.125rem;
 }
 
 /* Delete confirmation */
 .poi-delete-confirm {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .poi-delete-confirm p {
   margin: 0;
-  font-size: 0.875rem;
-  color: var(--trk-text-primary, #1a1a1a);
+  font-size: var(--trk-text-sm);
+  color: var(--trk-text);
   text-align: center;
-}
-
-.poi-delete-confirm-buttons {
-  display: flex;
-  gap: 12px;
 }
 
 .poi-delete-error {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: var(--trk-surface-error, #fef2f2);
-  color: var(--trk-error-dark, #991b1b);
-  border-radius: 8px;
-  font-size: 0.813rem;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--trk-red-light);
+  color: var(--trk-red-hover);
+  border-radius: var(--radius-md);
+  font-size: var(--trk-text-xs);
 }
 
 .poi-delete-error .material-symbols-outlined {
@@ -225,28 +193,32 @@
   flex-shrink: 0;
 }
 
-/* Spinning animation for loading */
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.spinning {
-  animation: spin 1s linear infinite;
-}
+/* .spinning class is defined in design-tokens.css */
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
+  .poi-details-header {
+    padding: 0 var(--space-3) var(--space-3) var(--space-3);
+  }
+
+  .poi-details-title {
+    font-size: var(--trk-text-2xl);
+  }
+
+  .poi-details-subtitle {
+    font-size: var(--trk-text-sm);
+  }
+
   .poi-details-content {
-    padding: 6px;
+    padding: var(--space-1-5);
   }
 
   .poi-details-info-label {
-    font-size: 13px;
+    font-size: var(--trk-text-sm);
   }
 
   .poi-details-info-value {
-    font-size: 13px;
+    font-size: var(--trk-text-sm);
   }
 
   .poi-details-copy-button {
@@ -259,44 +231,14 @@
   }
 
   .kulturminner-description-header .poi-details-info-label {
-    font-size: 13px;
+    font-size: var(--trk-text-sm);
   }
 
   .kulturminner-description-text {
-    font-size: 13px;
+    font-size: var(--trk-text-sm);
   }
 
   .poi-admin-actions {
-    padding: 12px 8px;
-  }
-
-  .poi-admin-button {
-    padding: 8px 12px;
-    font-size: 0.813rem;
-  }
-}
-
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-  .poi-admin-actions {
-    border-top-color: var(--trk-border-dark, #374151);
-  }
-
-  .poi-edit-button {
-    background: var(--trk-surface-dark, #1f2937);
-  }
-
-  .poi-edit-button:hover {
-    background: rgba(45, 90, 39, 0.2);
-  }
-
-  .poi-cancel-button {
-    background: var(--trk-surface-dark, #1f2937);
-    border-color: var(--trk-border-dark, #374151);
-    color: var(--trk-text-secondary-dark, #9ca3af);
-  }
-
-  .poi-delete-confirm p {
-    color: var(--trk-text-primary-dark, #f5f5f5);
+    padding: var(--space-3) var(--space-2);
   }
 }

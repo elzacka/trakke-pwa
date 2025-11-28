@@ -237,10 +237,9 @@ const MapPreferencesSheet = ({ isOpen, onClose, onPreferencesChange }: MapPrefer
 
           <div className="preferences-actions">
             <button
-              className="reset-button"
+              className="trk-btn trk-btn--md trk-btn--ghost trk-btn--full-width"
               onClick={handleReset}
             >
-              <span className="material-symbols-outlined">restart_alt</span>
               Tilbakestill til standardverdier
             </button>
           </div>

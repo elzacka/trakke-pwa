@@ -392,19 +392,17 @@ const RouteSheet = ({
             <section className="route-actions">
               <button
                 type="button"
-                className="route-action-button primary"
+                className="trk-btn trk-btn--md trk-btn--primary"
                 onClick={handleStartDrawing}
               >
-                <span className="material-symbols-outlined">route</span>
-                <span>Tegn ny rute</span>
+                Tegn ny rute
               </button>
               <button
                 type="button"
-                className="route-action-button"
+                className="trk-btn trk-btn--md trk-btn--secondary"
                 onClick={handleStartWaypoint}
               >
-                <span className="material-symbols-outlined">location_on</span>
-                <span>Legg til punkt</span>
+                Legg til punkt
               </button>
             </section>
 
@@ -412,24 +410,20 @@ const RouteSheet = ({
             <section className="route-actions">
               <button
                 type="button"
-                className="route-action-button secondary"
+                className="trk-btn trk-btn--md trk-btn--ghost"
                 onClick={onClearMapRoute}
               >
-                <span className="material-symbols-outlined">layers_clear</span>
-                <span>Fjern rute fra kart</span>
+                Fjern rute fra kart
               </button>
               <button
                 type="button"
-                className="route-action-button secondary"
+                className="trk-btn trk-btn--md trk-btn--ghost"
                 onClick={() => {
                   devLog('[RouteSheet] Toggle button clicked, current routesVisible:', routesVisible)
                   onToggleVisibility()
                 }}
               >
-                <span className="material-symbols-outlined">
-                  {routesVisible ? 'visibility_off' : 'visibility'}
-                </span>
-                <span>{routesVisible ? 'Fjern punkter fra kart' : 'Vis punkter på kart'}</span>
+                {routesVisible ? 'Skjul punkter' : 'Vis punkter'}
               </button>
             </section>
 
@@ -560,11 +554,10 @@ const RouteSheet = ({
             <section className="route-actions">
               <button
                 type="button"
-                className="route-action-button primary"
+                className="trk-btn trk-btn--md trk-btn--primary"
                 onClick={handleCreateProject}
               >
-                <span className="material-symbols-outlined">create_new_folder</span>
-                <span>Nytt prosjekt</span>
+                Nytt prosjekt
               </button>
             </section>
 
@@ -680,19 +673,17 @@ const RouteSheet = ({
             <div className="route-detail-actions">
               {projectRoutes.length > 0 && (
                 <button
-                  className="route-detail-button primary"
+                  className="trk-btn trk-btn--md trk-btn--primary"
                   onClick={() => handleExportProjectGpx(project.id)}
                 >
-                  <span className="material-symbols-outlined">download</span>
-                  <span>Eksporter GPX</span>
+                  Eksporter GPX
                 </button>
               )}
               <button
-                className="route-detail-button"
+                className="trk-btn trk-btn--md trk-btn--danger"
                 onClick={() => handleDeleteProject(project.id)}
               >
-                <span className="material-symbols-outlined">delete</span>
-                <span>Slett prosjekt</span>
+                Slett prosjekt
               </button>
             </div>
           </div>
@@ -796,19 +787,17 @@ const RouteSheet = ({
 
             <div className="route-detail-actions">
               <button
-                className="route-detail-button primary"
+                className="trk-btn trk-btn--md trk-btn--primary"
                 onClick={() => handleExportRouteGpx(route.id)}
                 disabled={!canExportRoute(route)}
               >
-                <span className="material-symbols-outlined">download</span>
-                <span>Eksporter GPX</span>
+                Eksporter GPX
               </button>
               <button
-                className="route-detail-button"
+                className="trk-btn trk-btn--md trk-btn--danger"
                 onClick={() => handleDeleteRoute(route.id)}
               >
-                <span className="material-symbols-outlined">delete</span>
-                <span>Slett rute</span>
+                Slett rute
               </button>
             </div>
           </div>

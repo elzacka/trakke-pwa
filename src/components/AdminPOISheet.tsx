@@ -446,7 +446,7 @@ const AdminPOISheet = ({
           <div className="admin-poi-actions">
             <button
               type="button"
-              className="admin-poi-cancel"
+              className="trk-btn trk-btn--md trk-btn--secondary"
               onClick={onClose}
               disabled={isSaving}
             >
@@ -454,21 +454,11 @@ const AdminPOISheet = ({
             </button>
             <button
               type="button"
-              className="admin-poi-save"
+              className="trk-btn trk-btn--md trk-btn--primary"
               onClick={handleSave}
               disabled={isSaving || !name.trim() || !coordinates}
             >
-              {isSaving ? (
-                <>
-                  <span className="material-symbols-outlined spinning">progress_activity</span>
-                  <span>Lagrer...</span>
-                </>
-              ) : (
-                <>
-                  <span className="material-symbols-outlined">save</span>
-                  <span>{isEditMode ? 'Oppdater' : 'Lagre'}</span>
-                </>
-              )}
+              {isSaving ? 'Lagrer...' : (isEditMode ? 'Oppdater' : 'Lagre')}
             </button>
           </div>
         </div>

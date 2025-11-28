@@ -91,17 +91,15 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
             <div className="error-actions">
               <button
-                className="error-button error-button-primary"
+                className="trk-btn trk-btn--md trk-btn--primary"
                 onClick={this.handleReload}
               >
-                <span className="material-symbols-outlined">refresh</span>
                 Last siden på nytt
               </button>
               <button
-                className="error-button error-button-secondary"
+                className="trk-btn trk-btn--md trk-btn--secondary"
                 onClick={this.handleReset}
               >
-                <span className="material-symbols-outlined">restart_alt</span>
                 Prøv igjen
               </button>
             </div>

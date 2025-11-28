@@ -44,7 +44,7 @@ const InstallSheet = ({ isOpen, onClose, onInstall, canInstall, platform }: Inst
 
           {canInstall && !isIOS && (
             <button
-              className="install-button"
+              className="trk-btn trk-btn--md trk-btn--primary trk-btn--full-width"
               onClick={handleInstall}
               disabled={installing}
             >

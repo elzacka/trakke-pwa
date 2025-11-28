@@ -1,22 +1,23 @@
 /* Admin POI Sheet Styles */
+@import './design-tokens.css';
 
 .admin-poi-sheet {
-  padding: 0 16px 24px;
+  padding: 0 var(--space-4) var(--space-6);
 }
 
 .admin-poi-sheet h2 {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 0 0 20px 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--trk-text-primary, #1a1a1a);
+  gap: var(--space-2);
+  margin: 0 0 var(--space-5) 0;
+  font-size: var(--trk-text-xl);
+  font-weight: var(--trk-font-semibold);
+  color: var(--trk-text);
 }
 
 .admin-poi-sheet h2 .material-symbols-outlined {
   font-size: 1.5rem;
-  color: var(--trk-primary, #2d5a27);
+  color: var(--trk-brand);
 }
 
 /* Not logged in state */
@@ -24,54 +25,54 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 24px;
-  background: var(--trk-surface-warning, #fef3cd);
-  border-radius: 12px;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  background: var(--trk-yellow-light);
+  border-radius: var(--radius-lg);
   text-align: center;
 }
 
 .admin-poi-not-logged-in .material-symbols-outlined {
   font-size: 2rem;
-  color: var(--trk-warning, #856404);
+  color: var(--trk-yellow);
 }
 
 .admin-poi-not-logged-in p {
   margin: 0;
-  font-size: 0.875rem;
-  color: var(--trk-warning-dark, #533f03);
+  font-size: var(--trk-text-sm);
+  color: var(--trk-text);
 }
 
 /* Form */
 .admin-poi-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .admin-poi-form .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-1-5);
 }
 
 .admin-poi-form label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--trk-text-primary, #1a1a1a);
+  font-size: var(--trk-text-sm);
+  font-weight: var(--trk-font-medium);
+  color: var(--trk-text);
 }
 
 .admin-poi-form input[type="text"],
 .admin-poi-form input[type="url"],
 .admin-poi-form textarea,
 .admin-poi-form select {
-  padding: 12px 14px;
-  font-size: 1rem;
-  border: 1px solid var(--trk-border, #ddd);
-  border-radius: 8px;
-  background: var(--trk-surface, #fff);
-  color: var(--trk-text-primary, #1a1a1a);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  padding: var(--space-3) var(--space-3-5);
+  font-size: var(--trk-text-base);
+  border: var(--border-1) solid var(--trk-border);
+  border-radius: var(--radius-md);
+  background: var(--trk-surface);
+  color: var(--trk-text);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   font-family: inherit;
 }
 
@@ -79,13 +80,13 @@
 .admin-poi-form textarea:focus,
 .admin-poi-form select:focus {
   outline: none;
-  border-color: var(--trk-primary, #2d5a27);
-  box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.1);
+  border-color: var(--trk-brand);
+  box-shadow: var(--trk-shadow-focus);
 }
 
 .admin-poi-form input::placeholder,
 .admin-poi-form textarea::placeholder {
-  color: var(--trk-text-muted, #999);
+  color: var(--trk-text-muted);
 }
 
 .admin-poi-form textarea {
@@ -94,69 +95,69 @@
 }
 
 .form-hint {
-  margin: 4px 0 0;
-  font-size: 0.75rem;
-  color: var(--trk-text-secondary, #666);
-  line-height: 1.4;
+  margin: var(--space-1) 0 0;
+  font-size: var(--trk-text-xs);
+  color: var(--trk-text-soft);
+  line-height: var(--trk-leading-snug);
 }
 
 /* Location section */
 .admin-poi-location-section {
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
 }
 
 .admin-poi-coordinates {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 14px;
-  background: var(--trk-surface-success, #d4edda);
-  border-radius: 8px;
-  font-size: 0.875rem;
-  color: var(--trk-success-dark, #0d3d15);
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-3-5);
+  background: var(--trk-green-light);
+  border-radius: var(--radius-md);
+  font-size: var(--trk-text-sm);
+  color: var(--trk-green-hover);
 }
 
 .admin-poi-coordinates .material-symbols-outlined {
   font-size: 1.25rem;
-  color: var(--trk-success, #155724);
+  color: var(--trk-green);
 }
 
 .admin-poi-change-location {
   margin-left: auto;
-  padding: 4px 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--trk-text-secondary, #666);
-  background: var(--trk-surface, #fff);
-  border: 1px solid var(--trk-border, #ddd);
-  border-radius: 4px;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--trk-text-xs);
+  font-weight: var(--trk-font-medium);
+  color: var(--trk-text-soft);
+  background: var(--trk-surface);
+  border: var(--border-1) solid var(--trk-border);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color var(--transition-fast);
 }
 
 .admin-poi-change-location:hover {
-  background: var(--trk-surface-hover, #f5f5f5);
+  background: var(--trk-surface-subtle);
 }
 
 .admin-poi-pick-location {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
   width: 100%;
-  padding: 16px;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--trk-primary, #2d5a27);
-  background: var(--trk-surface, #fff);
-  border: 2px dashed var(--trk-primary, #2d5a27);
-  border-radius: 12px;
+  padding: var(--space-4);
+  font-size: var(--trk-text-base);
+  font-weight: var(--trk-font-medium);
+  color: var(--trk-brand);
+  background: var(--trk-surface);
+  border: var(--border-2) dashed var(--trk-brand);
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .admin-poi-pick-location:hover {
-  background: rgba(45, 90, 39, 0.05);
+  background: var(--trk-brand-tint);
 }
 
 .admin-poi-pick-location .material-symbols-outlined {
@@ -166,41 +167,41 @@
 /* Category type toggle */
 .admin-poi-category-type {
   display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
 }
 
 .category-type-button {
   flex: 1;
-  padding: 10px 12px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--trk-text-secondary, #666);
-  background: var(--trk-surface, #fff);
-  border: 1px solid var(--trk-border, #ddd);
-  border-radius: 8px;
+  padding: var(--space-2-5) var(--space-3);
+  font-size: var(--trk-text-sm);
+  font-weight: var(--trk-font-medium);
+  color: var(--trk-text-soft);
+  background: var(--trk-surface);
+  border: var(--border-1) solid var(--trk-border);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
 }
 
 .category-type-button:hover {
-  background: var(--trk-surface-hover, #f5f5f5);
+  background: var(--trk-surface-subtle);
 }
 
 .category-type-button.active {
-  color: #fff;
-  background: var(--trk-primary, #2d5a27);
-  border-color: var(--trk-primary, #2d5a27);
+  color: var(--trk-text-inverse);
+  background: var(--trk-brand);
+  border-color: var(--trk-brand);
 }
 
 /* Message */
 .admin-poi-message {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 14px;
-  border-radius: 8px;
-  font-size: 0.875rem;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-3-5);
+  border-radius: var(--radius-md);
+  font-size: var(--trk-text-sm);
 }
 
 .admin-poi-message .material-symbols-outlined {
@@ -209,114 +210,29 @@
 }
 
 .admin-poi-message-success {
-  background: var(--trk-surface-success, #d4edda);
-  color: var(--trk-success-dark, #0d3d15);
+  background: var(--trk-green-light);
+  color: var(--trk-green-hover);
 }
 
 .admin-poi-message-error {
-  background: var(--trk-surface-error, #f8d7da);
-  color: var(--trk-error-dark, #721c24);
+  background: var(--trk-red-light);
+  color: var(--trk-red-hover);
 }
 
 /* Actions */
 .admin-poi-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 8px;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
 }
 
-.admin-poi-cancel {
+/* Flex sizing for action buttons */
+.admin-poi-actions .trk-btn:first-child {
   flex: 1;
-  padding: 12px 20px;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--trk-text-secondary, #666);
-  background: var(--trk-surface, #fff);
-  border: 1px solid var(--trk-border, #ddd);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s;
 }
 
-.admin-poi-cancel:hover:not(:disabled) {
-  background: var(--trk-surface-hover, #f5f5f5);
-}
-
-.admin-poi-save {
+.admin-poi-actions .trk-btn:last-child {
   flex: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 20px;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #fff;
-  background: var(--trk-primary, #2d5a27);
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s, opacity 0.2s;
 }
 
-.admin-poi-save:hover:not(:disabled) {
-  background: var(--trk-primary-dark, #1e3d1a);
-}
-
-.admin-poi-save:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.admin-poi-save .material-symbols-outlined {
-  font-size: 1.25rem;
-}
-
-/* Spinning animation */
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.spinning {
-  animation: spin 1s linear infinite;
-}
-
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-  .admin-poi-sheet h2 {
-    color: var(--trk-text-primary-dark, #f5f5f5);
-  }
-
-  .admin-poi-form input,
-  .admin-poi-form textarea,
-  .admin-poi-form select {
-    background: var(--trk-surface-dark, #2a2a2a);
-    border-color: var(--trk-border-dark, #444);
-    color: var(--trk-text-primary-dark, #f5f5f5);
-  }
-
-  .admin-poi-form label {
-    color: var(--trk-text-primary-dark, #f5f5f5);
-  }
-
-  .category-type-button {
-    background: var(--trk-surface-dark, #2a2a2a);
-    border-color: var(--trk-border-dark, #444);
-    color: var(--trk-text-secondary-dark, #aaa);
-  }
-
-  .category-type-button:hover {
-    background: var(--trk-surface-hover-dark, #3a3a3a);
-  }
-
-  .admin-poi-cancel {
-    background: var(--trk-surface-dark, #2a2a2a);
-    border-color: var(--trk-border-dark, #444);
-    color: var(--trk-text-secondary-dark, #aaa);
-  }
-}
+/* .spinning class is defined in design-tokens.css */

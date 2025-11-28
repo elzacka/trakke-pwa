@@ -145,13 +145,13 @@ const WaypointDetailsSheet = ({
 
           <div className="waypoint-details-actions">
             <button
-              className="waypoint-action-button secondary"
+              className="trk-btn trk-btn--md trk-btn--secondary"
               onClick={handleCancel}
             >
               Avbryt
             </button>
             <button
-              className="waypoint-action-button primary"
+              className="trk-btn trk-btn--md trk-btn--primary"
               onClick={handleSave}
             >
               Lagre

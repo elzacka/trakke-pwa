@@ -63,7 +63,7 @@
 }
 
 .measurement-mode-button:active {
-  background: var(--trk-gray-100, #f3f4f6);
+  background: var(--trk-surface-subtle);
   transform: translateY(1px);
 }
 

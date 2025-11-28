@@ -6,21 +6,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Tråkke documentation follows a strict "single source of truth" principle. Each document has a specific purpose:
 
-| Document | Purpose | Authoritative For |
-|----------|---------|-------------------|
-| **[README.md](README.md)** | User/contributor overview | Features, roadmap, installation, quick start |
-| **[CLAUDE.md](CLAUDE.md)** (this file) | AI assistant context | Architecture patterns, IndexedDB schema, code examples, component structure |
-| **[PRIVACY_BY_DESIGN.md](PRIVACY_BY_DESIGN.md)** | Privacy/GDPR compliance | [External API Registry](PRIVACY_BY_DESIGN.md#external-api-registry), [CSP configuration](PRIVACY_BY_DESIGN.md#2-content-security-policy-csp), [Service Worker privacy](PRIVACY_BY_DESIGN.md#3-service-worker-privacy-configuration) |
-| **[DEVELOPER_GUIDELINES.md](DEVELOPER_GUIDELINES.md)** | Developer workflow | [Pre-implementation checklist](DEVELOPER_GUIDELINES.md#pre-implementation-checklist), privacy-first development patterns |
-| **[DESIGN_SYSTEM.md](devdocs/DESIGN_SYSTEM.md)** | Visual design | Nordisk ro colors, typography, icons, spacing, logo specifications |
+| Document                                                       | Purpose                   | Authoritative For                                                                                                                                                                                                                   |
+| -------------------------------------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **[README.md](README.md)**                                     | User/contributor overview | Features, installation, quick start                                                                                                                                                                                                 |
+| **[CLAUDE.md](CLAUDE.md)** (this file)                         | AI assistant context      | Architecture patterns, IndexedDB schema, code examples, component structure                                                                                                                                                         |
+| **[PRIVACY_BY_DESIGN.md](PRIVACY_BY_DESIGN.md)**               | Privacy/GDPR compliance   | [External API Registry](PRIVACY_BY_DESIGN.md#external-api-registry), [CSP configuration](PRIVACY_BY_DESIGN.md#2-content-security-policy-csp), [Service Worker privacy](PRIVACY_BY_DESIGN.md#3-service-worker-privacy-configuration) |
+| **[DEVELOPER_GUIDELINES.md](devdocs/DEVELOPER_GUIDELINES.md)** | Developer workflow        | [Pre-implementation checklist](devdocs/DEVELOPER_GUIDELINES.md#pre-implementation-checklist), privacy-first development patterns                                                                                                    |
 
 **When you need information:**
 - External APIs? → [PRIVACY_BY_DESIGN.md - External API Registry](PRIVACY_BY_DESIGN.md#external-api-registry)
 - CSP headers? → [PRIVACY_BY_DESIGN.md - CSP](PRIVACY_BY_DESIGN.md#2-content-security-policy-csp)
-- Privacy checklist? → [DEVELOPER_GUIDELINES.md](DEVELOPER_GUIDELINES.md#pre-implementation-checklist)
+- Privacy checklist? → [DEVELOPER_GUIDELINES.md](devdocs/DEVELOPER_GUIDELINES.md#pre-implementation-checklist)
 - Database schema? → [CLAUDE.md - IndexedDB Schema](#indexeddb-schema-v3)
-- Roadmap/features? → [README.md - Roadmap](README.md#-roadmap)
-- Design tokens? → [DESIGN_SYSTEM.md](devdocs/DESIGN_SYSTEM.md)
+- Features? → [README.md](README.md)
+- Design tokens? → [src/styles/tokens/tokens.css](src/styles/tokens/tokens.css)
 
 ## CRITICAL DEPLOYMENT WORKFLOW
 
@@ -35,9 +34,24 @@ Tråkke documentation follows a strict "single source of truth" principle. Each 
 
 **Exception**: Only push immediately if user explicitly says "and push to GitHub" in the same request.
 
+## No Emojis Policy
+
+**NEVER use emojis in code or documentation.** This includes:
+- Source code files (`.ts`, `.tsx`, `.css`, `.js`, etc.)
+- Documentation files (`.md`)
+- Comments in code
+- Commit messages
+- Any other project files
+
+Use text alternatives instead:
+- Instead of checkmark emoji: `[OK]`, `PASSED`, `Compliant`, or simply describe the status
+- Instead of warning emoji: `[WARNING]`, `Note:`, or `CAUTION:`
+- Instead of X/cross emoji: `[FAIL]`, `NOT ALLOWED`, or `PROHIBITED`
+- Instead of flag emojis: Write the country name (e.g., "Norway" not flag emoji)
+
 ## Project Overview
 
-**Tråkke** is a privacy-first Progressive Web Application for Norwegian outdoor navigation. It's built with React 19.2, TypeScript 5.9.3, and Vite 5.4.21, using MapLibre GL JS for mapping with Kartverket (Norwegian government) tiles.
+**Tråkke** is a privacy-first Progressive Web Application for Norwegian outdoor navigation. It's built with React 19.2, TypeScript 5.9.3, and Vite 5.4.21, using MapLibre GL JS for mapping with Kartverket (Norwegian) tiles.
 
 **Core Philosophy**: Privacy by Design - No external tracking, no analytics, no cookies. All user data stays local. GDPR compliant by architecture.
 
@@ -63,7 +77,7 @@ npm run lint         # ESLint check (TypeScript, React)
 
 **Content Security Policy**: See authoritative [CSP configuration](PRIVACY_BY_DESIGN.md#2-content-security-policy-csp) in PRIVACY_BY_DESIGN.md. Update CSP when adding external APIs.
 
-**Complete privacy checklist**: [DEVELOPER_GUIDELINES.md](DEVELOPER_GUIDELINES.md#pre-implementation-checklist)
+**Complete privacy checklist**: [DEVELOPER_GUIDELINES.md](devdocs/DEVELOPER_GUIDELINES.md#pre-implementation-checklist)
 
 ## Architecture
 
@@ -294,7 +308,7 @@ isSelectingArea: boolean     // Two clicks to select download area
 - Uses CSS Grid and Flexbox
 - Material Symbols icons (self-hosted, variable fonts)
 
-**Design System**: All colors, typography, spacing, and visual design tokens are documented in [DESIGN_SYSTEM.md](devdocs/DESIGN_SYSTEM.md). The app uses the **Nordisk ro** color palette with CSS custom properties (`--trk-*` prefix).
+**Design System**: All colors, typography, spacing, and visual design tokens are in [src/styles/tokens/tokens.css](src/styles/tokens/tokens.css). The app uses the **Nordisk ro** color palette with CSS custom properties (`--trk-*` prefix).
 
 ## Common Development Patterns
 
@@ -497,13 +511,13 @@ const MyChartComponent = ({ data }: Props) => {
 **Event Listeners**: Always create stable event handler references within useEffect to prevent memory leaks:
 
 ```typescript
-// ❌ BAD - Recreates handlers on every dependency change
+// BAD - Recreates handlers on every dependency change
 useEffect(() => {
   window.addEventListener('mousemove', handleMouseMove)
   return () => window.removeEventListener('mousemove', handleMouseMove)
 }, [isDragging, overlayRect]) // overlayRect causes re-registration
 
-// ✅ GOOD - Stable handlers, minimal dependencies
+// GOOD - Stable handlers, minimal dependencies
 useEffect(() => {
   if (!isDragging) return
 
@@ -599,12 +613,12 @@ The `validateName()` function:
 **Minimize unnecessary re-runs** by carefully managing dependency arrays:
 
 ```typescript
-// ❌ BAD - Function dependency causes unnecessary re-runs
+// BAD - Function dependency causes unnecessary re-runs
 useEffect(() => {
   if (anySheetOpen) showControls()
 }, [searchSheetOpen, infoSheetOpen, showControls]) // showControls changes when delay changes
 
-// ✅ GOOD - Rely on useCallback stability
+// GOOD - Rely on useCallback stability
 useEffect(() => {
   if (anySheetOpen) showControls()
 }, [searchSheetOpen, infoSheetOpen]) // showControls is stable from useCallback
@@ -615,7 +629,7 @@ useEffect(() => {
 **Use functional updates** when new state depends on previous state to avoid stale closures:
 
 ```typescript
-// ✅ GOOD - Functional update prevents stale state
+// GOOD - Functional update prevents stale state
 setPoiMarkers(prevMarkers => {
   prevMarkers.forEach(marker => {
     if (shouldRemove(marker)) marker.remove()
@@ -729,16 +743,6 @@ Key files to understand the architecture:
 
 8. **Third-Party Library Integration**: When integrating libraries with DOM manipulation (Chart.js, D3, etc.), use class-based managers in refs to separate lifecycle from React's render cycle. Never store library instances in React state.
 
-## Roadmap & Features
-
-**For current feature status and complete roadmap**, see the **[README.md](README.md#-roadmap)** roadmap section.
-
-**Quick status**: Phase 2 complete (POI categories, coordinate formats, projects, GPX export). Phase 3 in progress (elevation profiles complete; weather integration pending).
-
-**Upcoming phases**:
-- Phase 3: Elevation profiles, weather, route planning, photo geotagging
-- Phase 4: GPS navigation, turn-by-turn guidance, track recording
-
 ## Privacy Compliance Reminders
 
 When reviewing or modifying code:
@@ -755,6 +759,6 @@ When reviewing or modifying code:
   - overpass-api.de (OSM POI data: caves, towers, war memorials, wilderness shelters)
 
 **Documentation reference**:
-- Privacy checklist: [DEVELOPER_GUIDELINES.md](DEVELOPER_GUIDELINES.md#pre-implementation-checklist)
+- Privacy checklist: [DEVELOPER_GUIDELINES.md](devdocs/DEVELOPER_GUIDELINES.md#pre-implementation-checklist)
 - External APIs: [PRIVACY_BY_DESIGN.md - External API Registry](PRIVACY_BY_DESIGN.md#external-api-registry)
 - CSP configuration: [PRIVACY_BY_DESIGN.md - CSP](PRIVACY_BY_DESIGN.md#2-content-security-policy-csp)

@@ -10,7 +10,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--trk-background-primary);
+  background: var(--trk-bg);
   z-index: 10000;
   padding: 24px;
 }
@@ -25,22 +25,22 @@
 
 .error-icon {
   font-size: 64px;
-  color: var(--trk-error);
+  color: var(--trk-red);
   margin-bottom: 8px;
 }
 
 .error-title {
-  font-family: var(--trk-font-primary);
-  font-size: 24px;
-  font-weight: 600;
-  color: var(--trk-text-primary);
+  font-family: var(--trk-font-body);
+  font-size: var(--trk-text-2xl);
+  font-weight: var(--trk-font-semibold);
+  color: var(--trk-text);
   margin: 0;
 }
 
 .error-message {
-  font-family: var(--trk-font-primary);
-  font-size: 16px;
-  color: var(--trk-text-secondary);
+  font-family: var(--trk-font-body);
+  font-size: var(--trk-text-base);
+  color: var(--trk-text-soft);
   margin: 0;
   line-height: 1.5;
 }
@@ -48,33 +48,33 @@
 .error-details {
   margin-top: 16px;
   text-align: left;
-  background: var(--trk-background-secondary);
-  border: 1px solid var(--trk-border-subtle);
-  border-radius: 8px;
+  background: var(--trk-surface);
+  border: 1px solid var(--trk-border);
+  border-radius: var(--radius-md);
   padding: 12px;
 }
 
 .error-details summary {
   cursor: pointer;
-  font-family: var(--trk-font-primary);
-  font-size: 14px;
-  color: var(--trk-text-secondary);
+  font-family: var(--trk-font-body);
+  font-size: var(--trk-text-sm);
+  color: var(--trk-text-soft);
   user-select: none;
 }
 
 .error-details summary:hover {
-  color: var(--trk-text-primary);
+  color: var(--trk-text);
 }
 
 .error-stack {
   margin: 12px 0 0;
   padding: 12px;
-  background: var(--trk-background-primary);
-  border: 1px solid var(--trk-border-subtle);
-  border-radius: 4px;
+  background: var(--trk-bg);
+  border: 1px solid var(--trk-border);
+  border-radius: var(--radius-sm);
   font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
-  font-size: 12px;
-  color: var(--trk-text-tertiary);
+  font-size: var(--trk-text-xs);
+  color: var(--trk-text-muted);
   overflow-x: auto;
   white-space: pre-wrap;
   word-break: break-word;
@@ -93,13 +93,13 @@
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
-  font-family: var(--trk-font-primary);
-  font-size: 16px;
-  font-weight: 500;
+  font-family: var(--trk-font-body);
+  font-size: var(--trk-text-base);
+  font-weight: var(--trk-font-medium);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .error-button .material-symbols-outlined {
@@ -107,14 +107,14 @@
 }
 
 .error-button-primary {
-  background: var(--trk-brand-green);
-  color: white;
+  background: var(--trk-brand);
+  color: var(--trk-text-inverse);
 }
 
 .error-button-primary:hover {
-  background: var(--trk-brand-green-hover);
+  background: var(--trk-brand-soft);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(52, 168, 83, 0.3);
+  box-shadow: var(--trk-shadow-button);
 }
 
 .error-button-primary:active {
@@ -122,14 +122,14 @@
 }
 
 .error-button-secondary {
-  background: var(--trk-background-secondary);
-  color: var(--trk-text-primary);
-  border: 1px solid var(--trk-border-subtle);
+  background: var(--trk-surface);
+  color: var(--trk-text);
+  border: 1px solid var(--trk-border);
 }
 
 .error-button-secondary:hover {
-  background: var(--trk-background-tertiary);
-  border-color: var(--trk-border-default);
+  background: var(--trk-surface-subtle);
+  border-color: var(--trk-border-strong);
 }
 
 /* Mobile Responsive */
@@ -139,11 +139,11 @@
   }
 
   .error-title {
-    font-size: 20px;
+    font-size: var(--trk-text-xl);
   }
 
   .error-message {
-    font-size: 14px;
+    font-size: var(--trk-text-sm);
   }
 
   .error-icon {

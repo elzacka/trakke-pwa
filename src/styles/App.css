@@ -216,7 +216,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--trk-background-primary);
+  background: var(--trk-bg);
 }
 
 .loading-spinner {
@@ -228,7 +228,7 @@
 
 .loading-spinner .material-symbols-outlined {
   font-size: 48px;
-  color: var(--trk-brand-green);
+  color: var(--trk-brand);
 }
 
 .loading-spinner .rotating {
@@ -236,9 +236,9 @@
 }
 
 .loading-spinner p {
-  font-family: var(--trk-font-primary);
-  font-size: 16px;
-  color: var(--trk-text-secondary);
+  font-family: var(--trk-font-body);
+  font-size: var(--trk-text-base);
+  color: var(--trk-text-soft);
   margin: 0;
 }
 

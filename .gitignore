@@ -76,8 +76,8 @@ PRIVACY_COMPLIANCE.md
 *_INTERNAL.md
 *_DRAFT.md
 .obsidian/*
+devdocs/*
 
 # PWA service worker cache (runtime generated)
 sw.js.map
 workbox-*.js.map
-devdocs/

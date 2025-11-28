@@ -1,6 +1,7 @@
 /* Import design tokens first */
 @import './tokens/tokens.css';
 @import './design-tokens.css';
+@import './buttons.css';
 
 /* Local Fonts - GDPR compliance */
 @font-face {

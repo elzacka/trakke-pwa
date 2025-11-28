@@ -21,12 +21,15 @@
   gap: 6px;
 }
 
-/* Section Group (Accordion) */
+/* ============================================
+   LEVEL 1: Accordion Section Groups
+   (Datakilder, Personvern, Veiledning)
+   ============================================ */
 .info-section-group {
   display: flex;
   flex-direction: column;
   background: var(--trk-surface);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
@@ -34,11 +37,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: var(--space-3) var(--space-4);
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background var(--transition-fast);
   text-align: left;
   width: 100%;
 }
@@ -48,8 +51,8 @@
 }
 
 .info-section-title {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--trk-text-base);
+  font-weight: var(--trk-font-semibold);
   color: var(--trk-text);
   flex: 1;
   text-align: left;
@@ -63,132 +66,248 @@
   transition: transform var(--transition-base);
 }
 
-/* Section Content */
+/* Accordion expanded content container */
 .info-section-content {
   display: flex;
   flex-direction: column;
-  padding: 8px 12px 12px 12px;
-  gap: 8px;
+  padding: var(--space-1) var(--space-3) var(--space-4) var(--space-3);
+  gap: var(--space-4);
 }
 
-.info-section {
+/* ============================================
+   LEVEL 2: Subsection Groups
+   (KART, VÆR, KATEGORIER - uppercase labels)
+   ============================================ */
+.info-subsection-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-2);
 }
 
-/* Subsection headers (Kart, Vær, Kategorier) */
-.info-subsection-header {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--trk-text);
-  margin: 16px 0 12px 0;
-  padding-bottom: 4px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.info-subsection-header:first-child {
-  margin-top: 0;
-}
-
-.info-section h3 {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--trk-text);
+/* Uppercase subsection label */
+.info-subsection-label {
+  font-size: var(--trk-text-xs);
+  font-weight: var(--trk-font-semibold);
+  color: var(--trk-text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   margin: 0;
+  padding: 0 var(--space-0-5);
 }
 
-.info-section h4 {
-  font-size: 12px;
-  font-weight: 600;
+/* Container for provider cards under a subsection */
+.info-subsection-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* ============================================
+   LEVEL 3: Provider Cards
+   (Kartverket, MET Norway, DSB, OSM, etc.)
+   ============================================ */
+.info-provider-card {
+  background: var(--trk-surface-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-3-5);
+}
+
+/* Provider name header inside card */
+.info-provider-name {
+  font-size: var(--trk-text-sm);
+  font-weight: var(--trk-font-semibold);
   color: var(--trk-text);
-  margin: 12px 0 6px 0;
-  padding-top: 6px;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  margin: 0 0 var(--space-1-5) 0;
 }
 
-.info-section h4:first-child {
+/* Data list inside provider card */
+.info-provider-list {
+  margin: 0;
+  padding-left: var(--space-4);
+  font-size: var(--trk-text-xs);
+  line-height: var(--trk-leading-normal);
+  color: var(--trk-text-muted);
+}
+
+.info-provider-list li {
+  margin: var(--space-1) 0;
+}
+
+/* ============================================
+   Simple content section (Personvern, etc.)
+   ============================================ */
+.info-simple-content {
+  background: var(--trk-surface-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-3-5);
+}
+
+.info-simple-content p {
+  font-size: var(--trk-text-xs);
+  line-height: var(--trk-leading-normal);
+  color: var(--trk-text-muted);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.info-simple-content p:last-child {
+  margin-bottom: 0;
+}
+
+.info-simple-content ul {
+  margin: var(--space-2) 0;
+  padding-left: var(--space-4);
+  font-size: var(--trk-text-xs);
+  line-height: var(--trk-leading-normal);
+  color: var(--trk-text-muted);
+}
+
+.info-simple-content li {
+  margin: var(--space-1) 0;
+}
+
+/* ============================================
+   Nested accordions (Veiledning subsections)
+   ============================================ */
+.info-nested-group {
+  display: flex;
+  flex-direction: column;
+  background: var(--trk-surface-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.info-nested-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2-5) var(--space-3-5);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  text-align: left;
+  width: 100%;
+}
+
+.info-nested-header:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.info-nested-title {
+  font-size: var(--trk-text-md);
+  font-weight: var(--trk-font-medium);
+  color: var(--trk-text);
+  flex: 1;
+  text-align: left;
+}
+
+.info-nested-chevron {
+  font-size: 18px;
+  color: var(--trk-text-soft);
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 18;
+  flex-shrink: 0;
+}
+
+.info-nested-content {
+  padding: 0 var(--space-3-5) var(--space-3-5) var(--space-3-5);
+}
+
+/* Guide section headers (Søk etter steder, etc.) */
+.info-guide-header {
+  font-size: var(--trk-text-sm);
+  font-weight: var(--trk-font-semibold);
+  color: var(--trk-text);
+  margin: var(--space-3-5) 0 var(--space-1-5) 0;
+  padding-top: var(--space-2-5);
+  border-top: var(--border-1) solid var(--trk-border);
+}
+
+.info-guide-header:first-child {
   margin-top: 0;
   padding-top: 0;
   border-top: none;
 }
 
-.info-section p {
-  font-size: 12px;
-  line-height: 1.4;
-  color: var(--trk-text-muted);
+.info-guide-list {
   margin: 0;
+  padding-left: var(--space-4);
+  font-size: var(--trk-text-xs);
+  line-height: var(--trk-leading-normal);
+  color: var(--trk-text-muted);
 }
 
-.info-detail {
-  font-size: 11px;
-  color: var(--trk-text-soft);
-  line-height: 1.3;
+.info-guide-list li {
+  margin: var(--space-1) 0;
 }
 
-.info-section a {
+/* ============================================
+   Links
+   ============================================ */
+.info-provider-list a,
+.info-simple-content a,
+.info-guide-list a {
   color: var(--trk-brand);
   text-decoration: none;
   font-weight: 500;
 }
 
-.info-section a:hover {
+.info-provider-list a:hover,
+.info-simple-content a:hover,
+.info-guide-list a:hover {
   text-decoration: underline;
 }
 
-.info-list {
-  margin: 6px 0;
-  padding-left: 18px;
-  font-size: 12px;
-  line-height: 1.4;
-  color: var(--trk-text-muted);
-}
-
-.info-list li {
-  margin: 3px 0;
-}
-
-/* Mobile adjustments */
+/* ============================================
+   Mobile adjustments
+   ============================================ */
 @media (max-width: 768px) {
   .info-section-header {
-    padding: 10px 12px;
+    padding: var(--space-2-5) var(--space-3);
   }
 
   .info-section-title {
-    font-size: 14px;
+    font-size: var(--trk-text-md);
   }
 
   .info-section-content {
-    padding: 8px 12px 12px 12px;
-    gap: 8px;
+    padding: var(--space-1) var(--space-2-5) var(--space-3-5) var(--space-2-5);
+    gap: var(--space-3-5);
   }
 
-  .info-subsection-header {
-    font-size: 13px;
-    margin: 14px 0 10px 0;
-    padding-bottom: 3px;
+  .info-subsection-label {
+    font-size: var(--trk-text-xs);
   }
 
-  .info-section h3 {
-    font-size: 12px;
+  .info-provider-card,
+  .info-simple-content {
+    padding: var(--space-2-5) var(--space-3);
   }
 
-  .info-section h4 {
-    font-size: 11px;
-    margin: 10px 0 5px 0;
-    padding-top: 5px;
+  .info-provider-name {
+    font-size: var(--trk-text-xs);
   }
 
-  .info-section p {
-    font-size: 11px;
+  .info-provider-list,
+  .info-simple-content p,
+  .info-simple-content ul,
+  .info-guide-list {
+    font-size: var(--trk-text-xs);
   }
 
-  .info-detail {
-    font-size: 10px;
+  .info-nested-header {
+    padding: var(--space-2) var(--space-3);
   }
 
-  .info-list {
-    font-size: 11px;
-    padding-left: 16px;
+  .info-nested-title {
+    font-size: var(--trk-text-sm);
+  }
+
+  .info-nested-content {
+    padding: 0 var(--space-3) var(--space-3) var(--space-3);
+  }
+
+  .info-guide-header {
+    font-size: var(--trk-text-xs);
+    margin: var(--space-3) 0 var(--space-1-5) 0;
   }
 }

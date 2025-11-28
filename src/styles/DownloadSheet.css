@@ -36,9 +36,9 @@
 
 /* Confirmation state */
 .download-confirm {
-  padding: 12px;
+  padding: var(--space-3);
   background: var(--trk-surface-subtle);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
 }
 
 .confirm-info {
@@ -48,16 +48,16 @@
 }
 
 .confirm-text {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--trk-text-lg);
+  font-weight: var(--trk-font-semibold);
   color: var(--trk-text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--trk-font-body);
 }
 
 .confirm-subtext {
-  font-size: 13px;
+  font-size: var(--trk-text-sm);
   color: var(--trk-text-soft);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--trk-font-body);
 }
 
 /* Download progress */
@@ -75,31 +75,31 @@
 }
 
 .progress-text {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--trk-text-lg);
+  font-weight: var(--trk-font-semibold);
   color: var(--trk-text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--trk-font-body);
 }
 
 .progress-subtext {
-  font-size: 13px;
+  font-size: var(--trk-text-sm);
   color: var(--trk-text-soft);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--trk-font-body);
 }
 
 .progress-bar {
   width: 100%;
-  height: 8px;
+  height: var(--space-2);
   background: var(--trk-border);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
   background: var(--trk-brand);
-  border-radius: 4px;
-  transition: width 0.3s ease;
+  border-radius: var(--radius-sm);
+  transition: width var(--transition-slow);
 }
 
 /* Buttons */
@@ -107,13 +107,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 10px 16px;
+  gap: var(--space-1-5);
+  padding: var(--space-2-5) var(--space-4);
   border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  border-radius: var(--radius-md);
+  font-size: var(--trk-text-md);
+  font-weight: var(--trk-font-medium);
+  font-family: var(--trk-font-body);
   cursor: pointer;
   transition: all var(--transition-base);
   flex: 1;
@@ -177,19 +177,19 @@
 }
 
 .configure-section label {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--trk-text-md);
+  font-weight: var(--trk-font-medium);
   color: var(--trk-text-muted);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--trk-font-body);
 }
 
 .area-name-input {
   width: 100%;
-  padding: 12px;
-  border: 1px solid var(--trk-border);
-  border-radius: 8px;
-  font-size: 15px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  padding: var(--space-3);
+  border: var(--border-1) solid var(--trk-border);
+  border-radius: var(--radius-md);
+  font-size: var(--trk-text-base);
+  font-family: var(--trk-font-body);
   color: var(--trk-text);
   transition: border-color var(--transition-base);
 }
@@ -256,17 +256,17 @@
 }
 
 .zoom-input-group label {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--trk-text-xs);
+  font-weight: var(--trk-font-medium);
   color: var(--trk-text-soft);
 }
 
 .zoom-input-group input {
-  padding: 10px;
-  border: 1px solid var(--trk-border);
-  border-radius: 8px;
-  font-size: 15px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  padding: var(--space-2-5);
+  border: var(--border-1) solid var(--trk-border);
+  border-radius: var(--radius-md);
+  font-size: var(--trk-text-base);
+  font-family: var(--trk-font-body);
   color: var(--trk-text);
   text-align: center;
   transition: border-color var(--transition-base);
@@ -278,23 +278,23 @@
 }
 
 .zoom-inputs > span {
-  font-size: 14px;
+  font-size: var(--trk-text-md);
   color: var(--trk-text-soft);
-  padding-top: 20px;
+  padding-top: var(--space-5);
 }
 
 .download-estimate {
-  padding: 12px;
+  padding: var(--space-3);
   background: var(--trk-surface-subtle);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   text-align: center;
 }
 
 .estimate-text {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--trk-text-md);
+  font-weight: var(--trk-font-medium);
   color: var(--trk-text-muted);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--trk-font-body);
 }
 
 /* Download complete */
@@ -313,10 +313,10 @@
 }
 
 .success-text {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--trk-text-lg);
+  font-weight: var(--trk-font-semibold);
   color: var(--trk-text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--trk-font-body);
 }
 
 /* Downloaded areas list */
@@ -335,10 +335,10 @@
 .area-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
+  gap: var(--space-2-5);
+  padding: var(--space-2-5) var(--space-3);
   background: var(--trk-surface-subtle);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: background-color var(--transition-base);
 }
@@ -356,16 +356,16 @@
 }
 
 .area-name {
-  font-size: 15px;
-  font-weight: 500;
+  font-size: var(--trk-text-base);
+  font-weight: var(--trk-font-medium);
   color: var(--trk-text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--trk-font-body);
 }
 
 .area-details {
-  font-size: 12px;
+  font-size: var(--trk-text-xs);
   color: var(--trk-text-soft);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--trk-font-body);
 }
 
 .area-delete-button {
@@ -377,7 +377,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   transition: background-color var(--transition-base);
   flex-shrink: 0;
 }
@@ -393,11 +393,11 @@
 }
 
 .empty-message {
-  font-size: 13px;
+  font-size: var(--trk-text-sm);
   color: var(--trk-text-soft);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--trk-font-body);
   margin: 0;
-  padding: 4px 0;
+  padding: var(--space-1) 0;
 }
 
 /* Mobile optimizations */
@@ -412,8 +412,8 @@
   }
 
   .download-button {
-    font-size: 14px;
-    padding: 10px 16px;
+    font-size: var(--trk-text-md);
+    padding: var(--space-2-5) var(--space-4);
   }
 
   .download-initial,
@@ -426,10 +426,10 @@
   }
 
   .confirm-text {
-    font-size: 15px;
+    font-size: var(--trk-text-base);
   }
 
   .confirm-subtext {
-    font-size: 12px;
+    font-size: var(--trk-text-xs);
   }
 }

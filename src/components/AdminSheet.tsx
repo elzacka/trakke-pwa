@@ -113,24 +113,21 @@ const AdminSheet = ({ isOpen, onClose, onAddPOI, onAddCategory }: AdminSheetProp
             </div>
 
             <div className="admin-action-buttons">
-              <button className="admin-action-button" onClick={handleAddPOI}>
-                <span className="material-symbols-outlined">add_location</span>
-                <span>Legg til sted</span>
+              <button className="trk-btn trk-btn--md trk-btn--primary" onClick={handleAddPOI}>
+                Legg til sted
               </button>
 
-              <button className="admin-action-button" onClick={handleAddCategory}>
-                <span className="material-symbols-outlined">category</span>
-                <span>Ny kategori</span>
+              <button className="trk-btn trk-btn--md trk-btn--secondary" onClick={handleAddCategory}>
+                Ny kategori
               </button>
             </div>
 
             <button
-              className="admin-signout-button"
+              className="trk-btn trk-btn--md trk-btn--ghost trk-btn--full-width admin-signout-btn"
               onClick={handleSignOut}
               disabled={isLoading}
             >
-              <span className="material-symbols-outlined">logout</span>
-              <span>{isLoading ? 'Logger ut...' : 'Logg ut'}</span>
+              {isLoading ? 'Logger ut...' : 'Logg ut'}
             </button>
           </div>
         ) : (
@@ -142,7 +139,7 @@ const AdminSheet = ({ isOpen, onClose, onAddPOI, onAddCategory }: AdminSheetProp
                 <p>Sjekk e-posten din for innloggingslenke.</p>
                 <p className="magic-link-hint">Klikk på lenken i e-posten for å logge inn.</p>
                 <button
-                  className="admin-secondary-button"
+                  className="trk-btn trk-btn--sm trk-btn--secondary"
                   onClick={() => {
                     setMagicLinkSent(false)
                     setMessage(null)
@@ -173,17 +170,10 @@ const AdminSheet = ({ isOpen, onClose, onAddPOI, onAddCategory }: AdminSheetProp
 
                 <button
                   type="submit"
-                  className="admin-login-button"
+                  className="trk-btn trk-btn--md trk-btn--primary trk-btn--full-width"
                   disabled={isLoading || !email.trim()}
                 >
-                  {isLoading ? (
-                    <>
-                      <span className="material-symbols-outlined spinning">progress_activity</span>
-                      <span>Sender...</span>
-                    </>
-                  ) : (
-                    <span>Send innloggingslenke</span>
-                  )}
+                  {isLoading ? 'Sender...' : 'Send innloggingslenke'}
                 </button>
               </form>
             )}

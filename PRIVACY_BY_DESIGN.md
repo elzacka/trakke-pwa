@@ -1,8 +1,7 @@
 # Privacy by Design - Tråkke PWA
 
-**Implementation Date**: November 8, 2025
 **Framework**: React 19.2.0 + Vite 5.4.21 + TypeScript 5.9.3
-**Compliance**: GDPR, Norwegian Personopplysningsloven
+**Compliance**: GDPR (the Norwegian "Personopplysningsloven/personvernforordningen")
 
 ## Executive Summary
 
@@ -88,10 +87,10 @@ const dbService = {
 
 | Data Type | Purpose | Storage | Retention | EU/EØS |
 |-----------|---------|---------|-----------|--------|
-| **Map tiles** | Display maps | Service Worker cache | 30 days | ✅ (Kartverket - Norway) |
-| **User location** | Show position on map | Memory only (runtime) | Session only | ✅ (Never leaves device) |
-| **App state** | Persist user preferences | IndexedDB (local) | Until user clears | ✅ (Never leaves device) |
-| **Fonts & Icons** | Display text/POI markers | Service Worker cache / Bundled | Permanent | ✅ (Served locally: Material Symbols, Osmic icons) |
+| **Map tiles** | Display maps | Service Worker cache | 30 days | Compliant (Kartverket - Norway) |
+| **User location** | Show position on map | Memory only (runtime) | Session only | Compliant (Never leaves device) |
+| **App state** | Persist user preferences | IndexedDB (local) | Until user clears | Compliant (Never leaves device) |
+| **Fonts & Icons** | Display text/POI markers | Service Worker cache / Bundled | Permanent | Compliant (Served locally: Material Symbols, Osmic icons) |
 
 ### External API Registry
 
@@ -99,17 +98,17 @@ const dbService = {
 
 | Domain | Service | Provider | Country | Purpose | GDPR Compliant | Justification |
 |--------|---------|----------|---------|---------|----------------|---------------|
-| `cache.kartverket.no` | WMTS Tiles | Kartverket | Norway 🇳🇴 | Map tile imagery | ✅ | Norwegian Mapping Authority, EU/EØS government agency |
-| `ws.geonorge.no` | SSR API | Kartverket | Norway 🇳🇴 | Place name search | ✅ | Sentralt Stedsnavnregister (SSR), Norwegian government |
-| `ws.geonorge.no` | Address API | Kartverket | Norway 🇳🇴 | Address geocoding | ✅ | Norwegian address registry, government data |
-| `ws.geonorge.no` | Høydedata API | Kartverket | Norway 🇳🇴 | Elevation data (DTM 10m) | ✅ | Norwegian Digital Terrain Model, government data |
-| `ogc.dsb.no` | WFS Service | DSB | Norway 🇳🇴 | Public shelter (Tilfluktsrom) locations | ✅ | Direktoratet for samfunnssikkerhet og beredskap, Norwegian government |
-| `overpass-api.de` | Overpass API | FOSSGIS e.V. | Germany 🇩🇪 | POI data (caves, towers, war memorials, wilderness shelters) from OpenStreetMap | ✅ | German non-profit, EU-based, public OSM data, no tracking |
-| `api.ra.no` | Brukerminner API | Riksantikvaren | Norway 🇳🇴 | Cultural heritage POI data (kulturminner) | ✅ | Norwegian Directorate for Cultural Heritage, OGC API-Features, government data, NLOD/CC BY 4.0 |
-| `opencache.statkart.no` | Norge i bilder WMTS | Kartverket | Norway 🇳🇴 | Satellite/orthophoto imagery (WMTS - offline capable) | ✅ | 25cm resolution orthophotos, zoom 0-19. Service deprecated but publicly accessible with no replacement. CC BY 4.0. Attribution: ©Kartverket \| Norge i bilder |
-| `api.met.no` | Locationforecast 2.0 | MET Norway | Norway 🇳🇴 | Weather forecasts | ⚠️ | Norwegian Meteorological Institute, **logs user IP addresses** in Oslo datacenter. CC BY 4.0 license. Direct API calls (no proxy). |
-| `badetemperaturer.yr.no` | Bathing Temp API | Yr (MET/NRK) | Norway 🇳🇴 | Bathing/swimming water temperatures | ⏸️ | Yr service by MET Norway/NRK. **Requires API key** (obtain via email to support@yr.no). Feature implemented but disabled until API key configured. |
-| `*.supabase.co` | Personal POI Database | Supabase (User-hosted) | Sweden 🇸🇪 (EU) | User-defined POI categories (Tråkke spesial) | ✅ | **Optional feature** - User provides own Supabase project URL and anon key. Recommended: EU region (eu-north-1, Stockholm). Read-only access, no tracking, user controls data. Disabled by default. |
+| `cache.kartverket.no` | WMTS Tiles | Kartverket | Norway | Map tile imagery | Yes | Norwegian Mapping Authority, EU/EØS government agency |
+| `ws.geonorge.no` | SSR API | Kartverket | Norway | Place name search | Yes | Sentralt Stedsnavnregister (SSR), Norwegian government |
+| `ws.geonorge.no` | Address API | Kartverket | Norway | Address geocoding | Yes | Norwegian address registry, government data |
+| `ws.geonorge.no` | Høydedata API | Kartverket | Norway | Elevation data (DTM 10m) | Yes | Norwegian Digital Terrain Model, government data |
+| `ogc.dsb.no` | WFS Service | DSB | Norway | Public shelter (Tilfluktsrom) locations | Yes | Direktoratet for samfunnssikkerhet og beredskap, Norwegian government |
+| `overpass-api.de` | Overpass API | FOSSGIS e.V. | Germany | POI data (caves, towers, war memorials, wilderness shelters) from OpenStreetMap | Yes | German non-profit, EU-based, public OSM data, no tracking |
+| `api.ra.no` | Brukerminner API | Riksantikvaren | Norway | Cultural heritage POI data (kulturminner) | Yes | Norwegian Directorate for Cultural Heritage, OGC API-Features, government data, NLOD/CC BY 4.0 |
+| `opencache.statkart.no` | Norge i bilder WMTS | Kartverket | Norway | Satellite/orthophoto imagery (WMTS - offline capable) | Yes | 25cm resolution orthophotos, zoom 0-19. Service deprecated but publicly accessible with no replacement. CC BY 4.0. Attribution: ©Kartverket \| Norge i bilder |
+| `api.met.no` | Locationforecast 2.0 | MET Norway | Norway | Weather forecasts | Note | Norwegian Meteorological Institute, **logs user IP addresses** in Oslo datacenter. CC BY 4.0 license. Direct API calls (no proxy). |
+| `badetemperaturer.yr.no` | Bathing Temp API | Yr (MET/NRK) | Norway | Bathing/swimming water temperatures | Pending | Yr service by MET Norway/NRK. **Requires API key** (obtain via email to support@yr.no). Feature implemented but disabled until API key configured. |
+| `*.supabase.co` | Personal POI Database | Supabase (User-hosted) | Sweden (EU) | User-defined POI categories (Tråkke spesial) | Yes | **Optional feature** - User provides own Supabase project URL and anon key. Recommended: EU region (eu-north-1, Stockholm). Read-only access, no tracking, user controls data. Disabled by default. |
 
 **Privacy guarantees for all approved services:**
 - No user tracking or analytics
@@ -126,14 +125,14 @@ const dbService = {
 ### 1. No External Trackers
 
 ```typescript
-// ❌ NOT IMPLEMENTED (Privacy by Design)
+// NOT IMPLEMENTED (Privacy by Design)
 // - Google Analytics
 // - Facebook Pixel
 // - Hotjar
 // - Mixpanel
 // - Any analytics or tracking
 
-// ✅ PRIVACY-PRESERVING ALTERNATIVES (if needed future)
+// PRIVACY-PRESERVING ALTERNATIVES (if needed future)
 // - Plausible Analytics (EU-hosted, privacy-focused)
 // - Matomo (self-hosted on EU servers)
 // - Simple Analytics (EU-based)
@@ -202,7 +201,7 @@ Implemented via vite.config.ts custom plugin (production builds only):
 
 ```typescript
 // LocationButton.tsx
-// ✅ Privacy-preserving implementation
+// Privacy-preserving implementation
 - User must explicitly click button
 - No background tracking
 - No location history stored
@@ -214,7 +213,7 @@ Implemented via vite.config.ts custom plugin (production builds only):
 
 ```typescript
 // dbService.ts
-// ✅ Privacy-preserving storage
+// Privacy-preserving storage
 - All data local to device
 - No cloud synchronization
 - No data export to servers
@@ -227,13 +226,13 @@ Implemented via vite.config.ts custom plugin (production builds only):
 
 | Package | Version | Source | Purpose | Privacy Risk | Status |
 |---------|---------|--------|---------|--------------|--------|
-| **react** | 19.2.0 | Meta (USA) | UI framework | ✅ Low (client-side library) | Safe |
-| **react-dom** | 19.2.0 | Meta (USA) | React renderer | ✅ Low (client-side library) | Safe |
-| **maplibre-gl** | 5.11.0 | MapLibre (Open Source) | Map rendering | ✅ Low (client-side library) | Safe |
-| **vite** | 5.4.21 | Vite (Open Source) | Build tool | ✅ None (dev only) | Safe |
-| **vite-plugin-pwa** | 1.1.0 | vite-pwa (Open Source) | PWA generation | ✅ None (build time) | Safe |
-| **workbox-window** | 7.3.0 | Google (USA) | Service Worker | ✅ Low (client-side library) | Safe |
-| **typescript** | 5.9.3 | Microsoft (USA) | Type safety | ✅ None (dev only) | Safe |
+| **react** | 19.2.0 | Meta (USA) | UI framework | Low (client-side library) | Safe |
+| **react-dom** | 19.2.0 | Meta (USA) | React renderer | Low (client-side library) | Safe |
+| **maplibre-gl** | 5.11.0 | MapLibre (Open Source) | Map rendering | Low (client-side library) | Safe |
+| **vite** | 5.4.21 | Vite (Open Source) | Build tool | None (dev only) | Safe |
+| **vite-plugin-pwa** | 1.1.0 | vite-pwa (Open Source) | PWA generation | None (build time) | Safe |
+| **workbox-window** | 7.3.0 | Google (USA) | Service Worker | Low (client-side library) | Safe |
+| **typescript** | 5.9.3 | Microsoft (USA) | Type safety | None (dev only) | Safe |
 
 **Risk Assessment**: All dependencies are client-side libraries. No runtime data collection or external API calls.
 
@@ -241,16 +240,16 @@ Implemented via vite.config.ts custom plugin (production builds only):
 
 | Asset | Source | License | Purpose | Privacy |
 |-------|--------|---------|---------|---------|
-| **Material Symbols** | Google Fonts (self-hosted) | Apache 2.0 | UI icons and navigation | ✅ Self-hosted font file, no external requests |
-| **Osmic Icons** | github.com/gmgeo/osmic | CC0-1.0 (Public Domain) | POI category markers (fort.svg for war memorials) | ✅ Self-hosted SVGs, no external requests |
-| **OSM-Carto Icons** | github.com/gravitystorm/openstreetmap-carto | CC0-1.0 (Public Domain) | Natural feature POI markers (caves) | ✅ Self-hosted SVGs, no external requests |
-| **Custom SVG** | In-house | N/A | T-marker for Tilfluktsrom | ✅ Inline SVG, no external requests |
+| **Material Symbols** | Google Fonts (self-hosted) | Apache 2.0 | UI icons and navigation | Self-hosted font file, no external requests |
+| **Osmic Icons** | github.com/gmgeo/osmic | CC0-1.0 (Public Domain) | POI category markers (fort.svg for war memorials) | Self-hosted SVGs, no external requests |
+| **OSM-Carto Icons** | github.com/gravitystorm/openstreetmap-carto | CC0-1.0 (Public Domain) | Natural feature POI markers (caves) | Self-hosted SVGs, no external requests |
+| **Custom SVG** | In-house | N/A | T-marker for Tilfluktsrom | Inline SVG, no external requests |
 
 **Icon Strategy**: Hybrid approach using Material Symbols for UI controls, Osmic for man-made POI markers, and OSM-Carto for natural features. All assets bundled in build, served from same origin. Zero external CDN dependencies.
 
 ### Future Dependency Guidelines
 
-**🚫 PROHIBITED** Dependencies:
+**PROHIBITED Dependencies:**
 - Analytics libraries (Google Analytics, Mixpanel, etc.)
 - Advertising SDKs
 - Social media tracking pixels
@@ -258,7 +257,7 @@ Implemented via vite.config.ts custom plugin (production builds only):
 - Error tracking with automatic data upload (Sentry, Bugsnag without self-hosting)
 - CDNs outside EU/EØS for runtime assets
 
-**✅ ALLOWED** Dependencies (with review):
+**ALLOWED Dependencies (with review):**
 - Client-side libraries (no external API calls)
 - Build-time tools (development only)
 - EU-hosted services with proper DPA
@@ -271,23 +270,23 @@ Implemented via vite.config.ts custom plugin (production builds only):
 Before implementing any new feature, check:
 
 1. **Does it require external API calls?**
-   - ✅ Yes → Verify provider is EU/EØS based
-   - ❌ No → Proceed
+   - Yes: Verify provider is EU/EØS based
+   - No: Proceed
 
 2. **Does it collect user data?**
-   - ✅ Yes → Document in privacy policy
-   - ✅ Yes → Store locally only (IndexedDB)
-   - ❌ No → Proceed
+   - Yes: Document in privacy policy
+   - Yes: Store locally only (IndexedDB)
+   - No: Proceed
 
 3. **Does it use third-party services?**
-   - ✅ Yes → Audit for GDPR compliance
-   - ✅ Yes → Check server location (must be EU/EØS)
-   - ❌ No → Proceed
+   - Yes: Audit for GDPR compliance
+   - Yes: Check server location (must be EU/EØS)
+   - No: Proceed
 
 4. **Does it require user consent?**
-   - ✅ Yes → Implement opt-in mechanism
-   - ✅ Yes → Make feature optional
-   - ❌ No → Proceed
+   - Yes: Implement opt-in mechanism
+   - Yes: Make feature optional
+   - No: Proceed
 
 ### Code Review Checklist
 
@@ -329,49 +328,49 @@ npm run preview
 
 ### GDPR (EU General Data Protection Regulation)
 
-**Article 25 - Privacy by Design**: ✅ Implemented
+**Article 25 - Privacy by Design**: Implemented
 - Data minimization
 - Storage limitation
 - Default privacy settings
 - Transparent processing
 
-**Article 32 - Security**: ✅ Implemented
+**Article 32 - Security**: Implemented
 - HTTPS encryption
 - Local data storage
 - No unnecessary data transmission
 - CSP headers
 
-**Article 44-49 - International Transfers**: ✅ Compliant
+**Article 44-49 - International Transfers**: Compliant
 - No data transfers outside EU/EØS
 - Only Kartverket (Norway) accessed
 
 ### Norwegian Personopplysningsloven
 
-✅ **Compliant**: No personal data processing requiring consent or registration
+**Compliant**: No personal data processing requiring consent or registration
 
 ## Future Enhancements (Privacy-Preserving)
 
 ### Phase 2 Features - Privacy Considerations
 
 1. **Offline Map Downloads**
-   - ✅ Store locally in IndexedDB
-   - ❌ Do NOT sync to cloud
-   - ✅ User controls deletion
+   - Store locally in IndexedDB
+   - Do NOT sync to cloud
+   - User controls deletion
 
 2. **Search Functionality**
-   - ✅ Use Kartverket API (Norway-based)
-   - ❌ Do NOT use Google Places API
-   - ✅ Alternative: Local search in cached data
+   - Use Kartverket API (Norway-based)
+   - Do NOT use Google Places API
+   - Alternative: Local search in cached data
 
 3. **Routes and Waypoints**
-   - ✅ Store in IndexedDB
-   - ❌ Do NOT sync to external servers
-   - ✅ Export as GPX (user-controlled)
+   - Store in IndexedDB
+   - Do NOT sync to external servers
+   - Export as GPX (user-controlled)
 
 4. **Projects/Tracks Management**
-   - ✅ Local storage only
-   - ✅ User-initiated export/import
-   - ❌ No automatic cloud backup
+   - Local storage only
+   - User-initiated export/import
+   - No automatic cloud backup
 
 ### Privacy-Preserving Services (If Needed)
 

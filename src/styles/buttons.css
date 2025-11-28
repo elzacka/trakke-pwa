@@ -1,0 +1,249 @@
+/**
+ * Tråkke Design System - Button Styles
+ *
+ * Reusable button classes based on design system v2 tokens.
+ * Import this file in components that need button styling.
+ */
+
+/* ==========================================================================
+   BASE BUTTON
+   ========================================================================== */
+
+.trk-btn {
+  /* Reset */
+  appearance: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--trk-font-body);
+
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+
+  /* Typography */
+  font-weight: var(--trk-font-medium);
+  line-height: var(--trk-leading-tight);
+  text-decoration: none;
+  white-space: nowrap;
+
+  /* Visual */
+  border-radius: var(--radius-lg);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
+
+  /* Touch */
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.trk-btn:focus-visible {
+  outline: 2px solid var(--trk-blue);
+  outline-offset: 2px;
+  box-shadow: var(--trk-shadow-focus);
+}
+
+.trk-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ==========================================================================
+   SIZES
+   ========================================================================== */
+
+.trk-btn--sm {
+  min-height: var(--trk-touch-compact);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--trk-text-sm);
+}
+
+.trk-btn--md {
+  min-height: var(--trk-touch-min);
+  padding: var(--space-2-5) var(--space-4);
+  font-size: var(--trk-text-base);
+}
+
+.trk-btn--lg {
+  min-height: var(--trk-touch-comfortable);
+  padding: var(--space-3) var(--space-5);
+  font-size: var(--trk-text-lg);
+}
+
+/* ==========================================================================
+   VARIANTS
+   ========================================================================== */
+
+/* Primary - Brand green, white text */
+.trk-btn--primary {
+  background-color: var(--trk-brand);
+  color: var(--trk-text-inverse);
+}
+
+.trk-btn--primary:hover:not(:disabled) {
+  background-color: var(--trk-brand-soft);
+  transform: translateY(-1px);
+  box-shadow: var(--trk-shadow-button);
+}
+
+.trk-btn--primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--trk-shadow-button-pressed);
+}
+
+/* Secondary - Outlined */
+.trk-btn--secondary {
+  background-color: transparent;
+  color: var(--trk-text);
+  border: 1px solid var(--trk-border);
+}
+
+.trk-btn--secondary:hover:not(:disabled) {
+  background-color: var(--trk-surface-subtle);
+  border-color: var(--trk-border-strong);
+}
+
+.trk-btn--secondary:active:not(:disabled) {
+  background-color: var(--trk-border);
+}
+
+/* Ghost - No border, subtle hover */
+.trk-btn--ghost {
+  background-color: transparent;
+  color: var(--trk-text);
+}
+
+.trk-btn--ghost:hover:not(:disabled) {
+  background-color: var(--trk-surface-subtle);
+}
+
+.trk-btn--ghost:active:not(:disabled) {
+  background-color: var(--trk-border);
+}
+
+/* Danger - Red, destructive actions */
+.trk-btn--danger {
+  background-color: var(--trk-red);
+  color: var(--trk-text-inverse);
+}
+
+.trk-btn--danger:hover:not(:disabled) {
+  background-color: var(--trk-red-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(208, 68, 62, 0.25);
+}
+
+.trk-btn--danger:active:not(:disabled) {
+  background-color: var(--trk-red-active);
+  transform: translateY(0);
+}
+
+.trk-btn--danger:focus-visible {
+  outline-color: var(--trk-red);
+  box-shadow: var(--trk-shadow-focus-error);
+}
+
+/* Success - Green, confirmations */
+.trk-btn--success {
+  background-color: var(--trk-green);
+  color: var(--trk-text-inverse);
+}
+
+.trk-btn--success:hover:not(:disabled) {
+  background-color: var(--trk-green-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(46, 158, 91, 0.25);
+}
+
+.trk-btn--success:active:not(:disabled) {
+  background-color: var(--trk-green-active);
+  transform: translateY(0);
+}
+
+.trk-btn--success:focus-visible {
+  outline-color: var(--trk-green);
+  box-shadow: var(--trk-shadow-focus-success);
+}
+
+/* ==========================================================================
+   MODIFIERS
+   ========================================================================== */
+
+.trk-btn--full-width {
+  width: 100%;
+}
+
+.trk-btn--icon-only {
+  padding: var(--space-2);
+  border-radius: var(--radius-full);
+}
+
+.trk-btn--icon-only.trk-btn--sm {
+  width: var(--trk-touch-compact);
+  height: var(--trk-touch-compact);
+  padding: 0;
+}
+
+.trk-btn--icon-only.trk-btn--md {
+  width: var(--trk-touch-min);
+  height: var(--trk-touch-min);
+  padding: 0;
+}
+
+.trk-btn--icon-only.trk-btn--lg {
+  width: var(--trk-touch-comfortable);
+  height: var(--trk-touch-comfortable);
+  padding: 0;
+}
+
+/* ==========================================================================
+   ICON STYLING
+   ========================================================================== */
+
+.trk-btn .material-symbols-outlined {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.trk-btn--lg .material-symbols-outlined {
+  font-size: 24px;
+}
+
+/* ==========================================================================
+   ACCESSIBILITY
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .trk-btn {
+    transition: none;
+  }
+
+  .trk-btn:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .trk-btn--secondary {
+    border-width: 2px;
+    border-color: var(--trk-text);
+  }
+
+  .trk-btn--ghost:hover:not(:disabled) {
+    border: 1px solid var(--trk-text);
+  }
+}
+
+/* Touch device optimizations */
+@media (pointer: coarse) {
+  .trk-btn--sm {
+    min-height: var(--trk-touch-min);
+  }
+}

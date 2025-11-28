@@ -93,11 +93,11 @@ Icons were selected based on:
 | Criterion | Osmic | Mapbox Maki | Material Symbols |
 |-----------|-------|-------------|------------------|
 | **License** | CC0 (Public Domain) | CC0 | Apache 2.0 |
-| **Map-Specific** | ✅ Designed for cartography | ✅ Designed for maps | ❌ General purpose |
-| **Outdoor Coverage** | ✅ Excellent | ⚠️ Good | ❌ Limited |
+| **Map-Specific** | [OK] Designed for cartography | [OK] Designed for maps | [FAIL] General purpose |
+| **Outdoor Coverage** | [OK] Excellent | [WARNING] Good | [FAIL] Limited |
 | **File Size** | ~1-3 KB per SVG | ~1-2 KB per SVG | 300 KB font |
-| **Norwegian Context** | ✅ Alpine huts, trails | ⚠️ Basic | ❌ Generic |
-| **Active Maintenance** | ✅ 331 commits | ⚠️ Last update 2022 | ✅ Google-backed |
+| **Norwegian Context** | [OK] Alpine huts, trails | [WARNING] Basic | [FAIL] Generic |
+| **Active Maintenance** | [OK] 331 commits | [WARNING] Last update 2022 | [OK] Google-backed |
 
 ## Adding New Icons
 
@@ -126,21 +126,21 @@ When adding new POI categories to Tråkke:
 4. **Document in PRIVACY_BY_DESIGN.md**: Update Icon Assets table
 
 5. **Privacy Checklist**:
-   - ✅ Icon is self-hosted in `public/icons/`
-   - ✅ No external CDN requests
-   - ✅ License is compatible (CC0 or similar)
-   - ✅ Source documented in this README
+   - [OK] Icon is self-hosted in `public/icons/`
+   - [OK] No external CDN requests
+   - [OK] License is compatible (CC0 or similar)
+   - [OK] Source documented in this README
 
 ## Privacy Guarantees
 
 **All icons comply with Tråkke's privacy-first principles:**
 
-- ✅ **No external CDN requests** - All icons served from same origin
-- ✅ **No tracking** - No analytics or telemetry in icon files
-- ✅ **GDPR compliant** - EU-based sources (Osmic from Germany)
-- ✅ **Offline-first** - Icons cached by Service Worker
-- ✅ **No cookies** - Static SVG/font files
-- ✅ **No personal data** - Public, open-source icons only
+- [OK] **No external CDN requests** - All icons served from same origin
+- [OK] **No tracking** - No analytics or telemetry in icon files
+- [OK] **GDPR compliant** - EU-based sources (Osmic from Germany)
+- [OK] **Offline-first** - Icons cached by Service Worker
+- [OK] **No cookies** - Static SVG/font files
+- [OK] **No personal data** - Public, open-source icons only
 
 ## Performance
 

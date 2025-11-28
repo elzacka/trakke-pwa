@@ -78,18 +78,16 @@ const MeasurementToolsSheet = ({
             <p className="measurement-instruction">Velg måletype:</p>
             <div className="measurement-mode-buttons">
               <button
-                className="measurement-mode-button"
+                className="trk-btn trk-btn--md trk-btn--primary"
                 onClick={() => onModeChange('distance')}
               >
-                <span className="material-symbols-outlined">straighten</span>
-                <span>Avstand</span>
+                Avstand
               </button>
               <button
-                className="measurement-mode-button"
+                className="trk-btn trk-btn--md trk-btn--secondary"
                 onClick={() => onModeChange('area')}
               >
-                <span className="material-symbols-outlined">square_foot</span>
-                <span>Areal</span>
+                Areal
               </button>
             </div>
           </div>
@@ -121,28 +119,25 @@ const MeasurementToolsSheet = ({
 
             <div className="measurement-actions">
               <button
-                className="measurement-action-button secondary"
+                className="trk-btn trk-btn--md trk-btn--ghost"
                 onClick={() => onModeChange(null)}
                 disabled={points.length > 0}
               >
-                <span className="material-symbols-outlined">swap_horiz</span>
-                <span>Bytt modus</span>
+                Bytt modus
               </button>
               {points.length > 0 && (
                 <>
                   <button
-                    className="measurement-action-button secondary"
+                    className="trk-btn trk-btn--md trk-btn--ghost"
                     onClick={handleUndo}
                   >
-                    <span className="material-symbols-outlined">undo</span>
-                    <span>Angre</span>
+                    Angre
                   </button>
                   <button
-                    className="measurement-action-button secondary"
+                    className="trk-btn trk-btn--md trk-btn--ghost"
                     onClick={handleClear}
                   >
-                    <span className="material-symbols-outlined">clear</span>
-                    <span>Nullstill</span>
+                    Nullstill
                   </button>
                 </>
               )}

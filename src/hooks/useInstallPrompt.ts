@@ -37,10 +37,16 @@ export const useInstallPrompt = () => {
     setIsInstalled(checkInstalled())
 
     // Capture beforeinstallprompt event (Chromium only)
+    // Note: Calling preventDefault() here stores the prompt for later use via our custom Install button.
+    // The browser warning "Banner not shown: beforeinstallpromptevent.preventDefault() called" is expected
+    // when using a custom install UI instead of the browser's automatic banner.
     const handleBeforeInstall = (e: Event) => {
-      e.preventDefault()
-      setDeferredPrompt(e as BeforeInstallPromptEvent)
-      devLog('PWA: beforeinstallprompt event captured')
+      // Only capture if not already installed
+      if (!checkInstalled()) {
+        e.preventDefault()
+        setDeferredPrompt(e as BeforeInstallPromptEvent)
+        devLog('PWA: beforeinstallprompt event captured for custom install UI')
+      }
     }
 
     // Track successful installation

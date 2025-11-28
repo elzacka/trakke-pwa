@@ -2,35 +2,35 @@
 /* InstallSheet Component - Clean & Minimal Design */
 
 .install-sheet-content {
-  padding: 20px;
+  padding: var(--space-5);
 }
 
 /* Benefits - Text only, no icons */
 .install-benefits {
-  margin-bottom: 24px;
+  margin-bottom: var(--space-6);
 }
 
 .install-benefits p {
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: var(--trk-text-base);
+  line-height: var(--trk-leading-relaxed);
   color: var(--trk-text-muted);
-  margin: 8px 0;
-  font-weight: 400;
+  margin: var(--space-2) 0;
+  font-weight: var(--trk-font-normal);
 }
 
 /* Install Button */
 .install-button {
   width: 100%;
-  padding: 14px 20px;
+  padding: var(--button-padding-lg);
   background-color: var(--trk-brand);
   color: var(--trk-surface);
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: var(--radius-md);
+  font-size: var(--trk-text-lg);
+  font-weight: var(--trk-font-semibold);
   cursor: pointer;
-  transition: background-color 0.2s;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: background-color var(--transition-base);
+  font-family: var(--trk-font-body);
 }
 
 .install-button:hover:not(:disabled) {
@@ -48,15 +48,15 @@
 
 /* iOS Instructions - Plain text, no icons */
 .install-instructions-ios {
-  padding: 16px;
+  padding: var(--space-4);
   background-color: var(--trk-surface-subtle);
-  border-radius: 8px;
-  margin-top: 16px;
+  border-radius: var(--radius-md);
+  margin-top: var(--space-4);
 }
 
 .install-instructions-ios p {
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: var(--trk-text-sm);
+  line-height: var(--trk-leading-relaxed);
   color: var(--trk-text-muted);
   margin: 0;
 }

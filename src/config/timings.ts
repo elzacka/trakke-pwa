@@ -36,6 +36,26 @@ export const CACHE_CONFIG = {
 
   /** Local font cache max age (1 year in seconds) */
   FONT_MAX_AGE: 60 * 60 * 24 * 365, // 1 year
+
+  /** Maximum POI cache entries per service (prevents unbounded memory growth) */
+  POI_MAX_ENTRIES: 100,
+} as const
+
+/**
+ * Request timeouts (prevents hanging requests)
+ */
+export const REQUEST_TIMEOUTS = {
+  /** Default fetch timeout (15 seconds) */
+  DEFAULT: 15000,
+
+  /** POI data fetch timeout (25 seconds) - Overpass queries can be slow */
+  POI_FETCH: 25000,
+
+  /** Search API timeout (10 seconds) */
+  SEARCH: 10000,
+
+  /** Supabase API timeout (15 seconds) */
+  SUPABASE: 15000,
 } as const
 
 /**

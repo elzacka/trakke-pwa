@@ -4,7 +4,34 @@
 // External API: See PRIVACY_BY_DESIGN.md#external-api-registry
 
 import { devLog, devError } from '../constants'
-import { CACHE_CONFIG } from '../config/timings'
+import { CACHE_CONFIG, REQUEST_TIMEOUTS } from '../config/timings'
+
+// =====================================================
+// Fetch with timeout helper
+// =====================================================
+
+/**
+ * Fetch with AbortController timeout
+ * Prevents hanging requests by aborting after specified timeout
+ */
+const fetchWithTimeout = async (
+  url: string,
+  options: RequestInit,
+  timeout: number = REQUEST_TIMEOUTS.SUPABASE
+): Promise<Response> => {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), timeout)
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    })
+    return response
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
 
 // =====================================================
 // Type Definitions
@@ -66,6 +93,66 @@ interface POICacheEntry {
 // =====================================================
 
 const CACHE_TTL = CACHE_CONFIG.POI_TTL  // 5 minutes (same as other POI sources)
+const MAX_CACHE_ENTRIES = CACHE_CONFIG.POI_MAX_ENTRIES  // Prevent unbounded memory growth
+
+// =====================================================
+// Input Validation Helpers
+// =====================================================
+
+/**
+ * Validate and sanitize a name field
+ * Returns sanitized name or null if invalid
+ */
+const validateName = (name: string | undefined, maxLength: number = 100): string | null => {
+  if (!name || typeof name !== 'string') return null
+  const trimmed = name.trim()
+  if (trimmed.length === 0) return null
+  if (trimmed.length > maxLength) return null
+  // Remove any potential HTML/script tags
+  const sanitized = trimmed.replace(/<[^>]*>/g, '')
+  return sanitized
+}
+
+/**
+ * Validate URL to prevent javascript: XSS attacks
+ * Returns true only for http: and https: URLs
+ */
+const isValidHttpUrl = (url: string): boolean => {
+  if (!url || typeof url !== 'string') return false
+  try {
+    const parsed = new URL(url)
+    return ['http:', 'https:'].includes(parsed.protocol)
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Sanitize text field (description, etc.)
+ * Removes HTML tags but preserves newlines
+ */
+const sanitizeText = (text: string | undefined, maxLength: number = 2000): string | undefined => {
+  if (!text || typeof text !== 'string') return undefined
+  const trimmed = text.trim()
+  if (trimmed.length === 0) return undefined
+  // Remove HTML/script tags but preserve newlines
+  const sanitized = trimmed.replace(/<[^>]*>/g, '').slice(0, maxLength)
+  return sanitized
+}
+
+/**
+ * Validate coordinates are within valid ranges
+ */
+const validateCoordinates = (coords: [number, number]): boolean => {
+  if (!Array.isArray(coords) || coords.length !== 2) return false
+  const [lon, lat] = coords
+  if (typeof lon !== 'number' || typeof lat !== 'number') return false
+  if (isNaN(lon) || isNaN(lat)) return false
+  // Valid longitude: -180 to 180, latitude: -90 to 90
+  if (lon < -180 || lon > 180) return false
+  if (lat < -90 || lat > 90) return false
+  return true
+}
 
 // Built-in Supabase configuration from environment variables
 // These are set at build time and bundled into the app
@@ -95,6 +182,26 @@ class SupabaseService {
   private poiCache: Map<string, POICacheEntry> = new Map()
   private loading: Map<string, Promise<SupabasePOI[]>> = new Map()
   private categoryLoading: Promise<SupabaseCategory[]> | null = null
+
+  /**
+   * Enforce cache size limit by removing oldest entries
+   * Prevents unbounded memory growth
+   */
+  private enforceCacheLimit(): void {
+    if (this.poiCache.size <= MAX_CACHE_ENTRIES) return
+
+    // Sort entries by timestamp (oldest first)
+    const sortedEntries = Array.from(this.poiCache.entries())
+      .sort((a, b) => a[1].timestamp - b[1].timestamp)
+
+    // Remove oldest entries until we're under the limit
+    const entriesToRemove = sortedEntries.slice(0, this.poiCache.size - MAX_CACHE_ENTRIES)
+    for (const [key] of entriesToRemove) {
+      this.poiCache.delete(key)
+    }
+
+    devLog(`[SupabaseService] Cache trimmed: removed ${entriesToRemove.length} old entries`)
+  }
 
   // =====================================================
   // Configuration Management
@@ -132,7 +239,7 @@ class SupabaseService {
     try {
       const url = `${config.projectUrl}/rest/v1/categories?select=id&limit=1`
 
-      const response = await fetch(url, {
+      const response = await fetchWithTimeout(url, {
         method: 'GET',
         headers: {
           'apikey': config.anonKey,
@@ -158,7 +265,7 @@ class SupabaseService {
 
       // Try to get actual category count
       const countUrl = `${config.projectUrl}/rest/v1/categories?select=id`
-      const countResponse = await fetch(countUrl, {
+      const countResponse = await fetchWithTimeout(countUrl, {
         method: 'GET',
         headers: {
           'apikey': config.anonKey,
@@ -220,7 +327,7 @@ class SupabaseService {
 
     devLog('[SupabaseService] Fetching categories from Supabase')
 
-    this.categoryLoading = fetch(
+    this.categoryLoading = fetchWithTimeout(
       `${config.projectUrl}/rest/v1/categories?select=id,name,slug,description,icon,color,min_zoom,sort_order&order=sort_order.asc`,
       {
         method: 'GET',
@@ -343,7 +450,7 @@ class SupabaseService {
 
     devLog(`[SupabaseService] Fetching POIs from URL: ${url}`)
 
-    const fetchPromise = fetch(url, {
+    const fetchPromise = fetchWithTimeout(url, {
       method: 'GET',
       headers: {
         'apikey': config.anonKey,
@@ -382,6 +489,7 @@ class SupabaseService {
           zoom,
           timestamp: Date.now()
         })
+        this.enforceCacheLimit()
 
         devLog(`[SupabaseService] Fetched ${pois.length} POIs`)
         this.loading.delete(cacheKey)
@@ -474,7 +582,7 @@ class SupabaseService {
     // Filter by source_category
     url += `&source_category=eq.${sourceCategory}`
 
-    const fetchPromise = fetch(url, {
+    const fetchPromise = fetchWithTimeout(url, {
       method: 'GET',
       headers: {
         'apikey': config.anonKey,
@@ -513,6 +621,7 @@ class SupabaseService {
           zoom,
           timestamp: Date.now()
         })
+        this.enforceCacheLimit()
 
         devLog(`[SupabaseService] Fetched ${pois.length} POIs with source_category=${sourceCategory}`)
         this.loading.delete(cacheKey)
@@ -577,8 +686,36 @@ class SupabaseService {
       return { success: false, error: 'Supabase ikke konfigurert' }
     }
 
+    // Validate and sanitize inputs
+    const sanitizedName = validateName(poi.name)
+    if (!sanitizedName) {
+      return { success: false, error: 'Ugyldig navn (tomt eller for langt)' }
+    }
+
+    if (!validateCoordinates(poi.coordinates)) {
+      return { success: false, error: 'Ugyldige koordinater' }
+    }
+
+    if (!poi.categoryId || typeof poi.categoryId !== 'string') {
+      return { success: false, error: 'Kategori er påkrevd' }
+    }
+
+    // Validate URL if provided
+    if (poi.externalUrl && !isValidHttpUrl(poi.externalUrl)) {
+      return { success: false, error: 'Ugyldig URL (må starte med http:// eller https://)' }
+    }
+
+    if (poi.imageUrl && !isValidHttpUrl(poi.imageUrl)) {
+      return { success: false, error: 'Ugyldig bilde-URL (må starte med http:// eller https://)' }
+    }
+
+    // Sanitize text fields
+    const sanitizedDescription = sanitizeText(poi.description)
+    const sanitizedMunicipality = sanitizeText(poi.municipality, 100)
+    const sanitizedPlace = sanitizeText(poi.place, 100)
+
     try {
-      const response = await fetch(`${config.projectUrl}/rest/v1/pois`, {
+      const response = await fetchWithTimeout(`${config.projectUrl}/rest/v1/pois`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -587,13 +724,13 @@ class SupabaseService {
           'Prefer': 'return=representation'
         },
         body: JSON.stringify({
-          name: poi.name,
+          name: sanitizedName,
           category_id: poi.categoryId,
           longitude: poi.coordinates[0],
           latitude: poi.coordinates[1],
-          description: poi.description || null,
-          municipality: poi.municipality || null,
-          place: poi.place || null,
+          description: sanitizedDescription || null,
+          municipality: sanitizedMunicipality || null,
+          place: sanitizedPlace || null,
           external_url: poi.externalUrl || null,
           image_url: poi.imageUrl || null,
           tags: poi.tags || null,
@@ -662,23 +799,50 @@ class SupabaseService {
       return { success: false, error: 'Supabase ikke konfigurert' }
     }
 
+    // Validate ID
+    if (!id || typeof id !== 'string' || id.trim().length === 0) {
+      return { success: false, error: 'Ugyldig POI-ID' }
+    }
+
+    // Validate name if provided
+    if (updates.name !== undefined) {
+      const sanitizedName = validateName(updates.name)
+      if (!sanitizedName) {
+        return { success: false, error: 'Ugyldig navn (tomt eller for langt)' }
+      }
+    }
+
+    // Validate coordinates if provided
+    if (updates.coordinates !== undefined && !validateCoordinates(updates.coordinates)) {
+      return { success: false, error: 'Ugyldige koordinater' }
+    }
+
+    // Validate URLs if provided
+    if (updates.externalUrl && !isValidHttpUrl(updates.externalUrl)) {
+      return { success: false, error: 'Ugyldig URL (må starte med http:// eller https://)' }
+    }
+
+    if (updates.imageUrl && !isValidHttpUrl(updates.imageUrl)) {
+      return { success: false, error: 'Ugyldig bilde-URL (må starte med http:// eller https://)' }
+    }
+
     try {
       const body: Record<string, unknown> = {}
-      if (updates.name !== undefined) body.name = updates.name
+      if (updates.name !== undefined) body.name = validateName(updates.name)
       if (updates.categoryId !== undefined) body.category_id = updates.categoryId
       if (updates.coordinates !== undefined) {
         body.longitude = updates.coordinates[0]
         body.latitude = updates.coordinates[1]
       }
-      if (updates.description !== undefined) body.description = updates.description || null
-      if (updates.municipality !== undefined) body.municipality = updates.municipality || null
-      if (updates.place !== undefined) body.place = updates.place || null
+      if (updates.description !== undefined) body.description = sanitizeText(updates.description) || null
+      if (updates.municipality !== undefined) body.municipality = sanitizeText(updates.municipality, 100) || null
+      if (updates.place !== undefined) body.place = sanitizeText(updates.place, 100) || null
       if (updates.externalUrl !== undefined) body.external_url = updates.externalUrl || null
       if (updates.imageUrl !== undefined) body.image_url = updates.imageUrl || null
       if (updates.tags !== undefined) body.tags = updates.tags || null
       if (updates.sourceCategory !== undefined) body.source_category = updates.sourceCategory || null
 
-      const response = await fetch(`${config.projectUrl}/rest/v1/pois?id=eq.${id}`, {
+      const response = await fetchWithTimeout(`${config.projectUrl}/rest/v1/pois?id=eq.${encodeURIComponent(id)}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -720,8 +884,13 @@ class SupabaseService {
       return { success: false, error: 'Supabase ikke konfigurert' }
     }
 
+    // Validate ID
+    if (!id || typeof id !== 'string' || id.trim().length === 0) {
+      return { success: false, error: 'Ugyldig POI-ID' }
+    }
+
     try {
-      const response = await fetch(`${config.projectUrl}/rest/v1/pois?id=eq.${id}`, {
+      const response = await fetchWithTimeout(`${config.projectUrl}/rest/v1/pois?id=eq.${encodeURIComponent(id)}`, {
         method: 'DELETE',
         headers: {
           'apikey': config.anonKey,
@@ -773,8 +942,36 @@ class SupabaseService {
       return { success: false, error: 'Supabase ikke konfigurert' }
     }
 
+    // Validate name
+    const sanitizedName = validateName(category.name)
+    if (!sanitizedName) {
+      return { success: false, error: 'Ugyldig kategorinavn (tomt eller for langt)' }
+    }
+
+    // Validate slug (alphanumeric, underscores, hyphens only)
+    if (!category.slug || typeof category.slug !== 'string') {
+      return { success: false, error: 'Slug er påkrevd' }
+    }
+    const slugRegex = /^[a-z0-9_-]+$/
+    if (!slugRegex.test(category.slug) || category.slug.length > 50) {
+      return { success: false, error: 'Ugyldig slug (bruk bare små bokstaver, tall, understrek og bindestrek)' }
+    }
+
+    // Validate icon
+    if (!category.icon || typeof category.icon !== 'string' || category.icon.length > 50) {
+      return { success: false, error: 'Ugyldig ikonverdi' }
+    }
+
+    // Validate color if provided (hex color)
+    if (category.color) {
+      const hexColorRegex = /^#[0-9a-fA-F]{6}$/
+      if (!hexColorRegex.test(category.color)) {
+        return { success: false, error: 'Ugyldig farge (bruk hex-format, f.eks. #22c55e)' }
+      }
+    }
+
     try {
-      const response = await fetch(`${config.projectUrl}/rest/v1/categories`, {
+      const response = await fetchWithTimeout(`${config.projectUrl}/rest/v1/categories`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -783,9 +980,9 @@ class SupabaseService {
           'Prefer': 'return=representation'
         },
         body: JSON.stringify({
-          name: category.name,
+          name: sanitizedName,
           slug: category.slug,
-          description: category.description || null,
+          description: sanitizeText(category.description, 500) || null,
           icon: category.icon,
           color: category.color || '#22c55e',
           min_zoom: category.minZoom ?? 10,
@@ -850,17 +1047,46 @@ class SupabaseService {
       return { success: false, error: 'Supabase ikke konfigurert' }
     }
 
+    // Validate ID
+    if (!id || typeof id !== 'string' || id.trim().length === 0) {
+      return { success: false, error: 'Ugyldig kategori-ID' }
+    }
+
+    // Validate name if provided
+    if (updates.name !== undefined) {
+      const sanitizedName = validateName(updates.name)
+      if (!sanitizedName) {
+        return { success: false, error: 'Ugyldig kategorinavn (tomt eller for langt)' }
+      }
+    }
+
+    // Validate slug if provided
+    if (updates.slug !== undefined) {
+      const slugRegex = /^[a-z0-9_-]+$/
+      if (!slugRegex.test(updates.slug) || updates.slug.length > 50) {
+        return { success: false, error: 'Ugyldig slug (bruk bare små bokstaver, tall, understrek og bindestrek)' }
+      }
+    }
+
+    // Validate color if provided
+    if (updates.color) {
+      const hexColorRegex = /^#[0-9a-fA-F]{6}$/
+      if (!hexColorRegex.test(updates.color)) {
+        return { success: false, error: 'Ugyldig farge (bruk hex-format, f.eks. #22c55e)' }
+      }
+    }
+
     try {
       const body: Record<string, unknown> = {}
-      if (updates.name !== undefined) body.name = updates.name
+      if (updates.name !== undefined) body.name = validateName(updates.name)
       if (updates.slug !== undefined) body.slug = updates.slug
-      if (updates.description !== undefined) body.description = updates.description || null
+      if (updates.description !== undefined) body.description = sanitizeText(updates.description, 500) || null
       if (updates.icon !== undefined) body.icon = updates.icon
       if (updates.color !== undefined) body.color = updates.color
       if (updates.minZoom !== undefined) body.min_zoom = updates.minZoom
       if (updates.sortOrder !== undefined) body.sort_order = updates.sortOrder
 
-      const response = await fetch(`${config.projectUrl}/rest/v1/categories?id=eq.${id}`, {
+      const response = await fetchWithTimeout(`${config.projectUrl}/rest/v1/categories?id=eq.${encodeURIComponent(id)}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -902,8 +1128,13 @@ class SupabaseService {
       return { success: false, error: 'Supabase ikke konfigurert' }
     }
 
+    // Validate ID
+    if (!id || typeof id !== 'string' || id.trim().length === 0) {
+      return { success: false, error: 'Ugyldig kategori-ID' }
+    }
+
     try {
-      const response = await fetch(`${config.projectUrl}/rest/v1/categories?id=eq.${id}`, {
+      const response = await fetchWithTimeout(`${config.projectUrl}/rest/v1/categories?id=eq.${encodeURIComponent(id)}`, {
         method: 'DELETE',
         headers: {
           'apikey': config.anonKey,
@@ -927,6 +1158,10 @@ class SupabaseService {
 
     } catch (error) {
       devError('[SupabaseService] Failed to delete category:', error)
+      // Handle timeout errors specifically
+      if (error instanceof Error && error.name === 'AbortError') {
+        return { success: false, error: 'Forespørselen tok for lang tid (timeout)' }
+      }
       return { success: false, error: 'Nettverksfeil ved sletting' }
     }
   }

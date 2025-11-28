@@ -76,16 +76,17 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  /* Calculate max-height to prevent overlap with top controls */
-  /* Weather widget is at: safe-area-top + 10px + 10px + 44px + 4px = safe-area + 68px */
-  /* Menu should not extend beyond: viewport - (safe-area + 68px + 44px widget + 8px gap) */
-  max-height: calc(100vh - max(10px, env(safe-area-inset-top)) - 68px - 44px - 8px - 72px - max(var(--space-xl), calc(var(--space-xl) + var(--safe-area-inset-bottom))));
+  /* Calculate max-height: viewport - top safe area - FAB button - bottom safe area - some padding */
+  /* Simplified calculation that leaves room for all menu items */
+  max-height: calc(100vh - env(safe-area-inset-top, 0px) - 72px - env(safe-area-inset-bottom, 0px) - 120px);
   overflow-y: auto;
   overflow-x: visible;
   /* Hide scrollbar but keep functionality */
   scrollbar-width: none;
   -ms-overflow-style: none;
   z-index: 1;
+  /* Add padding at bottom to ensure last item is fully visible when scrolling */
+  padding-bottom: var(--space-2);
 }
 
 .fab-menu::-webkit-scrollbar {
@@ -236,7 +237,7 @@
 
   /* Adjust max-height calculation for mobile */
   .fab-menu {
-    max-height: calc(100vh - max(10px, env(safe-area-inset-top)) - 68px - 44px - 8px - 68px - max(var(--space-lg), calc(var(--space-lg) + var(--safe-area-inset-bottom))));
+    max-height: calc(100vh - env(safe-area-inset-top, 0px) - 68px - env(safe-area-inset-bottom, 0px) - 100px);
   }
 }
 

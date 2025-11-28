@@ -1,9 +1,32 @@
 // POI (Point of Interest) Service for fetching and managing category data
 // Supports: Emergency shelters (Tilfluktsrom), Wilderness shelters (Gapahuk/vindskjul), Caves (Huler), Observation Towers, War Memorials (Forts, Bunkers, Battlefields)
 
-import { CACHE_CONFIG } from '../config/timings'
+import { CACHE_CONFIG, REQUEST_TIMEOUTS } from '../config/timings'
 import { devLog, devError } from '../constants'
 import { supabaseService } from './supabaseService'
+
+/**
+ * Fetch with AbortController timeout
+ * Prevents hanging requests by aborting after specified timeout
+ */
+const fetchWithTimeout = async (
+  url: string,
+  options: RequestInit,
+  timeout: number = REQUEST_TIMEOUTS.POI_FETCH
+): Promise<Response> => {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), timeout)
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    })
+    return response
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
 
 export interface ShelterPOI {
   id: string
@@ -205,7 +228,28 @@ class POIService {
   private cache: Map<string, CacheEntry> = new Map()
   private loading: Map<string, Promise<POI[]>> = new Map()
   private readonly CACHE_TTL = CACHE_CONFIG.POI_TTL
+  private readonly MAX_CACHE_ENTRIES = CACHE_CONFIG.POI_MAX_ENTRIES
   private readonly OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
+
+  /**
+   * Enforce cache size limit by removing oldest entries
+   * Prevents unbounded memory growth
+   */
+  private enforceCacheLimit(): void {
+    if (this.cache.size <= this.MAX_CACHE_ENTRIES) return
+
+    // Sort entries by timestamp (oldest first)
+    const sortedEntries = Array.from(this.cache.entries())
+      .sort((a, b) => a[1].timestamp - b[1].timestamp)
+
+    // Remove oldest entries until we're under the limit
+    const entriesToRemove = sortedEntries.slice(0, this.cache.size - this.MAX_CACHE_ENTRIES)
+    for (const [key] of entriesToRemove) {
+      this.cache.delete(key)
+    }
+
+    devLog(`[POIService] Cache trimmed: removed ${entriesToRemove.length} old entries`)
+  }
 
   // Get category configuration
   getCategoryConfig(category: POICategory): CategoryConfig {
@@ -590,7 +634,7 @@ class POIService {
     devLog(`[POIService] Fetching ${category} from Overpass: ${cacheKey}`)
     devLog(`[POIService] Query:`, query)
 
-    const fetchPromise = fetch(this.OVERPASS_URL, {
+    const fetchPromise = fetchWithTimeout(this.OVERPASS_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -639,6 +683,7 @@ class POIService {
           zoom,
           timestamp: Date.now()
         })
+        this.enforceCacheLimit()
 
         this.loading.delete(cacheKey)
         return pois
@@ -695,7 +740,7 @@ class POIService {
 
     devLog(`[POIService] Fetching shelters for viewport: ${cacheKey}`)
 
-    const fetchPromise = fetch(url)
+    const fetchPromise = fetchWithTimeout(url, { method: 'GET' })
       .then(response => {
         devLog(`[POIService] WFS response status: ${response.status} ${response.statusText}`)
         if (!response.ok) {
@@ -714,6 +759,7 @@ class POIService {
           zoom,
           timestamp: Date.now()
         })
+        this.enforceCacheLimit()
 
         this.loading.delete(cacheKey)
         return shelters
@@ -773,7 +819,7 @@ class POIService {
     devLog(`[POIService] Fetching ${category} from GeoJSON API: ${cacheKey}`)
     devLog(`[POIService] URL:`, url)
 
-    const fetchPromise = fetch(url, {
+    const fetchPromise = fetchWithTimeout(url, {
       method: 'GET',
       headers: {
         'Accept': 'application/geo+json',
@@ -815,6 +861,7 @@ class POIService {
           zoom,
           timestamp: Date.now()
         })
+        this.enforceCacheLimit()
 
         this.loading.delete(cacheKey)
         return pois
